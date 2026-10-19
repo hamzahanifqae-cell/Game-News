@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/* Self-hosted Latin fonts; licenses accompany the WOFF2 assets. */
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 400; font-display: swap; src: url("../assets/fonts/manrope-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 500; font-display: swap; src: url("../assets/fonts/manrope-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 600; font-display: swap; src: url("../assets/fonts/manrope-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 700; font-display: swap; src: url("../assets/fonts/manrope-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 800; font-display: swap; src: url("../assets/fonts/manrope-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 400; font-display: swap; src: url("../assets/fonts/source-sans-3-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 500; font-display: swap; src: url("../assets/fonts/source-sans-3-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 600; font-display: swap; src: url("../assets/fonts/source-sans-3-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 700; font-display: swap; src: url("../assets/fonts/source-sans-3-latin-700-normal.woff2") format("woff2"); }
+
+/* GameNews editorial palette: warm paper, graphite, and a restrained vermilion. */
+@theme {
+  --font-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #162039;
+  --color-ink-muted: #637087;
+  --color-paper: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-line: #e1e6f0;
+  --color-brand-50: #eef0ff;
+  --color-brand-100: #e0e5ff;
+  --color-brand-200: #c7d0fe;
+  --color-brand-300: #a2b1fb;
+  --color-brand-400: #8091f4;
+  --color-brand-500: #6174e9;
+  --color-brand-600: #4b52d8;
+  --color-brand-700: #393eb3;
+  --color-brand-800: #30358e;
+  --color-brand-900: #282e70;
+  --color-accent: #087f85;
+  --color-accent-50: #e8f7f6;
+  --color-accent-600: #076b70;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink antialiased;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    text-wrap: balance;
+  }
+
+  a {
+    @apply underline-offset-2;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+
+  /* Respect reduced-motion preferences for the one transition we rely on. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    * {
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Editorial article/document typography. */
+  .prose-article {
+    @apply max-w-none text-[1.0625rem] leading-[1.75] text-ink-muted;
+  }
+
+  .prose-article > :first-child {
+    @apply mt-0;
+  }
+
+  .prose-article h2 {
+    @apply mt-12 mb-4 scroll-mt-24 text-[1.5rem] font-bold leading-snug text-ink;
+  }
+
+  .prose-article h3 {
+    @apply mt-8 mb-3 scroll-mt-24 text-xl font-semibold leading-snug text-ink;
+  }
+
+  .prose-article p {
+    @apply mb-5;
+  }
+
+  .prose-article ul,
+  .prose-article ol {
+    @apply mb-5 ml-6 list-outside space-y-2;
+  }
+
+  .prose-article ul {
+    @apply list-disc marker:text-brand-600;
+  }
+
+  .prose-article ol {
+    @apply list-decimal marker:font-semibold marker:text-ink;
+  }
+
+  .prose-article li > p {
+    @apply mb-0;
+  }
+
+  .prose-article a:not(.btn-primary):not(.btn-secondary) {
+    @apply font-medium text-brand-600 underline decoration-brand-200 decoration-2 hover:text-brand-700 hover:decoration-brand-400;
+  }
+
+  .prose-article strong {
+    @apply font-semibold text-ink;
+  }
+
+  .prose-article blockquote {
+    @apply my-6 border-l-[3px] border-accent bg-accent-50 px-5 py-4 text-ink;
+  }
+
+  .prose-article blockquote p {
+    @apply mb-0;
+  }
+
+  .prose-article img {
+    @apply my-6 rounded-lg border border-line;
+  }
+
+  .prose-article table {
+    @apply my-6 w-full border-collapse text-sm;
+  }
+
+  .prose-article th,
+  .prose-article td {
+    @apply border border-line px-3 py-2 text-left;
+  }
+
+  .prose-article th {
+    @apply bg-slate-50 font-semibold text-ink;
+  }
+
+  .prose-article hr {
+    @apply my-10 border-line;
+  }
+
+  /* Shared pill/button primitives. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-ink px-5 py-2.5 text-[15px] font-semibold text-white no-underline transition-colors hover:bg-brand-700 hover:text-white focus-visible:text-white;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line bg-surface px-5 py-2.5 text-[15px] font-semibold text-ink transition-colors hover:border-brand-300 hover:text-brand-700;
+  }
+}
+
+/* Publication layout primitives, shared by the homepage and article listings. */
+.editorial-kicker { font-size: .8125rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.editorial-rule { border-top: 1px solid var(--color-ink); }
+.story-card { border: 1px solid var(--color-line); border-radius: 18px; background: var(--color-surface); padding: 1rem; box-shadow: 0 5px 18px #16203904; }
+.story-card > a { border-radius: 11px; }
+.story-card h3 { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 600; line-height: 1.4; }
+.story-art { position: relative; overflow: hidden; background: #e6e8df; }
+.story-art::after { content: ''; position: absolute; inset: 12%; border: 1px solid #1620391c; border-radius: 50%; transform: rotate(-25deg) scaleX(1.35); }
+.story-art-word { position: absolute; bottom: 12%; left: 8%; font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 4rem); line-height: 1; letter-spacing: -.05em; color: #3c4b3a; }
+.story-art[data-type="tutorial"] { background: #eee4d8; }
+.story-art[data-type="tutorial"] .story-art-word { color: #80573e; }
+.story-art[data-type="troubleshooting"] { background: #e2e7e9; }
+.story-art[data-type="troubleshooting"] .story-art-word { color: #3b565e; }
+.section-heading { font-family: var(--font-heading); font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 700; letter-spacing: -.035em; }
+@media (prefers-reduced-motion: no-preference) { .story-card img { transition: transform .35s ease; } .story-card:hover img { transform: scale(1.025); } }
+.prose-article table { display: block; overflow-x: auto; }
+
+.prose-article h2, .prose-article h3 { font-family: var(--font-heading); font-weight: 700; letter-spacing: -.02em; }
+
+/* Keep explicit legacy font-sans headings on the shared display family. */
+h1.font-sans, h2.font-sans, h3.font-sans { font-family: var(--font-heading); }

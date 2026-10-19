@@ -1,0 +1,29 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+// Only top-level sections, and only when there are enough to make a TOC
+// actually useful rather than restating the page's only two headings.
+const sections = headings.filter((h) => h.depth === 2);
+---
+
+{sections.length >= 3 && (
+  <nav aria-label="Table of contents" class="mb-10 border-y border-line py-5" data-pagefind-ignore>
+    <h2 class="mb-4 editorial-kicker text-ink-muted">In this article</h2>
+    <ol class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      {sections.map((h) => (
+        <li>
+          <a href={`#${h.slug}`} class="text-brand-600 hover:text-brand-700 hover:underline">{h.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}

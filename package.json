@@ -1,0 +1,44 @@
+{
+  "name": "gamenews",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && npm run pagefind",
+    "pagefind": "pagefind --site dist/client",
+    "preview": "astro preview",
+    "start": "node ./dist/server/entry.mjs",
+    "launch-check": "node scripts/launch-readiness.mjs",
+    "launch-check:strict": "node scripts/launch-readiness.mjs --strict",
+    "release": "npm run launch-check:strict && npm run build",
+    "astro": "astro",
+    "test:news": "node --experimental-strip-types --test tests/news.test.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdoc": "^2.0.11",
+    "@astrojs/node": "^11.1.8",
+    "@astrojs/react": "^7.0.1",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/source-serif-4": "^5.3.1",
+    "@keystatic/astro": "^6.0.0",
+    "@keystatic/core": "^0.6.9",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "astro": "^7.3.8",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^5.4.3",
+    "pagefind": "^1.5.2",
+    "typescript": "^6.0.3"
+  }
+}

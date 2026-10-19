@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LiveNews from '../../components/LiveNews.astro';
+---
+<BaseLayout title="Latest game updates — GameNews" description="Follow official publisher announcements for upcoming and popular PC games, with automatic updates and original source links." adPageEligible={false} pagefindIndex={false}>
+<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+<p class="editorial-kicker text-brand-700">The news desk</p>
+<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Keep up with what’s next.</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Follow Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. We bring together their official Steam announcements so you can go straight to the source.</p>
+<LiveNews limit={18} />
+<p class="text-sm text-ink-muted">For original editorial coverage, explore our <a class="underline text-brand-700" href="/blog">upcoming-game features</a>.</p>
+</section>
+</BaseLayout>

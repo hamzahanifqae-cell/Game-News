@@ -1,0 +1,8 @@
+---
+interface Props { class?: string; markOnly?: boolean; }
+const { class: className = '', markOnly = false } = Astro.props;
+---
+<span class={`inline-flex items-center gap-2.5 ${className}`}>
+  <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#4b52d8"/><text x="15.5" y="24" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="19" fill="white">G</text><circle cx="26" cy="9" r="3.2" fill="#c9f477"/></svg>
+  {!markOnly && <span style="font-family: var(--font-heading)" class="text-[1.6rem] font-bold leading-none tracking-[-.04em] text-ink">GameNews<span class="text-brand-600">.</span></span>}
+</span>

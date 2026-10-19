@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import AppCard from '../../components/AppCard.astro';
+import { getCollection } from 'astro:content';
+import { getPublicCollection, sortByPublishDateDesc } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const categories = await getCollection('categories');
+  return categories.map((category) => ({ params: { slug: category.id }, props: { category } }));
+}
+
+const { category } = Astro.props;
+const articles = sortByPublishDateDesc(await getPublicCollection('articles')).filter(
+  (a) => a.data.category === category.id
+);
+const apps = (await getPublicCollection('apps')).filter((a) => a.data.category === category.id);
+---
+
+<BaseLayout
+  title={category.data.name}
+  description={category.data.description || `Browse ${category.data.name} content.`}
+  canonicalPath={`/categories/${category.id}`}
+  adPageEligible={apps.length > 0 || articles.length > 0}
+>
+  <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+    <h1 class="font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">{category.data.name}</h1>
+    {category.data.description && (
+      <p class="mt-2 max-w-2xl text-ink-muted">{category.data.description}</p>
+    )}
+
+    {apps.length > 0 && (
+      <div class="mt-10">
+        <h2 class="mb-5 text-xl font-semibold text-ink">Apps</h2>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {apps.map((app) => <AppCard app={app} />)}
+        </div>
+      </div>
+    )}
+
+    {articles.length > 0 && (
+      <div class="mt-12">
+        <h2 class="mb-5 text-xl font-semibold text-ink">Articles</h2>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => <ArticleCard article={article} showImage={!apps.some(app => app.data.coverImage?.src === article.data.coverImage?.src)} />)}
+        </div>
+      </div>
+    )}
+
+    {apps.length === 0 && articles.length === 0 && (
+      <div class="mt-10 rounded-xl border border-line bg-white p-8 text-center">
+        <p class="text-ink-muted">Nothing here yet — check back soon.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

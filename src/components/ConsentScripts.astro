@@ -1,0 +1,91 @@
+---
+// Consent integration point — NOT a complete compliance solution by itself.
+//
+// This project uses Basic Consent Mode (see README "Consent & Analytics"):
+// neither the GA4 tag nor the AdSense ad-library script is injected at all
+// until the visitor's CMP reports consent for that category. No cookieless
+// pings are sent pre-consent. The actual wiring lives in
+// src/lib/consent-client.ts, which reads each CMP's own documented
+// JavaScript event/object — it does not read or map raw IAB TCF purpose
+// flags itself, and it does not invent an event shape for providers it
+// doesn't have documented support for.
+//
+// Selecting a provider in Site Settings only loads its script tag. It does
+// not, by itself, complete consent compliance — see "cmpConfiguredAndVerified"
+// in Site Settings and README "CMP configuration safeguards".
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  settings: CollectionEntry<'siteSettings'>['data'];
+  /** Same page-level flag passed to BaseLayout — see src/lib/ads.ts. */
+  adsPageEligible: boolean;
+}
+
+const { settings, adsPageEligible } = Astro.props;
+const needsConsentGate =
+  (settings.adsEnabled && adsPageEligible) || settings.analyticsProvider === 'ga4';
+
+const gateConfig = {
+  cmpProvider: settings.cmpProvider,
+  ga4MeasurementId: settings.analyticsProvider === 'ga4' && settings.analyticsId ? settings.analyticsId : null,
+  adsClientId: settings.adsensePublisherId || null,
+  adsPageEligible,
+};
+---
+
+{needsConsentGate && (
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      window.dataLayer.push(arguments);
+    }
+    window.gtag = window.gtag || gtag;
+    // Google's documented Consent Mode v2 default — deny everything except
+    // security_storage until the CMP below says otherwise.
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      security_storage: 'granted',
+      wait_for_update: 2000,
+    });
+  </script>
+)}
+
+{settings.cmpProvider === 'cookiebot' && settings.cmpSiteId && (
+  <script
+    is:inline
+    id="Cookiebot"
+    src="https://consent.cookiebot.com/uc.js"
+    data-cbid={settings.cmpSiteId}
+    data-blockingmode="auto"
+    type="text/javascript"
+  />
+)}
+
+{settings.cmpProvider === 'cookieyes' && settings.cmpSiteId && (
+  <script
+    is:inline
+    id="cookieyes"
+    type="text/javascript"
+    src={`https://cdn-cookieyes.com/client_data/${settings.cmpSiteId}/script.js`}
+  />
+)}
+
+{settings.cmpProvider === 'custom' && settings.cmpCustomScript && (
+  <Fragment set:html={settings.cmpCustomScript} />
+)}
+
+{needsConsentGate && (
+  <script type="application/json" id="consent-gate-config" set:html={JSON.stringify(gateConfig)} />
+)}
+{needsConsentGate && (
+  <script>
+    import { initConsentGate } from '../lib/consent-client';
+    const configEl = document.getElementById('consent-gate-config');
+    if (configEl?.textContent) {
+      initConsentGate(JSON.parse(configEl.textContent));
+    }
+  </script>
+)}

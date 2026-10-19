@@ -1,0 +1,136 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import { editorialImages } from '../lib/editorial-images';
+import Breadcrumbs from './Breadcrumbs.astro';
+import TypeBadge from './TypeBadge.astro';
+import TableOfContents from './TableOfContents.astro';
+import AdSlot from './AdSlot.astro';
+import ArticleCard from './ArticleCard.astro';
+import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc } from '../lib/content';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+}
+
+const { article } = Astro.props;
+const { data } = article;
+const { Content, headings } = await render(article);
+
+const category = await getCategory(data.category);
+const author = await getPublicEntry('authors', data.author);
+const relatedApp = await getPublicEntry('apps', data.relatedApp);
+
+const typeToPath = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
+const typeToLabel = { review: 'Reviews', tutorial: 'Tutorials', troubleshooting: 'Troubleshooting', news: 'News' } as const;
+
+const formattedPublish = data.publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+const formattedUpdated = data.updatedDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const related = sortByPublishDateDesc(
+  (await getPublicCollection('articles')).filter(
+    (a) => a.id !== article.id && a.data.category === data.category
+  )
+).slice(0, 3);
+
+const siteUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: data.title,
+  description: data.description,
+  datePublished: data.publishDate.toISOString(),
+  ...(data.updatedDate ? { dateModified: data.updatedDate.toISOString() } : {}),
+  ...(author ? { author: { '@type': author.data.kind, name: author.data.name } } : {}),
+  ...(siteUrl ? { mainEntityOfPage: siteUrl } : {}),
+};
+---
+
+<div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+  <Breadcrumbs
+    items={[
+      { label: typeToLabel[data.type], href: `/${typeToPath[data.type]}` },
+      { label: data.title },
+    ]}
+  />
+
+  <article>
+    <div class="flex items-center gap-2">
+      <TypeBadge type={data.type} />
+      {category && (
+        <a href={`/categories/${category.id}`} class="text-xs font-medium text-ink-muted hover:text-brand-700">
+          {category.data.name}
+        </a>
+      )}
+    </div>
+
+    <h1 class="mt-3 font-sans text-3xl font-bold leading-[1.12] tracking-tight text-ink sm:text-5xl">
+      {data.title}
+    </h1>
+
+    <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+      {author && <span>By <span class="font-medium text-ink">{author.data.name}</span></span>}
+      <time datetime={data.publishDate.toISOString()}>{formattedPublish}</time>
+      {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
+    </div>
+
+    <figure class="mt-7">
+      <Image src={data.coverImage || editorialImages[data.type].src} alt={data.coverImage ? data.coverImageAlt : editorialImages[data.type].alt} width={1100} height={680} widths={[480, 768, 1100]} sizes="(min-width: 768px) 720px, 100vw" format="webp" class="aspect-[16/10] w-full rounded-sm bg-surface object-contain" />
+      {data.coverImageCredit && <figcaption class="mt-2 text-xs leading-5 text-ink-muted">{data.coverImageCredit}{data.coverImageSource && <> · <a href={data.coverImageSource} target="_blank" rel="noopener noreferrer" class="underline">Image source</a></>}</figcaption>}
+      {!data.coverImage && <figcaption class="mt-2 text-xs text-ink-muted">Illustrative editorial artwork · not an app screenshot</figcaption>}
+    </figure>
+
+    {relatedApp && (
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-y border-line py-5">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-ink-muted">App info</p>
+          <p class="font-semibold text-ink">{relatedApp.data.name}</p>
+        </div>
+        <a href={`/apps/${relatedApp.id}`} class="btn-secondary shrink-0">View app info</a>
+      </div>
+    )}
+
+    <div class="mt-8">
+      <TableOfContents headings={headings} />
+
+      <div class="prose-article">
+        <Content />
+      </div>
+    </div>
+
+    <AdSlot placement="articleBottom" format="in-article" />
+
+    {author && (
+      <div class="mt-10 flex items-center gap-3 border-t border-line pt-6">
+        {author.data.avatar && (
+          <Image src={author.data.avatar} alt="" width={48} height={48} class="h-12 w-12 rounded-full object-cover" />
+        )}
+        <div>
+          <p class="font-semibold text-ink">{author.data.name}</p>
+          {author.data.bio && <p class="text-sm text-ink-muted">{author.data.bio}</p>}
+        </div>
+      </div>
+    )}
+  </article>
+
+  {related.length > 0 && (
+    <div class="mt-14 border-t border-line pt-10">
+      <h2 class="mb-5 section-heading text-ink">Related reading</h2>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {related.map((a) => <ArticleCard article={a} />)}
+      </div>
+    </div>
+  )}
+</div>
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { editorialImages } from '../lib/editorial-images';
+import { getCategory } from '../lib/content';
+
+interface Props {
+  showImage?: boolean;
+  app: CollectionEntry<'apps'>;
+}
+
+const { app, showImage = true } = Astro.props;
+const { data } = app;
+const category = await getCategory(data.category);
+---
+
+<article class="group flex flex-col overflow-hidden rounded-2xl border border-line bg-white p-4 shadow-sm">
+  {showImage && (
+  <a href={`/apps/${app.id}`} class="block aspect-[16/10] overflow-hidden bg-slate-100" tabindex="-1">
+    {data.coverImage ? (
+      <Image
+        src={data.coverImage}
+        alt={data.coverImageAlt}
+        width={480}
+        height={270}
+        class="h-full w-full object-contain bg-surface transition-transform duration-200 group-hover:scale-[1.03]"
+      />
+    ) : (
+      <Image src={editorialImages.review.src} alt="" width={640} height={400} format="webp" loading="lazy" class="h-full w-full object-contain bg-surface" />
+    )}
+  </a>
+  )}
+  <div class:list={["flex flex-1 flex-col gap-2.5", { "pt-5": showImage }]}>
+    {category && <span class="text-[13px] font-medium text-ink-muted">{category.data.name}</span>}
+    <h3 class="font-sans text-xl font-semibold leading-snug text-ink">
+      <a href={`/apps/${app.id}`} class="transition-colors hover:text-brand-700">{data.name}</a>
+    </h3>
+    <p class="line-clamp-2 flex-1 text-[15px] leading-relaxed text-ink-muted">{data.description}</p>
+    {data.developer && <p class="text-[13px] text-ink-muted/80">by {data.developer}</p>}
+    {data.category === 'games' && <a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary mt-3">Get on Steam <span aria-hidden="true">↗</span><span class="sr-only"> (official store, opens in a new tab)</span></a>}
+  </div>
+</article>

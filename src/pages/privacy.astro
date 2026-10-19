@@ -1,0 +1,149 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { render } from 'astro:content';
+import { getLegalPage, getSiteSettings } from '../lib/content';
+import { adsMasterEnabled } from '../lib/ads';
+
+const page = await getLegalPage('legalPrivacy');
+const { Content: AdditionalNotes } = await render(page);
+const hasAdditionalNotes = Boolean(page.body?.trim());
+const settings = await getSiteSettings();
+const adsActive = adsMasterEnabled(settings);
+
+const reviewDate = page.data.policyReviewDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+// Treated as a draft until a human has set an explicit review date — kept
+// out of the sitemap and out of on-site search while in that state (see
+// astro.config.mjs for the matching sitemap exclusion). Whether the business
+// details below are filled in is a separate, launch-readiness-script
+// concern (`npm run launch-check`) — it is not shown to readers here.
+const isDraft = !page.data.policyReviewDate;
+---
+
+<BaseLayout
+  title={page.data.seoTitle || 'Privacy Policy'}
+  description={page.data.seoDescription || `Privacy policy for ${settings.siteName}.`}
+  canonicalPath="/privacy"
+  noindex={isDraft}
+  pagefindIndex={!isDraft}
+  adPageEligible={!isDraft}
+>
+  <article class="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+    <h1 class="font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">Privacy Policy</h1>
+    <p class="mt-2 text-sm text-ink-muted">
+      {reviewDate ? `Last reviewed ${reviewDate}.` : 'This policy has not yet been reviewed — treat it as a draft.'}
+    </p>
+
+    <div class="prose-article mt-6">
+      <h2>Who we are</h2>
+      <p>
+        {settings.businessLegalName
+          ? `This site is operated by ${settings.businessLegalName}.`
+          : 'The legal entity operating this site has not been published yet.'}
+        {settings.contactEmail
+          ? ` You can reach us at ${settings.contactEmail}.`
+          : ' A contact email has not been published yet.'}
+      </p>
+
+      <h2>Information we collect</h2>
+      {settings.analyticsProvider === 'none' && (
+        <p>We do not currently run any analytics service on this site.</p>
+      )}
+      {settings.analyticsProvider === 'plausible' && (
+        <p>
+          We use <a href="https://plausible.io/data-policy" target="_blank" rel="noopener noreferrer">Plausible Analytics</a>,
+          a privacy-friendly analytics service that does not use cookies and does not collect or store any personal
+          data about individual visitors.
+        </p>
+      )}
+      {settings.analyticsProvider === 'ga4' && (
+        <p>
+          We use Google Analytics 4 to understand how visitors use this site. This site uses Google's{' '}
+          <a href="https://support.google.com/analytics/answer/9976101" target="_blank" rel="noopener noreferrer">
+            Basic Consent Mode
+          </a>: the Google Analytics code is not loaded in your browser, and no request to Google is made, until you
+          grant analytics consent through the consent banner described below. If you don't consent, no Google
+          Analytics request happens at all. Learn more about{' '}
+          <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
+            how Google uses information from sites that use its services
+          </a>.
+        </p>
+      )}
+
+      <h2>Fonts</h2>
+      <p>
+        This site's fonts are hosted on our own server, not fetched from Google Fonts or any other third party —
+        loading a page here doesn't send your IP address to a font provider.
+      </p>
+
+      <h2>Advertising</h2>
+      {adsActive ? (
+        <p>
+          This site displays ads served by Google AdSense. Like analytics, the AdSense ad code is not loaded in
+          your browser until you grant advertising consent through the consent banner described below — no ad
+          request is made before that. Once loaded, Google and its advertising partners may use cookies or device
+          identifiers to serve ads based on your visits to this and other sites. You can learn more and opt out of
+          personalized advertising at{' '}
+          <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
+            Google's advertising policy page
+          </a>{' '}
+          and manage ad personalization at{' '}
+          <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">
+            Google Ad Settings
+          </a>.
+        </p>
+      ) : (
+        <p>
+          Advertising is not currently active on this site. This section will be updated to name the specific ad
+          network(s) used once ad serving is turned on and verified.
+        </p>
+      )}
+
+      <h2>Cookie and advertising consent</h2>
+      {settings.cmpProvider === 'none' && (
+        <p>
+          No consent management platform is currently configured. In line with Google's requirements, this site
+          will not serve personalized ads to visitors in the European Economic Area, the UK, or Switzerland until a
+          Google-certified, IAB TCF-integrated consent management platform is configured and verified.
+        </p>
+      )}
+      {settings.cmpProvider !== 'none' && !settings.cmpConfiguredAndVerified && (
+        <p>
+          A consent management platform is configured but has not yet been verified as correctly integrated with
+          Google Consent Mode. Until that verification is complete, this site does not serve personalized ads to
+          visitors in the European Economic Area, the UK, or Switzerland.
+        </p>
+      )}
+      {settings.cmpProvider !== 'none' && settings.cmpConfiguredAndVerified && (
+        <p>
+          We use a consent management platform integrated with the IAB Transparency &amp; Consent Framework (TCF)
+          to collect and manage cookie, analytics, and advertising consent choices. You can change your choices at
+          any time, including withdrawing consent you previously gave, using the consent preferences control that
+          platform provides.
+        </p>
+      )}
+
+      <h2>Your choices</h2>
+      <p>
+        You can control cookies through your browser settings, and, where a consent banner is shown, through the
+        choices offered there. If you have questions about data we may hold about you,{' '}
+        {settings.contactEmail ? (
+          <>contact us at <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>.</>
+        ) : (
+          <>a contact method has not been published yet.</>
+        )}
+      </p>
+
+      <h2>Children's privacy</h2>
+      <p>This site is not directed at children and we do not knowingly collect personal data from children.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>We may update this policy as the services we use change. The review date above reflects the most recent human review.</p>
+
+      {hasAdditionalNotes && <AdditionalNotes />}
+    </div>
+  </article>
+</BaseLayout>

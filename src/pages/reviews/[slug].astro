@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleDetail from '../../components/ArticleDetail.astro';
+import { getPublicCollection } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const articles = await getPublicCollection('articles');
+  return articles
+    .filter((a) => a.data.type === 'review')
+    .map((article) => ({ params: { slug: article.id }, props: { article } }));
+}
+
+const { article } = Astro.props;
+---
+
+<BaseLayout
+  title={article.data.seoTitle || article.data.title}
+  description={article.data.seoDescription || article.data.description}
+  canonicalPath={`/reviews/${article.id}`}
+>
+  <ArticleDetail article={article} />
+</BaseLayout>

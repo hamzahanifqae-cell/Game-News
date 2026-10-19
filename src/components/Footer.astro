@@ -1,0 +1,55 @@
+---
+import Logo from './Logo.astro';
+import { getSiteSettings } from '../lib/content';
+
+const settings = await getSiteSettings();
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-line bg-[#edf0f8]" data-pagefind-ignore>
+  <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+    <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr]">
+      <div>
+        <Logo />
+        <p class="mt-4 max-w-xs text-[15px] leading-6 text-ink-muted">{settings.tagline}</p>
+      </div>
+
+      <nav aria-label="Content">
+        <h2 class="mb-5 editorial-kicker text-ink">Content</h2>
+        <ul class="space-y-3 text-[13px] text-ink-muted">
+          <li><a href="/blog" class="hover:text-brand-700">Upcoming games</a></li>
+          <li><a href="/games" class="hover:text-brand-700">Games</a></li>
+          
+          
+          
+          <li><a href="/updates" class="hover:text-brand-700">Game updates</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Site">
+        <h2 class="mb-5 editorial-kicker text-ink">Site</h2>
+        <ul class="space-y-3 text-[13px] text-ink-muted">
+          <li><a href="/about" class="hover:text-brand-700">About</a></li>
+          <li><a href="/privacy" class="hover:text-brand-700">Privacy Policy</a></li>
+          <li><a href="/terms" class="hover:text-brand-700">Terms of Use</a></li>
+        </ul>
+      </nav>
+
+      {settings.socialLinks.length > 0 && (
+        <nav aria-label="Follow">
+          <h2 class="mb-5 editorial-kicker text-ink">Follow</h2>
+          <ul class="space-y-3 text-[13px] text-ink-muted">
+            {settings.socialLinks.map((link) => (
+              <li><a href={link.url} target="_blank" class="hover:text-brand-700" rel="noopener noreferrer">{link.platform}<span class="sr-only"> (opens in a new tab)</span></a></li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </div>
+
+    <div class="mt-12 border-t border-line pt-6 text-[13px] text-ink-muted/80">
+      <p>&copy; {year} {settings.businessLegalName || settings.siteName}. All rights reserved.</p>
+      <p class="mt-1">App names, logos, and screenshots belong to their respective owners. GameNews is not affiliated with the publishers it covers unless stated otherwise.</p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { render } from 'astro:content';
+import { getLegalPage, getSiteSettings } from '../lib/content';
+
+const page = await getLegalPage('legalAbout');
+const { Content } = await render(page);
+const settings = await getSiteSettings();
+---
+
+<BaseLayout
+  title={page.data.seoTitle || 'About'}
+  description={page.data.seoDescription || `About ${settings.siteName}.`}
+  canonicalPath="/about"
+>
+  <article class="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+    <h1 class="font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">About {settings.siteName}</h1>
+    <div class="prose-article mt-6">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

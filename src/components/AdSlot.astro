@@ -1,0 +1,57 @@
+---
+// A configurable, reusable ad placement. Reserves space up front (sized by
+// `format`) so the layout doesn't shift when an ad eventually loads, and is
+// clearly labeled so it can never be mistaken for navigation or an
+// official-source link.
+//
+// Renders the reserved <ins> markup only when: ad serving is enabled, the
+// publisher ID is valid, the CMP attestation AND its required fields are
+// both valid, this specific placement has a valid ad-unit ID, AND
+// `pageEligible` is true — the same page-level flag passed to BaseLayout as
+// `adPageEligible`, so a page can never show manual ad markup while also
+// blocking the ad-library script (or vice versa). See src/lib/ads.ts.
+//
+// Even when this renders, the actual Google ad request only fires after the
+// visitor's CMP grants consent — see src/lib/consent-client.ts. This
+// component never pushes to `adsbygoogle` itself; that's centralized there.
+import { getSiteSettings } from '../lib/content';
+import { resolveAdSlot, type AdPlacement } from '../lib/ads';
+
+interface Props {
+  placement: AdPlacement;
+  format?: 'banner' | 'rectangle' | 'in-article';
+  pageEligible?: boolean;
+}
+
+const { placement, format = 'rectangle', pageEligible = true } = Astro.props;
+const settings = await getSiteSettings();
+const slot = resolveAdSlot(settings, placement, pageEligible);
+
+const reserved: Record<string, string> = {
+  banner: 'min-h-[100px] md:min-h-[90px]',
+  rectangle: 'min-h-[250px] w-full max-w-[300px]',
+  'in-article': 'min-h-[200px]',
+};
+---
+
+{slot && (
+  <div
+    class={`mx-auto my-8 flex flex-col items-center gap-1.5 ${reserved[format]}`}
+    data-ad-placement={placement}
+    data-pagefind-ignore
+  >
+    <span class="text-[11px] font-semibold uppercase tracking-wider text-ink-muted/70">
+      Advertisement
+    </span>
+    <div class={`flex w-full flex-1 items-center justify-center rounded-lg border border-dashed border-line bg-white ${reserved[format]}`}>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={slot.publisherId}
+        data-ad-slot={slot.adUnitId}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  </div>
+)}

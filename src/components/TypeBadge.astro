@@ -1,0 +1,26 @@
+---
+interface Props {
+  type: 'review' | 'tutorial' | 'troubleshooting' | 'news';
+  class?: string;
+}
+
+const { type, class: className = '' } = Astro.props;
+
+const labels: Record<Props['type'], string> = {
+  news: 'Upcoming',
+  review: 'Review',
+  tutorial: 'Tutorial',
+  troubleshooting: 'Troubleshooting',
+};
+
+const styles: Record<Props['type'], string> = {
+  news: 'text-brand-700',
+  review: 'text-brand-700',
+  tutorial: 'text-accent-600',
+  troubleshooting: 'text-ink-muted',
+};
+---
+
+<span class={`inline-flex items-center text-[12px] uppercase tracking-[.13em] font-semibold ${styles[type]} ${className}`}>
+  {labels[type]}
+</span>

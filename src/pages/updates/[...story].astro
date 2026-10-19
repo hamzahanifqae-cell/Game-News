@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { Image } from 'astro:assets';
+import { getNewsStory, newsGames } from '../../lib/news';
+import { getPublicCollection } from '../../lib/content';
+export const prerender = false;
+const path = Astro.params.story || '';
+const valid = /^\d{1,10}\/\d{1,12}-\d{1,24}$/.test(path) && newsGames.some(g => String(g.appId) === path.split('/')[0]);
+const item = valid ? await getNewsStory(path) : undefined;
+const game = item ? newsGames.find(g => String(g.appId) === item.id.split(':')[0]) : undefined;
+const apps = await getPublicCollection('apps');
+const profile = game ? apps.find(a => a.id === game.slug) : undefined;
+const features = await getPublicCollection('articles');
+const feature = game ? features.find(a => a.id === `${game.slug}-watchlist`) : undefined;
+const image = profile?.data.coverImage || feature?.data.coverImage;
+const imageData = profile?.data || feature?.data;
+if (!item) { Astro.response.status = valid ? 503 : 404; if (valid) Astro.response.headers.set('Retry-After','60'); }
+Astro.response.headers.set('Cache-Control', item ? 'public, max-age=60, s-maxage=900' : 'no-store');
+const adPageEligible = Boolean(item && game);
+const published = item ? new Date(item.publishedAt).toLocaleString('en-US',{dateStyle:'long',timeStyle:'short',timeZone:'UTC'}) : '';
+---
+<BaseLayout title={item ? `${item.game}: ${item.title}` : 'Update unavailable'} description={item ? `An automatic update brief for ${item.game}, with the official announcement and store links.` : 'This game update is unavailable.'} adPageEligible={adPageEligible} pagefindIndex={false} noindex>
+<article class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+<a href="/updates" class="text-sm font-semibold text-brand-700">← All game updates</a>
+{item && game ? <>
+<div class="mt-8 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-brand-700"><span>{item.game}</span><span class="text-ink-muted">Automatic update brief</span></div>
+<h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">{item.title}</h1>
+<p class="mt-4 text-sm text-ink-muted">Publisher posted <time datetime={item.publishedAt}>{published} UTC</time></p>
+{image && <figure class="mt-8"><Image src={image} alt={imageData?.coverImageAlt || game.name} width={960} height={550} class="aspect-video w-full rounded-2xl bg-white object-contain" /><figcaption class="mt-2 text-xs text-ink-muted">{imageData?.coverImageCredit} · <a href={imageData?.coverImageSource} class="underline" target="_blank" rel="noopener noreferrer">Artwork source</a></figcaption></figure>}
+<div class="prose-article mt-8">
+<p>A new official announcement for <strong>{item.game}</strong> is available. This brief brings together the publication date, a short preview where available, and the links you need to check the complete information.</p>
+{item.preview && <><h2>From the official announcement</h2><blockquote><p>{item.preview}</p></blockquote></>}
+<h2>Read the complete update</h2>
+<p>The publisher’s full post contains the details and any conditions that apply. Follow it for the exact changes, timing, or participation instructions before acting on this announcement.</p>
+<a href={item.url} target="_blank" rel="noopener noreferrer" class="btn-primary no-underline">Read official announcement ↗<span class="sr-only"> (opens in a new tab)</span></a>
+<h2>Game and download information</h2>
+{profile ? <p>{profile.data.description} You can read the <a href={`/apps/${profile.id}`}>GameNews game profile</a> before opening the official store.</p> : <p>Following this upcoming game? Read our <a href={feature ? `/news/${feature.id}` : '/blog'}>editorial watchlist</a>, then check the current publisher listing for availability.</p>}
+<p><a href={`https://store.steampowered.com/app/${game.appId}/`} target="_blank" rel="noopener noreferrer">{profile ? 'Get the game through the official Steam store' : 'View the official Steam listing'} ↗</a></p>
+</div>
+<aside class="mt-10 rounded-xl border border-line bg-white p-5 text-sm leading-6 text-ink-muted">This brief is assembled automatically from official Steam announcement metadata. It is not a hands-on report or an independent verification of the publisher’s claims. The date above belongs to the source announcement. Older briefs remain dated when a new announcement arrives.</aside>
+<AdSlot placement="articleBottom" format="in-article" pageEligible={adPageEligible} />
+</> : <div class="mt-10"><h1 class="text-3xl font-bold">{valid ? 'This update is temporarily unavailable.' : 'Update not found.'}</h1><p class="mt-4 text-ink-muted">{valid ? 'We could not retrieve this announcement from the publisher. Try again shortly or browse the latest available updates.' : 'Check the address or browse the current game updates.'}</p></div>}
+</article>
+</BaseLayout>

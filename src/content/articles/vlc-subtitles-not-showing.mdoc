@@ -1,0 +1,49 @@
+---
+title: "VLC subtitles not showing? Check these things first"
+type: "troubleshooting"
+category: "photo-and-video"
+author: "apploom"
+relatedApp: "vlc"
+description: "A non-destructive checklist for distinguishing missing subtitle tracks, unreadable text, and subtitle files that do not match your video."
+publishDate: "2026-10-15"
+coverImage: "../../assets/products/vlc.png"
+coverImageAlt: "VLC media player 3.0.17.4 on Windows, historical screenshot."
+coverImageCredit: "VLC / VideoLAN \u00b7 RazDum via Wikimedia Commons \u00b7 GPL-2.0-or-later \u00b7 historical screenshot (2022)"
+coverImageSource: "https://commons.wikimedia.org/wiki/File:VLC_Media_Player_Screenshot.png"
+draft: true
+sample: false
+---
+
+## Work out which problem you have
+
+“Subtitles do not work” can mean several things: the video has no subtitle track, a track exists but is not selected, or text appears in a form you cannot read. Start by identifying what you can actually see. That distinction helps you avoid changing unrelated settings or reinstalling the player without a reason.
+
+This checklist is based on VideoLAN's desktop VLC 3.0 documentation. Menu names can differ by platform and release. The image above is a genuine historical screenshot of VLC 3.0.17.4, not a capture made while testing this guide.
+
+## Check for a track before looking for a setting
+
+Open the subtitle-track menu and look for an available track. VideoLAN documents support for embedded tracks and separate subtitle files. A video playing successfully is not evidence that it contains subtitles. If there is no track, check what the source of the video says it includes.
+
+If several tracks are listed, select the language you need. Check a scene with actual dialogue rather than an opening title or a silent sequence. Note the approximate time where you expect text so that you can compare the same moment after each change.
+
+## If you have a separate subtitle file
+
+Confirm that it belongs with this video, not a different episode, edit, or language. Keep your originals unchanged while diagnosing the problem. VLC supports common subtitle formats such as SRT; VideoLAN also notes that VobSub uses the IDX file when loading that subtitle pair.
+
+Use the subtitle-loading option described for your installed version and choose the intended file. Installing additional software is not a necessary first step just because a subtitle file is separate from the video. Only obtain subtitle material from a source you are entitled to use.
+
+## If text is present but hard to read
+
+Distinguish appearance from timing. Tiny text, an unsuitable font, and text that appears at the wrong moment are different problems. In the documented desktop preferences, text subtitle appearance can be adjusted; bitmap-based subtitle formats do not behave like editable text. The documentation notes that font changes may require restarting playback.
+
+Change one setting at a time. Record its original value so that you can undo an adjustment that does not help. If the words themselves look corrupted, capture a short example and include the subtitle format when asking for support rather than changing several unrelated options at once.
+
+## Know when to stop guessing
+
+Test another video that you know includes subtitles, if you have one available. This is a comparison to narrow the issue, not a guarantee of a fix. If one file fails while another works, include that distinction in your support request.
+
+Useful details are your VLC version, operating system, video and subtitle file types, whether a track appears in the menu, and what you tried. Do not post private video files or logs containing personal paths without reviewing them first.
+
+## Sources and screenshot credit
+
+[VideoLAN's subtitle documentation](https://docs.videolan.me/vlc-user/desktop/3.0/en/basic/subtitles.html), checked 15 October 2026. [Official VLC download page](https://www.videolan.org/vlc/). Screenshot: VLC / VideoLAN, contributor RazDum via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:VLC_Media_Player_Screenshot.png), [GPL-2.0-or-later](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html); [software source](https://code.videolan.org/videolan/vlc). No firsthand troubleshooting test is claimed.

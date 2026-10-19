@@ -1,0 +1,135 @@
+---
+import snapshot from '../data/news-snapshot.json';
+import { newsPath } from '../lib/news';
+import { getPublicCollection } from '../lib/content';
+const [articles, apps] = await Promise.all([getPublicCollection('articles'), getPublicCollection('apps')]);
+const paths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
+const entries = [
+  ...snapshot.items.map(item => ({ title: item.title, description: item.game, url: newsPath(item), type: 'update' })),
+  ...articles.map(({id, data}) => ({title: data.title, description: data.description, url: `/${paths[data.type]}/${id}`, type: data.type})),
+  ...apps.map(({id, data}) => ({title: data.name, description: data.description, url: `/apps/${id}`, type: data.category === 'games' ? 'game' : 'app'})),
+];
+const payload = JSON.stringify({entries, production: import.meta.env.PROD}).replace(/</g, '\\u003c');
+---
+<div id="header-search" class="header-search">
+  <button id="header-search-toggle" type="button" class="search-trigger" aria-label="Search GameNews" aria-expanded="false" aria-controls="header-search-panel">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Search</span>
+  </button>
+  <form id="header-search-form" role="search" hidden>
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <label class="sr-only" for="header-search-input">Search GameNews</label>
+    <input id="header-search-input" type="search" placeholder="Search games & upcoming features…" autocomplete="off" aria-controls="header-search-results" />
+    <button id="header-search-close" type="button" aria-label="Close search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  </form>
+  <section id="header-search-panel" aria-label="Search suggestions" hidden>
+    <p id="header-search-status" role="status" aria-live="polite">Search games and upcoming features.</p>
+    <ul id="header-search-results"></ul>
+  </section>
+</div>
+<script id="header-search-data" type="application/json" set:html={payload} />
+<style>
+  .header-search { position: relative; }
+  .search-trigger { display: flex; align-items: center; gap: .65rem; height: 40px; padding: 0 1rem; border: 1px solid var(--color-line); background: var(--color-surface); border-radius: 999px; color: var(--color-ink-muted); font-size: .875rem; font-weight: 500; cursor: pointer; }
+  .search-trigger[hidden] { display: none; }
+  .search-trigger:hover { border-color: var(--color-ink-muted); color: var(--color-ink); }
+  .header-search.is-open { position: absolute; right: 24px; top: 18px; width: min(480px, calc(100% - 48px)); }
+  #header-search-form:not([hidden]) { display: flex; align-items: center; gap: .75rem; height: 40px; padding: 0 .7rem 0 1rem; background: var(--color-surface); border: 1px solid var(--color-brand-600); border-radius: 999px; box-shadow: 0 0 0 3px #4b52d80b; }
+  #header-search-form > svg { flex-shrink: 0; color: var(--color-brand-700); }
+  input { min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; font-size: 16px; color: var(--color-ink); }
+  #header-search-close { display: grid; place-items: center; flex-shrink: 0; height: 28px; width: 28px; border-radius: 50%; color: var(--color-ink-muted); cursor: pointer; }
+  #header-search-close:hover { background: var(--color-paper); }
+  #header-search-panel { position: absolute; top: calc(100% + 12px); right: 0; width: 100%; max-height: min(65vh, 480px); overflow-y: auto; overscroll-behavior: contain; padding: 1.15rem; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 12px; box-shadow: 0 16px 45px #16203916; }
+  #header-search-status { font-size: .875rem; color: var(--color-ink-muted); line-height: 1.6; }
+  #header-search-results { margin: .5rem 0 0; padding: 0; list-style: none; }
+  #header-search-results :global(li + li) { border-top: 1px solid var(--color-line); }
+  #header-search-results :global(a) { display: block; padding: .9rem .35rem; border-radius: 4px; }
+  #header-search-results :global(a:hover), #header-search-results :global(a:focus-visible) { background: var(--color-paper); }
+  #header-search-results :global(small) { display: block; color: var(--color-brand-700); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; }
+  #header-search-results :global(strong) { display: block; margin-top: .3rem; font-family: var(--font-serif); font-size: 1.1rem; line-height: 1.3; font-weight: 500; color: var(--color-ink); }
+  @media (max-width: 1023px) { .header-search.is-open { left: 16px; right: 16px; top: 14px; width: auto; } .search-trigger { padding: 0 .7rem; } .search-trigger span { display: none; } }
+  @media (prefers-reduced-motion: no-preference) { .is-open #header-search-form { animation: search-reveal .18s ease-out; } @keyframes search-reveal { from { opacity: .4; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } } }
+</style>
+<script is:inline type="module">
+  const root = document.getElementById('header-search');
+  const toggle = document.getElementById('header-search-toggle');
+  const form = document.getElementById('header-search-form');
+  const input = document.getElementById('header-search-input');
+  const panel = document.getElementById('header-search-panel');
+  const close = document.getElementById('header-search-close');
+  const results = document.getElementById('header-search-results');
+  const status = document.getElementById('header-search-status');
+  const header = root.closest('header');
+  const {entries, production} = JSON.parse(document.getElementById('header-search-data').textContent);
+  const known = new Map(entries.map(entry => [entry.url, entry]));
+  let sequence = 0, timer, engine, newsLoadedAt = 0;
+  async function refreshNewsSearch() {
+    if (Date.now() - newsLoadedAt < 15 * 60_000) return;
+    try {
+      const response = await fetch('/api/news.json', {signal: AbortSignal.timeout(10000)});
+      if (!response.ok) return;
+      const feed = await response.json();
+      if (!Array.isArray(feed.items)) return;
+      for (const item of feed.items) {
+        const [appId,gid] = String(item.id).split(':');
+        const stamp = Math.floor(Date.parse(item.publishedAt)/1000);
+        if (!/^\d+$/.test(appId) || !/^\d+$/.test(gid) || !Number.isFinite(stamp)) continue;
+        const entry = {title:String(item.title), description:String(item.game), url:`/updates/${appId}/${stamp}-${gid}`, type:'update'};
+        if (!known.has(entry.url)) entries.push(entry);
+        known.set(entry.url,entry);
+      }
+      newsLoadedAt = Date.now();
+      if (!panel.hidden && input.value.trim()) search();
+    } catch { /* The saved search index remains available during an outage. */ }
+  }
+  function setOpen(open, returnFocus = true) {
+    if (open) {
+      const menuToggle = document.getElementById('menu-toggle');
+      if (menuToggle?.getAttribute('aria-expanded') === 'true') menuToggle.click();
+    }
+    ++sequence; clearTimeout(timer);
+    root.classList.toggle('is-open', open);
+    header.toggleAttribute('data-search-open', open);
+    toggle.hidden = open; form.hidden = !open; panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    if (open) {
+      input.focus(); search(); void refreshNewsSearch();
+    } else if (returnFocus) toggle.focus();
+  }
+  async function search() {
+    const request = ++sequence, query = input.value.trim();
+    results.replaceChildren();
+    if (!query) { status.textContent = entries.length ? 'Search games and upcoming features.' : 'Our first articles are in preparation.'; return; }
+    status.textContent = 'Searching…';
+    const terms = query.toLocaleLowerCase().split(/\s+/);
+    let matches = entries.filter(entry => terms.every(term => `${entry.title} ${entry.description} ${entry.type}`.toLocaleLowerCase().includes(term)));
+    if (production && entries.length) {
+      try {
+        engine ??= import('/pagefind/pagefind.js');
+        const pagefind = await engine;
+        const response = await pagefind.search(query);
+        const pages = await Promise.all(response.results.slice(0, 20).map(result => result.data()));
+        const found = pages.map(page => known.get(new URL(page.url, location.origin).pathname.replace(/\/$/, ''))).filter(Boolean);
+        matches = [...new Map([...found, ...matches].map(item => [item.url, item])).values()];
+      } catch { /* Title and description search remains available. */ }
+    }
+    if (request !== sequence || panel.hidden) return;
+    status.textContent = matches.length ? `${matches.length} result${matches.length === 1 ? '' : 's'}${matches.length > 8 ? ' · showing the first 8' : ''}` : 'No matches. Try a different name or fewer words.';
+    for (const entry of matches.slice(0, 8)) {
+      const li = document.createElement('li'), link = document.createElement('a');
+      link.href = entry.url;
+      const type = document.createElement('small'); type.textContent = entry.type;
+      const title = document.createElement('strong'); title.textContent = entry.title;
+      link.append(type, title); li.append(link); results.append(li);
+    }
+  }
+  toggle.addEventListener('click', () => setOpen(true));
+  close.addEventListener('click', () => setOpen(false));
+  form.addEventListener('submit', event => { event.preventDefault(); clearTimeout(timer); search(); });
+  input.addEventListener('input', () => { ++sequence; clearTimeout(timer); timer = setTimeout(search, 160); });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && root.classList.contains('is-open')) { event.preventDefault(); setOpen(false); }
+    else if (event.key === 'ArrowDown' && document.activeElement === input) { const first = results.querySelector('a'); if (first) {event.preventDefault(); first.focus();} }
+  });
+  document.addEventListener('click', event => { if (root.classList.contains('is-open') && !root.contains(event.target)) setOpen(false, false); });
+  document.addEventListener('focusin', event => { if (root.classList.contains('is-open') && !root.contains(event.target)) setOpen(false, false); });
+</script>

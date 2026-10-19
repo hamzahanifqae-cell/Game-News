@@ -1,0 +1,86 @@
+---
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ConsentScripts from '../components/ConsentScripts.astro';
+import { getSiteSettings } from '../lib/content';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+  canonicalPath?: string;
+  ogImage?: string;
+  /** Set false for error/utility pages (404, search) that shouldn't appear in on-site search results. */
+  pagefindIndex?: boolean;
+  /**
+   * Single page-level ad-eligibility flag. Governs BOTH whether the AdSense
+   * ad-library script can ever load on this page (via the consent gate) and
+   * whether any AdSlot on this page renders its <ins> markup — one source of
+   * truth instead of two independent checks that could disagree. Defaults to
+   * true for ordinary content pages; pages should pass false for 404/search
+   * and for any page without substantive published content. See
+   * src/lib/ads.ts and README "Page-level ad eligibility".
+   */
+  adPageEligible?: boolean;
+}
+
+const {
+  title,
+  description,
+  noindex = false,
+  canonicalPath,
+  ogImage,
+  pagefindIndex = true,
+  adPageEligible = true,
+} = Astro.props;
+const settings = await getSiteSettings();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <Seo
+      title={title}
+      description={description}
+      siteName={settings.siteName}
+      noindex={noindex}
+      canonicalPath={canonicalPath}
+      ogImage={ogImage}
+    />
+
+    {/* AdSense ownership verification — independent of ad serving and of Search Console. */}
+    {settings.adsensePublisherId && (
+      <meta name="google-adsense-account" content={settings.adsensePublisherId} />
+    )}
+    {/* Search Console ownership verification — independent of AdSense. */}
+    {settings.searchConsoleVerification && (
+      <meta name="google-site-verification" content={settings.searchConsoleVerification} />
+    )}
+
+    <ConsentScripts settings={settings} adsPageEligible={adPageEligible} />
+
+    {settings.analyticsProvider === 'plausible' && settings.analyticsId && (
+      <script is:inline defer data-domain={settings.analyticsId} src="https://plausible.io/js/script.js" />
+    )}
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white"
+    >
+      Skip to content
+    </a>
+    <Header />
+    <main id="main-content" class="flex-1" data-pagefind-body={pagefindIndex ? true : undefined}>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

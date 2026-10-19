@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Content in progress"
+  description="This content is being prepared. Explore available GameNews pages while you wait."
+  canonicalPath="/in-progress"
+  noindex
+  pagefindIndex={false}
+  adPageEligible={false}
+>
+  <section class="mx-auto flex max-w-xl flex-col items-center px-4 py-20 text-center sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-wide text-brand-600">Coming soon</p>
+    <h1 class="mt-3 font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">This content is in progress</h1>
+    <p class="mt-4 leading-relaxed text-ink-muted">We're preparing this page or link. Please explore the rest of GameNews in the meantime.</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="/" class="btn-primary">Go to homepage</a>
+      <a href="/search" class="btn-secondary">Search GameNews</a>
+    </div>
+  </section>
+</BaseLayout>

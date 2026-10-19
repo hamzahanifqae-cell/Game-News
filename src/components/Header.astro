@@ -1,0 +1,95 @@
+---
+import Logo from './Logo.astro';
+import HeaderSearch from './HeaderSearch.astro';
+import { getPublicEntry } from '../lib/content';
+const currentPath = Astro.url.pathname;
+const appSlug = currentPath.startsWith('/apps/') ? currentPath.split('/')[2] : undefined;
+const currentApp = appSlug ? await getPublicEntry('apps', appSlug) : undefined;
+const gamePage = currentPath === '/games' || currentPath.startsWith('/games/') || currentApp?.data.category === 'games';
+const journalPage = ['/updates', '/news', '/blog', '/reviews', '/tutorials', '/troubleshooting', '/categories'].some(path => currentPath === path || currentPath.startsWith(path + '/'));
+const navLinks = [
+  { href: '/games', label: 'Popular Games', description: 'Games with official store downloads', active: gamePage },
+  { href: '/blog', label: 'Upcoming Games', description: 'Games on the horizon & original features', active: journalPage && !currentPath.startsWith('/updates') },
+  { href: '/updates', label: 'Game Updates', description: 'Official publisher announcements', active: currentPath.startsWith('/updates') },
+];
+---
+<header class="site-header sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-md" data-pagefind-ignore>
+  <div class="relative mx-auto flex h-[76px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+    <a href="/" class="shrink-0 rounded-sm" aria-label="GameNews home"><Logo /></a>
+    <nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex" aria-label="Primary">
+      {navLinks.map(link => <a href={link.href} aria-current={link.active ? 'page' : undefined} class:list={['nav-link', { 'is-active': link.active }]}>{link.label}</a>)}
+    </nav>
+    <div class="flex items-center gap-2">
+      <HeaderSearch />
+      <button type="button" id="menu-toggle" class="flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink lg:hidden" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="sr-only">Open main menu</span>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true" id="menu-icon-open"><path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true" id="menu-icon-close" class="hidden"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav id="mobile-menu" class="hidden flex-col border-t border-line bg-paper px-5 pb-5 pt-2 shadow-[0_12px_20px_-20px_#252824] lg:hidden" aria-label="Mobile">
+    {navLinks.map(link => <a href={link.href} aria-current={link.active ? 'page' : undefined} class:list={['mobile-nav-link flex items-center justify-between gap-4 border-b border-line py-4', {'is-active': link.active}]}><span><span class="block text-[15px] font-semibold">{link.label}</span><span class="mt-1 block text-[13px] text-ink-muted">{link.description}</span></span><span aria-hidden="true" class="text-brand-600">↗</span></a>)}
+  </nav>
+</header>
+<style>
+  .site-header[data-search-open] nav[aria-label="Primary"] { visibility: hidden; }
+  @media (max-width: 1023px) { .site-header[data-search-open] a[aria-label="GameNews home"], .site-header[data-search-open] #menu-toggle { visibility: hidden; } }
+  .site-header { box-shadow: 0 4px 25px #16203905; }
+  .nav-link { position: relative; padding: .7rem 1.15rem; border-radius: 999px; font-size: .9375rem; font-weight: 500; color: var(--color-ink-muted); transition: color .15s, background .15s; }
+  .nav-link:hover { color: var(--color-ink); background: #25282406; }
+  .nav-link.is-active { background: #eef0ff; color: var(--color-ink); }
+  .nav-link.is-active::before { content: ''; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--color-brand-600); left: .65rem; top: calc(50% - 2px); }
+  .mobile-nav-link { color: var(--color-ink); }
+  .mobile-nav-link.is-active { color: var(--color-brand-700); }
+  .search-control[aria-current="page"] { border-color: var(--color-brand-600); color: var(--color-brand-700); }
+  @media (max-width: 1023px) { .site-header > div { height: 68px; } }
+</style>
+<script>
+  const toggle = document.getElementById('menu-toggle') as HTMLButtonElement | null;
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+
+  if (toggle && menu && iconOpen && iconClose) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.classList.toggle('hidden', !open);
+      menu.classList.toggle('flex', open);
+      iconOpen.classList.toggle('hidden', open);
+      iconClose.classList.toggle('hidden', !open);
+      toggle.querySelector('.sr-only')!.textContent = open ? 'Close main menu' : 'Open main menu';
+      if (open) {
+        const firstLink = menu.querySelector('a');
+        (firstLink as HTMLAnchorElement | null)?.focus();
+      }
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (
+        toggle.getAttribute('aria-expanded') === 'true' &&
+        !menu.contains(event.target as Node) &&
+        !toggle.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    });
+
+    // Reset to the desktop layout when the viewport grows past the mobile breakpoint.
+    const mql = window.matchMedia('(min-width: 1024px)');
+    mql.addEventListener('change', (e) => {
+      if (e.matches) setOpen(false);
+    });
+  }
+</script>

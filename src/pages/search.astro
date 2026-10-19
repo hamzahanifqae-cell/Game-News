@@ -1,0 +1,83 @@
+---
+import snapshot from '../data/news-snapshot.json';
+import { newsPath } from '../lib/news';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings, getPublicCollection } from '../lib/content';
+const settings = await getSiteSettings();
+const paths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
+const [articles, apps] = await Promise.all([getPublicCollection('articles'), getPublicCollection('apps')]);
+const entries = [
+  ...snapshot.items.map(item => ({ title: item.title, description: item.game, url: newsPath(item), type: 'update' })),
+  ...articles.map(({ id, data }) => ({ title: data.title, description: data.description, url: `/${paths[data.type]}/${id}`, type: data.type })),
+  ...apps.map(({ id, data }) => ({ title: data.name, description: data.description, url: `/apps/${id}`, type: 'app' })),
+];
+const searchData = JSON.stringify({ entries, production: import.meta.env.PROD }).replace(/</g, '\\u003c');
+---
+<BaseLayout title="Search" description={`Search ${settings.siteName}.`} canonicalPath="/search" noindex pagefindIndex={false} adPageEligible={false}>
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+    <p class="editorial-kicker mb-4 text-brand-700">Explore GameNews</p>
+    <h1 class="font-sans text-4xl font-bold tracking-tight text-ink sm:text-5xl">Find a little clarity.</h1>
+    <p class="mt-4 text-ink-muted">Search popular games, upcoming-game blogs, and game updates.</p>
+    <form id="search-form" role="search" class="mt-8">
+      <label for="search-input" class="mb-2 block text-sm font-medium text-ink">Search GameNews</label>
+      <div class="flex overflow-hidden rounded-md border border-line bg-surface focus-within:border-brand-600 focus-within:ring-1 focus-within:ring-brand-600">
+        <input id="search-input" name="q" type="search" placeholder="Try a game name or update…" autocomplete="off" class="min-w-0 flex-1 bg-transparent px-4 py-4 text-base text-ink focus:outline-none" aria-controls="search-results" />
+        <button type="submit" class="m-1 rounded bg-ink px-4 text-sm font-medium text-white hover:bg-brand-700">Search</button>
+      </div>
+    </form>
+    <p id="search-status" role="status" aria-live="polite" class="mt-5 text-sm text-ink-muted">{entries.length ? 'Enter a few words to find your next read.' : 'Our first articles are in preparation. Searchable content will appear here when published.'}</p>
+    <ul id="search-results" class="mt-7 divide-y divide-line"></ul>
+    <noscript><p class="mt-6 text-sm text-ink-muted">Enable JavaScript to search, or <a href="/categories" class="text-brand-700 underline">browse categories</a>.</p></noscript>
+    <a href="/categories" class="mt-8 inline-block text-sm font-medium text-brand-700 underline underline-offset-4">Browse by category instead</a>
+  </section>
+  <script id="search-data" type="application/json" set:html={searchData} />
+  <script is:inline type="module">
+    const { entries, production } = JSON.parse(document.getElementById('search-data').textContent);
+    const form = document.getElementById('search-form');
+    const input = document.getElementById('search-input');
+    const results = document.getElementById('search-results');
+    const status = document.getElementById('search-status');
+    const known = new Map(entries.map(entry => [entry.url.replace(/\/$/, ''), entry]));
+    let sequence = 0;
+    let timer;
+    let engine;
+    const initialStatus = status.textContent;
+    async function search() {
+      const request = ++sequence;
+      const query = input.value.trim();
+      results.replaceChildren();
+      if (!query) { status.textContent = initialStatus; return; }
+      if (!entries.length) { status.textContent = 'No articles have been published yet. Please check back soon.'; return; }
+      status.textContent = 'Searching…';
+      const terms = query.toLocaleLowerCase().split(/\s+/);
+      let matches = entries.filter(entry => terms.every(term => `${entry.title} ${entry.description} ${entry.type}`.toLocaleLowerCase().includes(term)));
+      if (production) {
+        try {
+          engine ??= import('/pagefind/pagefind.js');
+          const pagefind = await engine;
+          const response = await pagefind.search(query);
+          const data = await Promise.all(response.results.slice(0, 30).map(result => result.data()));
+          const fullTextMatches = data.map(item => known.get(new URL(item.url, location.origin).pathname.replace(/\/$/, ''))).filter(Boolean);
+          matches = [...new Map([...fullTextMatches, ...matches].map(item => [item.url, item])).values()];
+        } catch {
+          // Keep the local title/description results if the full-text index is unavailable.
+        }
+      }
+      if (request !== sequence) return;
+      results.replaceChildren();
+      status.textContent = matches.length ? `${matches.length} result${matches.length === 1 ? '' : 's'} for “${query}”` : `No results for “${query}”. Try a different app name or fewer words.`;
+      for (const entry of matches) {
+        const row = document.createElement('li'); row.className = 'py-6';
+        const label = document.createElement('p'); label.className = 'editorial-kicker text-brand-700'; label.textContent = entry.type;
+        const heading = document.createElement('h2'); heading.className = 'mt-2 font-serif text-2xl text-ink';
+        const link = document.createElement('a'); link.href = entry.url; link.textContent = entry.title; link.className = 'hover:text-brand-700'; heading.append(link);
+        const description = document.createElement('p'); description.className = 'mt-2 text-sm leading-6 text-ink-muted'; description.textContent = entry.description;
+        row.append(label, heading, description); results.append(row);
+      }
+    }
+    input.addEventListener('input', () => { ++sequence; clearTimeout(timer); timer = setTimeout(search, 180); });
+    form.addEventListener('submit', event => { event.preventDefault(); clearTimeout(timer); search(); });
+    input.value = new URLSearchParams(location.search).get('q') || '';
+    if (input.value) search();
+  </script>
+</BaseLayout>

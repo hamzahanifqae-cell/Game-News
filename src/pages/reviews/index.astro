@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleTypeListing from '../../components/ArticleTypeListing.astro';
+import { getSiteSettings, hasPublicArticlesOfType } from '../../lib/content';
+
+const settings = await getSiteSettings();
+const hasContent = await hasPublicArticlesOfType('review');
+---
+
+<BaseLayout
+  title={`Reviews`}
+  description={`Original app reviews from ${settings.siteName}.`}
+  canonicalPath="/reviews"
+  adPageEligible={hasContent}
+>
+  <ArticleTypeListing
+    type="review"
+    heading="Reviews"
+    intro="In-depth, hands-on reviews of apps worth knowing about."
+  />
+</BaseLayout>

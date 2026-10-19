@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
+const articles = sortByPublishDateDesc(await getPublicCollection('articles'));
+---
+<BaseLayout title="Upcoming games — GameNews" description="Original upcoming-game features and links to the latest official announcements." adPageEligible={articles.length > 0}>
+<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+<p class="editorial-kicker text-brand-700">The watchlist</p>
+<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">The games on our radar.</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Look ahead with original features grounded in official sources. Each article is a dated editorial snapshot. For new announcements as they arrive, visit <a class="underline text-brand-700" href="/updates">Game updates</a>.</p>
+<div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{articles.map(article => <ArticleCard article={article} />)}</div>
+</section>
+</BaseLayout>

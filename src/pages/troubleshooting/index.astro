@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleTypeListing from '../../components/ArticleTypeListing.astro';
+import { getSiteSettings, hasPublicArticlesOfType } from '../../lib/content';
+
+const settings = await getSiteSettings();
+const hasContent = await hasPublicArticlesOfType('troubleshooting');
+---
+
+<BaseLayout
+  title={`Troubleshooting`}
+  description={`Troubleshooting guides from ${settings.siteName}.`}
+  canonicalPath="/troubleshooting"
+  adPageEligible={hasContent}
+>
+  <ArticleTypeListing
+    type="troubleshooting"
+    heading="Troubleshooting"
+    intro="Fixes for common problems, written from real troubleshooting steps."
+  />
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
+
+interface Props {
+  type: 'review' | 'tutorial' | 'troubleshooting';
+  heading: string;
+  intro: string;
+}
+
+const { heading, intro, type } = Astro.props;
+const all = sortByPublishDateDesc(await getPublicCollection('articles'));
+const items = all.filter((a) => a.data.type === type);
+---
+
+<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+  <h1 class="font-serif text-4xl font-medium tracking-tight text-ink sm:text-5xl">{heading}</h1>
+  <p class="mt-2 max-w-2xl text-ink-muted">{intro}</p>
+
+  {items.length > 0 ? (
+    <div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((article) => <ArticleCard article={article} />)}
+    </div>
+  ) : (
+    <div class="mt-10 border-t border-line py-12">
+      <p class="text-ink-muted">Our first stories are in preparation. Come back soon for new reading.</p>
+    </div>
+  )}
+</section>

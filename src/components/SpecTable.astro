@@ -1,0 +1,76 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  app: CollectionEntry<'apps'>;
+}
+
+const { app } = Astro.props;
+const { data } = app;
+
+// Sample destinations are demonstrations, never real download links.
+let officialUrl: string | undefined;
+try {
+  const url = new URL(data.officialLink);
+  const placeholder = /(^|\.)(example\.(com|org|net)|localhost)$|\.(invalid|test|localhost)$/.test(url.hostname);
+  if (!data.sample && !data.draft && !placeholder &&
+      ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password) {
+    officialUrl = url.href;
+  }
+} catch {
+  // Missing or malformed destinations render as plain unavailable text.
+}
+
+const platformLabels: Record<string, string> = {
+  android: 'Android',
+  ios: 'iOS',
+  windows: 'Windows',
+  macos: 'macOS',
+  web: 'Web',
+};
+
+const rows = [
+  ['Developer', data.developer],
+  ['Current version', data.currentVersion],
+  ['Last updated', data.lastUpdated?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })],
+  ['File size', data.fileSize],
+  ['Platforms', data.platforms.length ? data.platforms.map((p) => platformLabels[p]).join(', ') : undefined],
+].filter(([, value]) => Boolean(value)) as [string, string][];
+---
+
+<div class="rounded-xl border border-line bg-white p-5 sm:p-6">
+  <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-muted">Specifications</h2>
+
+  {rows.length > 0 ? (
+    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {rows.map(([label, value]) => (
+        <div class="flex flex-col gap-0.5 border-b border-line pb-2 sm:border-0 sm:pb-0">
+          <dt class="text-xs font-medium text-ink-muted">{label}</dt>
+          <dd class="text-sm font-medium text-ink">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  ) : (
+    <p class="text-sm text-ink-muted">No specifications published for this app yet.</p>
+  )}
+
+  {officialUrl ? (
+  <a
+    href={officialUrl}
+    rel="nofollow noopener noreferrer"
+    target="_blank"
+    class="btn-primary mt-5 w-full sm:w-auto"
+  >
+    Visit official page
+    <span class="sr-only">(opens in a new tab)</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </a>
+  ) : (
+    <a href="/in-progress" class="btn-secondary mt-5">Official link coming soon</a>
+  )}
+  <p class="mt-2 text-xs text-ink-muted">
+    Links to the official app store or developer site. Specifications are as reported there and may change without notice.
+  </p>
+</div>

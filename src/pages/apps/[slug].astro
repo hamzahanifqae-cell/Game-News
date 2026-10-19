@@ -1,0 +1,72 @@
+---
+import { editorialImages } from '../../lib/editorial-images';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SpecTable from '../../components/SpecTable.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { getCategory, getPublicCollection } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const apps = await getPublicCollection('apps');
+  return apps.map((app) => ({ params: { slug: app.id }, props: { app } }));
+}
+
+const { app } = Astro.props;
+const { data } = app;
+const { Content } = await render(app);
+const category = await getCategory(data.category);
+
+const relatedArticles = (await getPublicCollection('articles')).filter(
+  (article) => article.data.relatedApp === app.id
+);
+---
+
+<BaseLayout
+  title={data.seoTitle || data.name}
+  description={data.seoDescription || data.description}
+  canonicalPath={`/apps/${app.id}`}
+>
+  <article class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <Breadcrumbs items={[{ label: data.category === 'games' ? 'Popular Games' : 'Apps', href: data.category === 'games' ? '/games' : '/apps' }, { label: data.name }]} />
+
+    {category && (
+      <a href={`/categories/${category.id}`} class="text-xs font-medium text-ink-muted hover:text-brand-700">
+        {category.data.name}
+      </a>
+    )}
+
+    <h1 class="mt-2 font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+      {data.name}
+    </h1>
+    <p class="mt-3 text-ink-muted">{data.description}</p>
+
+    {data.category === 'games' && <div class="mt-6"><a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary">Download via Steam <span aria-hidden="true">↗</span><span class="sr-only"> (opens the official store in a new tab)</span></a><p class="mt-2 text-xs text-ink-muted">Opens the official store. Installation is handled by Steam; GameNews does not host game files.</p></div>}
+    <figure class="mt-7">
+      <Image src={data.coverImage || editorialImages.review.src} alt={data.coverImage ? data.coverImageAlt : editorialImages.review.alt} width={1100} height={680} format="webp" class="aspect-[16/10] w-full rounded-sm bg-surface object-contain" />
+      {data.coverImageCredit && <figcaption class="mt-2 text-xs leading-5 text-ink-muted">{data.coverImageCredit}{data.coverImageSource && <> · <a href={data.coverImageSource} target="_blank" rel="noopener noreferrer" class="underline">Image source</a></>}</figcaption>}
+      {!data.coverImage && <figcaption class="mt-2 text-xs text-ink-muted">Illustrative editorial artwork · not an app screenshot</figcaption>}
+    </figure>
+
+    <div class="mt-8">
+      <SpecTable app={app} />
+    </div>
+
+    <div class="prose-article mt-8">
+      <Content />
+    </div>
+
+    <AdSlot placement="appBottom" format="in-article" />
+
+    {relatedArticles.length > 0 && (
+      <div class="mt-12 border-t border-line pt-10">
+        <h2 class="mb-5 text-xl font-semibold text-ink">Related articles</h2>
+        <div class="grid gap-6 sm:grid-cols-2">
+          {relatedArticles.map((article) => <ArticleCard article={article} />)}
+        </div>
+      </div>
+    )}
+  </article>
+</BaseLayout>

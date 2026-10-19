@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AppCard from '../components/AppCard.astro';
+import { getPublicCollection } from '../lib/content';
+const games = (await getPublicCollection('apps')).filter(app => app.data.category === 'games');
+---
+<BaseLayout title="Popular games — official downloads" description="Explore game profiles, practical buying guides, and official store links. No game downloads are hosted here." adPageEligible={games.length > 0}>
+<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+<p class="editorial-kicker text-brand-700">Popular PC games</p><h1 class="mt-4 font-sans text-4xl tracking-tight sm:text-5xl">Find it. Get it. Play.</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Explore popular games, read the details, then download through the official Steam store. Each button clearly identifies where it takes you.</p>
+<div class="mt-8 border-y border-line py-4 text-sm text-ink-muted">Research-based guidance · No invented performance scores · Official sources only</div>
+<h2 class="section-heading mb-7 mt-12">Popular PC picks</h2>
+<p class="mb-7 max-w-3xl text-sm leading-6 text-ink-muted">Selected from <a class="underline" href="https://store.steampowered.com/charts/mostplayed/">Steam’s most-played chart</a>, checked 16 October 2026. This reflects player activity, not Google search volume; rankings change.</p>
+<div class="grid gap-8 md:grid-cols-3">{games.map(app => <AppCard app={app} />)}</div>
+
+<p class="mt-8 text-xs leading-6 text-ink-muted">Images are supplied by the respective publishers through their official Steam listings. Copyright remains with the rights holders; see individual pages for credits. GameNews is not affiliated with these publishers.</p>
+</section>
+</BaseLayout>
