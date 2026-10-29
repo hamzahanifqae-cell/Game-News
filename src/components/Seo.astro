@@ -1,4 +1,6 @@
 ---
+import { jsonLd } from '../lib/seo';
+
 interface Props {
   title: string;
   description: string;
@@ -6,27 +8,45 @@ interface Props {
   noindex?: boolean;
   canonicalPath?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
+  jsonLd?: unknown;
 }
 
-const { title, description, siteName, noindex = false, canonicalPath, ogImage } = Astro.props;
+const {
+  title,
+  description,
+  siteName,
+  noindex = false,
+  canonicalPath,
+  ogImage,
+  ogType = 'website',
+  jsonLd: structuredData,
+} = Astro.props;
 
 const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`;
+const robots = noindex
+  ? 'noindex, nofollow'
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const imageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined;
 ---
 
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL} />
-{noindex && <meta name="robots" content="noindex, nofollow" />}
+<meta name="robots" content={robots} />
 
-<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content={ogType} />
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:site_name" content={siteName} />
-{ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
+{imageUrl && <meta property="og:image" content={imageUrl} />}
 
-<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
-{ogImage && <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />}
+{imageUrl && <meta name="twitter:image" content={imageUrl} />}
+
+{structuredData && <script type="application/ld+json" set:html={jsonLd(structuredData)} />}

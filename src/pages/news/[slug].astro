@@ -17,6 +17,7 @@ const { article } = Astro.props;
   title={article.data.seoTitle || article.data.title}
   description={article.data.seoDescription || article.data.description}
   canonicalPath={`/news/${article.id}`}
+  ogType="article"
 >
   <ArticleDetail article={article} />
 </BaseLayout>

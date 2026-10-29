@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { loadEnv } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import node from '@astrojs/node';
@@ -26,7 +27,9 @@ function isPrivacyPolicyReady() {
 }
 const privacyPolicyReady = isPrivacyPolicyReady();
 
-const siteUrl = process.env.PUBLIC_SITE_URL;
+const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+const fileEnv = loadEnv(process.env.NODE_ENV ?? '', projectRoot, '');
+const siteUrl = process.env.PUBLIC_SITE_URL || fileEnv.PUBLIC_SITE_URL;
 const isPlaceholderUrl = !siteUrl || /example\.com|your-domain/.test(siteUrl);
 const isBuildCommand = process.argv.includes('build');
 

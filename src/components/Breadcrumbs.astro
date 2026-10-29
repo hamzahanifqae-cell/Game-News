@@ -1,4 +1,6 @@
 ---
+import { jsonLd, pageUrl } from '../lib/seo';
+
 interface Crumb {
   label: string;
   href?: string;
@@ -9,19 +11,32 @@ interface Props {
 }
 
 const { items } = Astro.props;
+const crumbs = [{ label: 'Home', href: '/' }, ...items];
+const origin = Astro.site;
+const structuredData = origin ? {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: crumbs.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.label,
+    item: pageUrl(origin, item.href ?? Astro.url.pathname),
+  })),
+} : undefined;
 ---
 
 <nav aria-label="Breadcrumb" class="mb-6 text-sm text-ink-muted" data-pagefind-ignore>
   <ol class="flex flex-wrap items-center gap-1.5">
-    {items.map((item, i) => (
+    {crumbs.map((item, i) => (
       <li class="flex items-center gap-1.5">
         {item.href ? (
           <a href={item.href} class="hover:text-brand-700">{item.label}</a>
         ) : (
           <span aria-current="page" class="text-ink">{item.label}</span>
         )}
-        {i < items.length - 1 && <span aria-hidden="true" class="text-line">/</span>}
+        {i < crumbs.length - 1 && <span aria-hidden="true" class="text-line">/</span>}
       </li>
     ))}
   </ol>
 </nav>
+{structuredData && <script type="application/ld+json" set:html={jsonLd(structuredData)} />}

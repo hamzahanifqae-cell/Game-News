@@ -124,7 +124,7 @@ export default config({
         searchConsoleVerification: fields.text({
           label: 'Google Search Console verification code',
           description:
-            'The "content" value of the google-site-verification meta tag from Search Console — separate from AdSense verification.',
+            'Optional fallback. Prefer GOOGLE_SITE_VERIFICATION in the environment — that value is used instead when it is set. Paste only the content value of the google-site-verification meta tag, separate from AdSense verification. Public pages are prerendered, so rebuild after changing this.',
           defaultValue: '',
         }),
         adUnitHomeMid: fields.text({

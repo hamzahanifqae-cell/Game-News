@@ -2,9 +2,31 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
+import { pageUrl } from '../lib/seo';
 const articles = sortByPublishDateDesc(await getPublicCollection('articles'));
+const articlePaths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
+const pageTitle = 'Upcoming PC Games: Release Dates & Watchlist';
+const pageDescription = 'Upcoming PC game news and dated release watchlists, checked against official Steam listings for Fable, Persona 4 Revival, Final Fantasy VII Revelation, and more.';
+const site = Astro.site;
+const listUrl = pageUrl(site, '/blog');
+const jsonLd = site && listUrl ? {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: pageTitle,
+  description: pageDescription,
+  url: listUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: articles.map((article, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: article.data.title,
+      url: new URL(`/${articlePaths[article.data.type]}/${article.id}`, site).toString(),
+    })),
+  },
+} : undefined;
 ---
-<BaseLayout title="Upcoming games — GameNews" description="Original upcoming-game features and links to the latest official announcements." adPageEligible={articles.length > 0}>
+<BaseLayout title={pageTitle} description={pageDescription} canonicalPath="/blog" jsonLd={jsonLd} adPageEligible={articles.length > 0}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
 <p class="editorial-kicker text-brand-700">The watchlist</p>
 <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">The games on our radar.</h1>

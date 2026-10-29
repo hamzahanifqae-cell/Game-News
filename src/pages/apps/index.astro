@@ -8,8 +8,8 @@ const apps = (await getPublicCollection('apps')).filter(app => app.data.category
 ---
 
 <BaseLayout
-  title="Apps"
-  description={`App information pages from ${settings.siteName}: specifications and official links.`}
+  title="App Info, Specs & Official Downloads"
+  description={`App information from ${settings.siteName}: specifications and official download links. No installers are hosted here.`}
   canonicalPath="/apps"
   adPageEligible={apps.length > 0}
 >

@@ -2,9 +2,30 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AppCard from '../components/AppCard.astro';
 import { getPublicCollection } from '../lib/content';
+import { pageUrl } from '../lib/seo';
 const games = (await getPublicCollection('apps')).filter(app => app.data.category === 'games');
+const pageTitle = 'Popular PC Games & Official Steam Downloads';
+const pageDescription = 'Popular PC games with official Steam download links, including GTA V Enhanced, Cyberpunk 2077, and Red Dead Redemption 2. GameNews does not host game files.';
+const site = Astro.site;
+const listUrl = pageUrl(site, '/games');
+const jsonLd = site && listUrl ? {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: pageTitle,
+  description: pageDescription,
+  url: listUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: games.map((game, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: game.data.name,
+      url: new URL(`/apps/${game.id}`, site).toString(),
+    })),
+  },
+} : undefined;
 ---
-<BaseLayout title="Popular games — official downloads" description="Explore game profiles, practical buying guides, and official store links. No game downloads are hosted here." adPageEligible={games.length > 0}>
+<BaseLayout title={pageTitle} description={pageDescription} canonicalPath="/games" jsonLd={jsonLd} adPageEligible={games.length > 0}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
 <p class="editorial-kicker text-brand-700">Popular PC games</p><h1 class="mt-4 font-sans text-4xl tracking-tight sm:text-5xl">Find it. Get it. Play.</h1>
 <p class="mt-4 max-w-2xl leading-7 text-ink-muted">Explore popular games, read the details, then download through the official Steam store. Each button clearly identifies where it takes you.</p>

@@ -6,6 +6,8 @@ export const GET: APIRoute = ({ site }) => {
 Allow: /
 Disallow: /keystatic
 Disallow: /search
+Disallow: /api/
+Disallow: /in-progress
 
 Sitemap: ${sitemapUrl}
 `;

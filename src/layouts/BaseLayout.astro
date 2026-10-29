@@ -5,6 +5,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ConsentScripts from '../components/ConsentScripts.astro';
 import { getSiteSettings } from '../lib/content';
+import { searchConsoleVerification } from '../lib/seo';
 
 interface Props {
   title: string;
@@ -12,6 +13,9 @@ interface Props {
   noindex?: boolean;
   canonicalPath?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
+  /** Schema.org graph for this page. Rendered once in the document head. */
+  jsonLd?: unknown;
   /** Set false for error/utility pages (404, search) that shouldn't appear in on-site search results. */
   pagefindIndex?: boolean;
   /**
@@ -32,10 +36,13 @@ const {
   noindex = false,
   canonicalPath,
   ogImage,
+  ogType = 'website',
+  jsonLd,
   pagefindIndex = true,
   adPageEligible = true,
 } = Astro.props;
 const settings = await getSiteSettings();
+const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerification);
 ---
 
 <!doctype html>
@@ -53,6 +60,8 @@ const settings = await getSiteSettings();
       noindex={noindex}
       canonicalPath={canonicalPath}
       ogImage={ogImage}
+      ogType={ogType}
+      jsonLd={jsonLd}
     />
 
     {/* AdSense ownership verification — independent of ad serving and of Search Console. */}
@@ -60,8 +69,8 @@ const settings = await getSiteSettings();
       <meta name="google-adsense-account" content={settings.adsensePublisherId} />
     )}
     {/* Search Console ownership verification — independent of AdSense. */}
-    {settings.searchConsoleVerification && (
-      <meta name="google-site-verification" content={settings.searchConsoleVerification} />
+    {searchConsoleToken && (
+      <meta name="google-site-verification" content={searchConsoleToken} />
     )}
 
     <ConsentScripts settings={settings} adsPageEligible={adPageEligible} />

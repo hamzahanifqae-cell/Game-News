@@ -8,6 +8,7 @@ import AdSlot from '../../components/AdSlot.astro';
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import { getCategory, getPublicCollection } from '../../lib/content';
+import { pageUrl } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const apps = await getPublicCollection('apps');
@@ -22,12 +23,29 @@ const category = await getCategory(data.category);
 const relatedArticles = (await getPublicCollection('articles')).filter(
   (article) => article.data.relatedApp === app.id
 );
+const isGame = data.category === 'games';
+const seoTitle = data.seoTitle || (isGame ? `${data.name} PC: Official Steam Download` : `${data.name}: Official Download & App Info`);
+const seoDescription = data.seoDescription || `${data.description} Official store link only. GameNews does not host the download.`;
+const appPageUrl = pageUrl(Astro.site, `/apps/${app.id}`);
+const appJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': isGame ? 'VideoGame' : 'SoftwareApplication',
+  name: data.name,
+  description: data.description,
+  ...(data.developer ? { author: { '@type': 'Organization', name: data.developer } } : {}),
+  ...(isGame
+    ? { gamePlatform: 'PC', applicationCategory: 'Game' }
+    : { applicationCategory: 'Utilities', operatingSystem: data.platforms.join(', ') }),
+  ...(appPageUrl ? { url: appPageUrl } : {}),
+  sameAs: data.officialLink,
+};
 ---
 
 <BaseLayout
-  title={data.seoTitle || data.name}
-  description={data.seoDescription || data.description}
+  title={seoTitle}
+  description={seoDescription}
   canonicalPath={`/apps/${app.id}`}
+  jsonLd={appJsonLd}
 >
   <article class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
     <Breadcrumbs items={[{ label: data.category === 'games' ? 'Popular Games' : 'Apps', href: data.category === 'games' ? '/games' : '/apps' }, { label: data.name }]} />

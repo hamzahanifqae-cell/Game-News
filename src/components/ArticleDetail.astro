@@ -8,7 +8,8 @@ import TypeBadge from './TypeBadge.astro';
 import TableOfContents from './TableOfContents.astro';
 import AdSlot from './AdSlot.astro';
 import ArticleCard from './ArticleCard.astro';
-import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc } from '../lib/content';
+import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
+import { jsonLd as serializeJsonLd, pageUrl } from '../lib/seo';
 
 interface Props {
   article: CollectionEntry<'articles'>;
@@ -42,17 +43,25 @@ const related = sortByPublishDateDesc(
   )
 ).slice(0, 3);
 
-const siteUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : undefined;
+const settings = await getSiteSettings();
+const siteUrl = pageUrl(Astro.site, Astro.url.pathname);
+const publisherUrl = Astro.site ? new URL('/', Astro.site).toString() : undefined;
 
-const jsonLd = {
+const structuredData = {
   '@context': 'https://schema.org',
-  '@type': 'Article',
+  '@type': data.type === 'news' ? 'NewsArticle' : 'Article',
   headline: data.title,
   description: data.description,
   datePublished: data.publishDate.toISOString(),
   ...(data.updatedDate ? { dateModified: data.updatedDate.toISOString() } : {}),
   ...(author ? { author: { '@type': author.data.kind, name: author.data.name } } : {}),
   ...(siteUrl ? { mainEntityOfPage: siteUrl } : {}),
+  inLanguage: 'en',
+  publisher: {
+    '@type': 'Organization',
+    name: settings.siteName,
+    ...(publisherUrl ? { url: publisherUrl } : {}),
+  },
 };
 ---
 
@@ -133,4 +142,4 @@ const jsonLd = {
   )}
 </div>
 
-<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+<script type="application/ld+json" set:html={serializeJsonLd(structuredData)} />

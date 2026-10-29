@@ -7,6 +7,8 @@ import { Image } from 'astro:assets';
 import AdSlot from '../components/AdSlot.astro';
 import { getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { editorialImages } from '../lib/editorial-images';
+import { pageUrl } from '../lib/seo';
+import gtaArtwork from '../assets/products/gta-vi-banner.jpg';
 const settings = await getSiteSettings();
 const homepageStories = ['fable-watchlist', 'phantom-blade-zero-watchlist', 'the-wolf-among-us-2-watchlist'];
 const articles = sortByPublishDateDesc(await getPublicCollection('articles')).filter(article => homepageStories.includes(article.id)).sort((a,b) => homepageStories.indexOf(a.id) - homepageStories.indexOf(b.id));
@@ -26,13 +28,50 @@ function claimImage(article: (typeof articles)[number] | undefined) {
   seen.add(article.data.coverImage.src); return true;
 }
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
+const homeTitle = 'GTA VI News, Upcoming Games & PC Updates';
+const homeDescription = 'Grand Theft Auto VI news from official Rockstar sources, plus upcoming PC games, publisher updates, and popular games with official Steam downloads.';
+const site = Astro.site;
+const homeUrl = pageUrl(site, '/');
+const organizationId = site ? new URL('/#organization', site).toString() : undefined;
+const websiteId = site ? new URL('/#website', site).toString() : undefined;
+const homeJsonLd = site && homeUrl && organizationId && websiteId ? {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      url: homeUrl,
+      name: settings.siteName,
+      description: homeDescription,
+      inLanguage: 'en',
+      publisher: { '@id': organizationId },
+    },
+    {
+      '@type': 'Organization',
+      '@id': organizationId,
+      name: settings.siteName,
+      url: homeUrl,
+      logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', site).toString() },
+    },
+    {
+      '@type': 'WebPage',
+      '@id': new URL('/#webpage', site).toString(),
+      url: homeUrl,
+      name: `${homeTitle} | ${settings.siteName}`,
+      description: homeDescription,
+      isPartOf: { '@id': websiteId },
+      about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI' },
+      inLanguage: 'en',
+    },
+  ],
+} : undefined;
 const topics = [
   {href:'/games', title:'Find your next game', copy:'Explore the shortlist. Check the details. Pick your next adventure.', icon:'game', tone:'violet'},
   {href:'/blog', title:'See what’s coming', copy:'Upcoming games, official reveals, and the questions worth asking.', icon:'guide', tone:'orange'},
   {href:'/updates', title:'Catch the latest', copy:'Fresh publisher announcements, with dates and original sources.', icon:'fix', tone:'teal'},
 ];
 ---
-<BaseLayout title={settings.siteName} description="Upcoming games, original gaming features, and the latest official publisher announcements." adPageEligible={articles.length > 0}>
+<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={gtaArtwork.src.includes('@fs') ? undefined : gtaArtwork.src} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
 <div class="magazine mx-auto max-w-6xl px-4 sm:px-6">
   <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/games">PC gaming</a><a href="/apps">Useful apps</a><a href="/blog">Upcoming games</a><a href="/updates">Game updates</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
   <GtaSpotlight />
