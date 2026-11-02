@@ -1,7 +1,8 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
@@ -26,6 +27,30 @@ function isPrivacyPolicyReady() {
   }
 }
 const privacyPolicyReady = isPrivacyPolicyReady();
+
+function publishedArticleTypes() {
+  const types = new Set();
+  try {
+    const dir = fileURLToPath(new URL('./src/content/articles', import.meta.url));
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith('.mdoc')) continue;
+      const raw = readFileSync(join(dir, file), 'utf8');
+      const type = raw.match(/^type:\s*"?(review|tutorial|troubleshooting|news)"?/m)?.[1];
+      const draft = /^draft:\s*true/m.test(raw);
+      const sample = /^sample:\s*true/m.test(raw);
+      if (type && !draft && !sample) types.add(type);
+    }
+  } catch {
+    return types;
+  }
+  return types;
+}
+const publishedTypes = publishedArticleTypes();
+const emptyListingPaths = [
+  ['review', '/reviews'],
+  ['tutorial', '/tutorials'],
+  ['troubleshooting', '/troubleshooting'],
+].filter(([type]) => !publishedTypes.has(type)).map(([, path]) => path);
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url));
 const fileEnv = loadEnv(process.env.NODE_ENV ?? '', projectRoot, '');
@@ -54,11 +79,14 @@ export default defineConfig({
 
   integrations: [
     sitemap({
-      filter: (page) =>
-        !page.includes('/keystatic') &&
-        !page.includes('/search') &&
-        !page.includes('/in-progress') &&
-        (privacyPolicyReady || !page.includes('/privacy')),
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(/\/$/, '') || '/';
+        if (path.startsWith('/keystatic') || path === '/search' || path === '/in-progress') return false;
+        if (path === '/news') return false;
+        if (!privacyPolicyReady && path === '/privacy') return false;
+        if (emptyListingPaths.includes(path)) return false;
+        return true;
+      },
     }),
     react(),
     markdoc(),

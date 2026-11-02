@@ -24,7 +24,8 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
-const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`;
+const alreadyBranded = title === siteName || title.startsWith(`${siteName}:`) || title.startsWith(`${siteName} |`);
+const fullTitle = alreadyBranded ? title : `${title} | ${siteName}`;
 const robots = noindex
   ? 'noindex, nofollow'
   : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';

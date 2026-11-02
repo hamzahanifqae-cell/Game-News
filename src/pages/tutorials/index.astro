@@ -11,6 +11,8 @@ const hasContent = await hasPublicArticlesOfType('tutorial');
   title="PC Game Guides & Buying Checklists"
   description={`Practical PC game guides from ${settings.siteName}: what to check before you install or buy, with official store links.`}
   canonicalPath="/tutorials"
+  noindex={!hasContent}
+  pagefindIndex={hasContent}
   adPageEligible={hasContent}
 >
   <ArticleTypeListing

@@ -11,6 +11,8 @@ const hasContent = await hasPublicArticlesOfType('troubleshooting');
   title="Game & App Troubleshooting Guides"
   description={`Troubleshooting guides from ${settings.siteName} for common game and app problems, starting with checks that do not change your files.`}
   canonicalPath="/troubleshooting"
+  noindex={!hasContent}
+  pagefindIndex={hasContent}
   adPageEligible={hasContent}
 >
   <ArticleTypeListing

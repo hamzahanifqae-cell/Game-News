@@ -11,6 +11,8 @@ const hasContent = await hasPublicArticlesOfType('review');
   title="PC Game Reviews & Comparisons"
   description={`Research-based PC game reviews and comparisons from ${settings.siteName}, with official sources and no invented scores.`}
   canonicalPath="/reviews"
+  noindex={!hasContent}
+  pagefindIndex={hasContent}
   adPageEligible={hasContent}
 >
   <ArticleTypeListing

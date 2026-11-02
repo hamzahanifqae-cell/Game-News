@@ -13,7 +13,10 @@ const settings = await getSiteSettings();
 const homepageStories = ['fable-watchlist', 'phantom-blade-zero-watchlist', 'the-wolf-among-us-2-watchlist'];
 const articles = sortByPublishDateDesc(await getPublicCollection('articles')).filter(article => homepageStories.includes(article.id)).sort((a,b) => homepageStories.indexOf(a.id) - homepageStories.indexOf(b.id));
 const featuredGames = ['gta-v-enhanced', 'cyberpunk-2077', 'red-dead-redemption-2'];
-const games = (await getPublicCollection('apps')).filter(app => featuredGames.includes(app.id)).sort((a, b) => featuredGames.indexOf(a.id) - featuredGames.indexOf(b.id));
+const allGames = (await getPublicCollection('apps')).filter(app => app.data.category === 'games');
+const games = allGames.filter(app => featuredGames.includes(app.id)).sort((a, b) => featuredGames.indexOf(a.id) - featuredGames.indexOf(b.id));
+const otherGames = allGames.filter(app => !featuredGames.includes(app.id)).sort((a, b) => a.data.name.localeCompare(b.data.name));
+const moreStories = sortByPublishDateDesc(await getPublicCollection('articles')).filter(article => !homepageStories.includes(article.id));
 const lead = articles[0];
 const rest = articles.filter(a => a.id !== lead?.id);
 const secondary = rest[0];
@@ -28,8 +31,8 @@ function claimImage(article: (typeof articles)[number] | undefined) {
   seen.add(article.data.coverImage.src); return true;
 }
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
-const homeTitle = 'GTA VI News, Upcoming Games & PC Updates';
-const homeDescription = 'Grand Theft Auto VI news from official Rockstar sources, plus upcoming PC games, publisher updates, and popular games with official Steam downloads.';
+const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
+const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar lists November 19, 2026 for PlayStation 5 and Xbox Series X|S.';
 const site = Astro.site;
 const homeUrl = pageUrl(site, '/');
 const organizationId = site ? new URL('/#organization', site).toString() : undefined;
@@ -73,9 +76,11 @@ const topics = [
 ---
 <BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={gtaArtwork.src.includes('@fs') ? undefined : gtaArtwork.src} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
 <div class="magazine mx-auto max-w-6xl px-4 sm:px-6">
-  <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/games">PC gaming</a><a href="/apps">Useful apps</a><a href="/blog">Upcoming games</a><a href="/updates">Game updates</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
+  <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/news/gta-vi-release-watchlist">GTA VI</a><a href="/games">PC gaming</a><a href="/apps">Useful apps</a><a href="/blog">Upcoming games</a><a href="/updates">Game updates</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
   <GtaSpotlight />
-  <section class="popular-downloads" aria-label="Popular games"><div class="section-top"><div><p class="section-eyebrow">READY TO PLAY</p><h2>Popular games. Official downloads.</h2></div><a href="/games" class="text-link">All popular games ↗</a></div><div class="grid gap-5 md:grid-cols-3">{games.map(game => <AppCard app={game} />)}</div></section>
+  <section class="popular-downloads" aria-label="Popular games"><div class="section-top"><div><p class="section-eyebrow">READY TO PLAY</p><h2>Popular games. Official downloads.</h2></div><a href="/games" class="text-link">All popular games ↗</a></div><div class="grid gap-5 md:grid-cols-3">{games.map(game => <AppCard app={game} />)}</div>
+  {otherGames.length > 0 && <nav class="crawl-links" aria-label="More popular PC games">{otherGames.map(game => <a href={`/apps/${game.id}`}>{game.data.name}</a>)}</nav>}
+  </section>
   <div class="section-top mt-12"><div><p class="section-eyebrow">ON THE HORIZON</p><h2>Upcoming games worth watching.</h2></div><a href="/blog" class="text-link">All upcoming blogs ↗</a></div>
   <section class="feature-grid" aria-label="Featured stories">
     {lead ? <article class="feature-lead">
@@ -88,6 +93,7 @@ const topics = [
       {third && <article class="side-comparison">{thirdImage && <Image src={third.data.coverImage!} alt={third.data.coverImageAlt} width={400} height={400} format="webp" class="comparison-image" />}<div><span class="section-eyebrow">COMING INTO FOCUS</span><h2><a href={href(third)}>{third.data.title}</a></h2><a href={href(third)} class="text-link">Explore the story ↗</a></div></article>}
     </div>
   </section>
+  {moreStories.length > 0 && <nav class="crawl-links" aria-label="More upcoming game articles">{moreStories.map(article => <a href={href(article)}>{article.data.seoTitle || article.data.title}</a>)}</nav>}
   <div class="reading-note"><span class="reading-note-icon" aria-hidden="true">✦</span><strong>A little context goes a long way.</strong><p>Original features. Official announcements. Clearly dated sources.</p><a href="/about">How we write ↗</a></div>
   <LiveNews limit={6} />
   <section class="discovery-section"><div class="section-top"><div><p class="section-eyebrow">PICK A DIRECTION</p><h2>What brings you here?</h2></div><span class="section-aside">A good place to start.</span></div><div class="discovery-grid">{topics.map((topic, index) => <a href={topic.href} class={`discovery-card ${topic.tone}`}><span class="discovery-icon" aria-hidden="true">{topic.icon === 'game' ? <svg viewBox="0 0 32 32" fill="none"><path d="M10 11h12c5 0 7 13 3 14-2 1-4-3-5-3h-8c-1 0-3 4-5 3-4-1-2-14 3-14Z" stroke="currentColor" stroke-width="1.8"/><path d="M9 16h6m-3-3v6m9-4h.1m3 3h.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg> : topic.icon === 'guide' ? <svg viewBox="0 0 32 32" fill="none"><path d="M7 5h18v23H7zM12 11h8m-8 5h8m-8 5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> : <svg viewBox="0 0 32 32" fill="none"><path d="m19 4-10 14h7l-2 10 10-15h-7l2-9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>}</span><span class="discovery-number">0{index+1}</span><h3>{topic.title}</h3><p>{topic.copy}</p><span class="discovery-arrow" aria-hidden="true">↗</span></a>)}</div></section>
@@ -102,6 +108,9 @@ const topics = [
 .topic-strip { display:flex; align-items:center; gap:24px; padding:18px 0; border-bottom:1px solid var(--color-line); font-size:16px; font-weight:500; color:var(--color-ink-muted); flex-wrap:wrap; line-height:1.6; }
 .explore-label { color:var(--color-brand-600); font-size:13px; font-weight:700; letter-spacing:.15em; }
 .topic-strip a:hover { color:var(--color-brand-600); }.all-topics { margin-left:auto; color:var(--color-ink); }
+.crawl-links { display:flex; flex-wrap:wrap; gap:10px 18px; margin:18px 0 8px; font-size:15px; font-weight:600; }
+.crawl-links a { color:var(--color-brand-700); }
+.crawl-links a:hover { text-decoration:underline; }
 .magazine-intro { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:38px 0 28px; }
 .section-eyebrow { font-size:13px; letter-spacing:.13em; font-weight:700; color:var(--color-brand-600); }
 h1 { font-size:clamp(2.4rem,4.7vw,3.8rem); line-height:1.06; letter-spacing:-.04em; font-weight:700; margin:10px 0 12px; }h1 span { color:var(--color-brand-600); }
