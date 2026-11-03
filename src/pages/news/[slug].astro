@@ -1,6 +1,5 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import ArticleDetail from '../../components/ArticleDetail.astro';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import { getPublicCollection } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -13,11 +12,4 @@ export async function getStaticPaths() {
 const { article } = Astro.props;
 ---
 
-<BaseLayout
-  title={article.data.seoTitle || article.data.title}
-  description={article.data.seoDescription || article.data.description}
-  canonicalPath={`/news/${article.id}`}
-  ogType="article"
->
-  <ArticleDetail article={article} />
-</BaseLayout>
+<ArticleLayout article={article} />

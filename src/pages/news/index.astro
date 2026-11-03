@@ -1,3 +1,5 @@
 ---
+// Served by the Node app so /news is an HTTP 301, not a 200 meta-refresh file.
+export const prerender = false;
 return Astro.redirect('/updates', 301);
 ---

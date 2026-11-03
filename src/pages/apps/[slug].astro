@@ -9,6 +9,7 @@ import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import { getCategory, getPublicCollection } from '../../lib/content';
 import { pageUrl } from '../../lib/seo';
+import { shareImage } from '../../lib/share-image';
 
 export async function getStaticPaths() {
   const apps = await getPublicCollection('apps');
@@ -27,6 +28,9 @@ const isGame = data.category === 'games';
 const seoTitle = data.seoTitle || (isGame ? `${data.name} PC: Official Steam Download` : `${data.name}: Official Download & App Info`);
 const seoDescription = data.seoDescription || `${data.description} Official store link only. GameNews does not host the download.`;
 const appPageUrl = pageUrl(Astro.site, `/apps/${app.id}`);
+const image = await shareImage(data.coverImage);
+const imageUrl = image ? pageUrl(Astro.site, image.src) : undefined;
+const categoryHref = data.category === 'games' ? '/games' : '/apps';
 const appJsonLd = {
   '@context': 'https://schema.org',
   '@type': isGame ? 'VideoGame' : 'SoftwareApplication',
@@ -37,6 +41,7 @@ const appJsonLd = {
     ? { gamePlatform: 'PC', applicationCategory: 'Game' }
     : { applicationCategory: 'Utilities', operatingSystem: data.platforms.join(', ') }),
   ...(appPageUrl ? { url: appPageUrl } : {}),
+  ...(imageUrl ? { image: imageUrl } : {}),
   sameAs: data.officialLink,
 };
 ---
@@ -45,13 +50,17 @@ const appJsonLd = {
   title={seoTitle}
   description={seoDescription}
   canonicalPath={`/apps/${app.id}`}
+  ogImage={image?.src}
+  ogImageAlt={data.coverImageAlt}
+  ogImageWidth={image?.width}
+  ogImageHeight={image?.height}
   jsonLd={appJsonLd}
 >
   <article class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
     <Breadcrumbs items={[{ label: data.category === 'games' ? 'Popular Games' : 'Apps', href: data.category === 'games' ? '/games' : '/apps' }, { label: data.name }]} />
 
     {category && (
-      <a href={`/categories/${category.id}`} class="text-xs font-medium text-ink-muted hover:text-brand-700">
+      <a href={categoryHref} class="text-xs font-medium text-ink-muted hover:text-brand-700">
         {category.data.name}
       </a>
     )}

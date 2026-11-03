@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { formatEditorialDate } from '../lib/seo';
 
 interface Props {
   app: CollectionEntry<'apps'>;
@@ -32,7 +33,7 @@ const platformLabels: Record<string, string> = {
 const rows = [
   ['Developer', data.developer],
   ['Current version', data.currentVersion],
-  ['Last updated', data.lastUpdated?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })],
+  ['Last updated', data.lastUpdated ? formatEditorialDate(data.lastUpdated) : undefined],
   ['File size', data.fileSize],
   ['Platforms', data.platforms.length ? data.platforms.map((p) => platformLabels[p]).join(', ') : undefined],
 ].filter(([, value]) => Boolean(value)) as [string, string][];

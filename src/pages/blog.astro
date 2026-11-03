@@ -1,18 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
 import { pageUrl } from '../lib/seo';
 const articles = sortByPublishDateDesc(await getPublicCollection('articles'));
 const articlePaths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
 const pageTitle = 'Upcoming PC Games: Release Dates & Watchlist';
+const pageHeading = 'Upcoming PC games and release dates.';
 const pageDescription = 'Upcoming PC game release dates and watchlists, including GTA VI, Fable, Persona 4 Revival, and Final Fantasy VII Revelation, checked against official listings.';
 const site = Astro.site;
 const listUrl = pageUrl(site, '/blog');
 const jsonLd = site && listUrl ? {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: pageTitle,
+  name: pageHeading,
   description: pageDescription,
   url: listUrl,
   mainEntity: {
@@ -28,9 +30,10 @@ const jsonLd = site && listUrl ? {
 ---
 <BaseLayout title={pageTitle} description={pageDescription} canonicalPath="/blog" jsonLd={jsonLd} adPageEligible={articles.length > 0}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+<Breadcrumbs items={[{ label: 'Upcoming games' }]} />
 <p class="editorial-kicker text-brand-700">The watchlist</p>
-<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Upcoming PC games and release dates.</h1>
-<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Look ahead with original features grounded in official sources. Each article is a dated editorial snapshot. For new announcements as they arrive, visit <a class="underline text-brand-700" href="/updates">Game updates</a>.</p>
+<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{pageHeading}</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Look ahead with original features grounded in official sources. Each article is a dated editorial snapshot. For new announcements as they arrive, visit <a class="underline text-brand-700" href="/updates">game updates</a>. For games you can install now, see <a class="underline text-brand-700" href="/games">popular PC games</a>.</p>
 <div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{articles.map(article => <ArticleCard article={article} />)}</div>
 </section>
 </BaseLayout>

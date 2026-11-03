@@ -20,3 +20,13 @@ export function pageUrl(site: URL | undefined, path: string): string | undefined
   if (!site) return undefined;
   return new URL(path, site).toString();
 }
+
+/** Format a content date in UTC so the visible day matches the stored calendar date. */
+export function formatEditorialDate(date: Date, month: 'long' | 'short' = 'long'): string {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month,
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}

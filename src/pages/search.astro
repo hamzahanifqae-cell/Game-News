@@ -27,8 +27,8 @@ const searchData = JSON.stringify({ entries, production: import.meta.env.PROD })
     </form>
     <p id="search-status" role="status" aria-live="polite" class="mt-5 text-sm text-ink-muted">{entries.length ? 'Enter a few words to find your next read.' : 'Our first articles are in preparation. Searchable content will appear here when published.'}</p>
     <ul id="search-results" class="mt-7 divide-y divide-line"></ul>
-    <noscript><p class="mt-6 text-sm text-ink-muted">Enable JavaScript to search, or <a href="/categories" class="text-brand-700 underline">browse categories</a>.</p></noscript>
-    <a href="/categories" class="mt-8 inline-block text-sm font-medium text-brand-700 underline underline-offset-4">Browse by category instead</a>
+    <noscript><p class="mt-6 text-sm text-ink-muted">Enable JavaScript to search, or browse <a href="/games" class="text-brand-700 underline">popular PC games</a> and the <a href="/blog" class="text-brand-700 underline">upcoming games watchlist</a>.</p></noscript>
+    <p class="mt-8 text-sm font-medium"><a href="/games" class="text-brand-700 underline underline-offset-4">Popular PC games</a> <span aria-hidden="true">·</span> <a href="/blog" class="text-brand-700 underline underline-offset-4">Upcoming games</a></p>
   </section>
   <script id="search-data" type="application/json" set:html={searchData} />
   <script is:inline type="module">

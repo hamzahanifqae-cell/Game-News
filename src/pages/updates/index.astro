@@ -1,13 +1,27 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import LiveNews from '../../components/LiveNews.astro';
+import { getPublicCollection, sortByPublishDateDesc } from '../../lib/content';
+
+const stories = sortByPublishDateDesc(await getPublicCollection('articles')).filter((article) => article.data.type === 'news');
 ---
 <BaseLayout title="Latest PC Game Updates & Official Announcements" description="Latest PC game updates from official Steam announcements, including Fable, Counter-Strike 2, Dota 2, and PUBG, with links back to the publisher." canonicalPath="/updates" adPageEligible={false} pagefindIndex={false}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+<Breadcrumbs items={[{ label: 'Game updates' }]} />
 <p class="editorial-kicker text-brand-700">The news desk</p>
-<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Keep up with what’s next.</h1>
-<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Follow Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. We bring together their official Steam announcements so you can go straight to the source.</p>
+<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Official PC game updates.</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Follow Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. We bring together their official Steam announcements so you can go straight to the source. Each brief below is automatic and links to the publisher. Dated editorial articles live on the <a class="underline text-brand-700" href="/blog">upcoming games watchlist</a>.</p>
+{stories.length > 0 && (
+  <nav class="mt-8" aria-label="Editorial watchlist">
+    <h2 class="text-lg font-semibold text-ink">Release-date articles</h2>
+    <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-brand-700">
+      {stories.map((article) => (
+        <li><a class="hover:underline" href={`/news/${article.id}`}>{article.data.seoTitle || article.data.title}</a></li>
+      ))}
+    </ul>
+  </nav>
+)}
 <LiveNews limit={18} />
-<p class="text-sm text-ink-muted">For original editorial coverage, explore our <a class="underline text-brand-700" href="/blog">upcoming-game features</a>.</p>
 </section>
 </BaseLayout>

@@ -1,17 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AppCard from '../components/AppCard.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { getPublicCollection } from '../lib/content';
 import { pageUrl } from '../lib/seo';
 const games = (await getPublicCollection('apps')).filter(app => app.data.category === 'games');
 const pageTitle = 'Popular PC Games & Official Steam Downloads';
+const pageHeading = 'Popular PC games. Official downloads.';
 const pageDescription = 'Popular PC games with official Steam download links, including GTA V Enhanced, Cyberpunk 2077, and Red Dead Redemption 2. GameNews does not host game files.';
 const site = Astro.site;
 const listUrl = pageUrl(site, '/games');
 const jsonLd = site && listUrl ? {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: pageTitle,
+  name: pageHeading,
   description: pageDescription,
   url: listUrl,
   mainEntity: {
@@ -27,8 +29,9 @@ const jsonLd = site && listUrl ? {
 ---
 <BaseLayout title={pageTitle} description={pageDescription} canonicalPath="/games" jsonLd={jsonLd} adPageEligible={games.length > 0}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-<p class="editorial-kicker text-brand-700">Popular PC games</p><h1 class="mt-4 font-sans text-4xl tracking-tight sm:text-5xl">Popular PC games. Official downloads.</h1>
-<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Explore popular games, read the details, then download through the official Steam store. Each button clearly identifies where it takes you.</p>
+<Breadcrumbs items={[{ label: 'Popular games' }]} />
+<p class="editorial-kicker text-brand-700">Popular PC games</p><h1 class="mt-4 font-sans text-4xl tracking-tight sm:text-5xl">{pageHeading}</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Explore popular games, read the details, then download through the official Steam store. Each button clearly identifies where it takes you. Release-date coverage is separate: see the <a class="underline text-brand-700" href="/blog">upcoming games watchlist</a>, including the <a class="underline text-brand-700" href="/news/gta-vi-release-watchlist">GTA VI release date</a> and the <a class="underline text-brand-700" href="/news/fable-watchlist">new Fable release date</a>. GTA V Enhanced on this page is a different, already released PC game.</p>
 <div class="mt-8 border-y border-line py-4 text-sm text-ink-muted">Research-based guidance · No invented performance scores · Official sources only</div>
 <h2 class="section-heading mb-7 mt-12">Popular PC picks</h2>
 <p class="mb-7 max-w-3xl text-sm leading-6 text-ink-muted">Selected from <a class="underline" href="https://store.steampowered.com/charts/mostplayed/">Steam’s most-played chart</a>, checked 16 October 2026. This reflects player activity, not Google search volume; rankings change.</p>

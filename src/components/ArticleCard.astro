@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import { editorialImages } from '../lib/editorial-images';
 import TypeBadge from './TypeBadge.astro';
 import { getCategory } from '../lib/content';
+import { formatEditorialDate } from '../lib/seo';
 
 interface Props {
   showImage?: boolean;
@@ -13,11 +14,7 @@ interface Props {
 const { article, showImage = true } = Astro.props;
 const { data } = article;
 const category = await getCategory(data.category);
-const formattedDate = data.publishDate.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+const formattedDate = formatEditorialDate(data.publishDate);
 
 const typeToPath = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
 const href = `/${typeToPath[data.type]}/${article.id}`;

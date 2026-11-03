@@ -7,7 +7,8 @@ import { Image } from 'astro:assets';
 import AdSlot from '../components/AdSlot.astro';
 import { getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { editorialImages } from '../lib/editorial-images';
-import { pageUrl } from '../lib/seo';
+import { formatEditorialDate, pageUrl } from '../lib/seo';
+import { shareImage } from '../lib/share-image';
 import gtaArtwork from '../assets/products/gta-vi-banner.jpg';
 const settings = await getSiteSettings();
 const homepageStories = ['fable-watchlist', 'phantom-blade-zero-watchlist', 'the-wolf-among-us-2-watchlist'];
@@ -31,6 +32,7 @@ function claimImage(article: (typeof articles)[number] | undefined) {
   seen.add(article.data.coverImage.src); return true;
 }
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
+const homeShare = await shareImage(gtaArtwork);
 const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
 const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar lists November 19, 2026 for PlayStation 5 and Xbox Series X|S.';
 const site = Astro.site;
@@ -60,7 +62,7 @@ const homeJsonLd = site && homeUrl && organizationId && websiteId ? {
       '@type': 'WebPage',
       '@id': new URL('/#webpage', site).toString(),
       url: homeUrl,
-      name: `${homeTitle} | ${settings.siteName}`,
+      name: homeTitle,
       description: homeDescription,
       isPartOf: { '@id': websiteId },
       about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI' },
@@ -74,7 +76,7 @@ const topics = [
   {href:'/updates', title:'Catch the latest', copy:'Fresh publisher announcements, with dates and original sources.', icon:'fix', tone:'teal'},
 ];
 ---
-<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={gtaArtwork.src.includes('@fs') ? undefined : gtaArtwork.src} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
+<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={homeShare?.src} ogImageAlt="Official Grand Theft Auto VI artwork featuring Jason, Lucia, and scenes from Leonida." ogImageWidth={homeShare?.width} ogImageHeight={homeShare?.height} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
 <div class="magazine mx-auto max-w-6xl px-4 sm:px-6">
   <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/news/gta-vi-release-watchlist">GTA VI</a><a href="/games">PC gaming</a><a href="/apps">Useful apps</a><a href="/blog">Upcoming games</a><a href="/updates">Game updates</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
   <GtaSpotlight />
@@ -85,7 +87,7 @@ const topics = [
   <section class="feature-grid" aria-label="Featured stories">
     {lead ? <article class="feature-lead">
       {leadImage && <Image src={lead.data.coverImage!} alt={lead.data.coverImageAlt} width={1100} height={760} widths={[480,768,1100]} sizes="(min-width: 900px) 700px, 100vw" format="webp" quality={85} loading="lazy" class="feature-background" />}
-      <div class="lead-content"><span class="feature-label lime">ON THE WATCHLIST</span><p class="feature-category">UPCOMING / EDITORIAL</p><h2><a href={href(lead)}>{lead.data.title}</a></h2><p class="lead-description">{lead.data.description}</p><div class="feature-bottom"><span>Editorial feature · {lead.data.publishDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span><a href={href(lead)} class="round-link" aria-label={`Read ${lead.data.title}`}>↗</a></div></div>
+      <div class="lead-content"><span class="feature-label lime">ON THE WATCHLIST</span><p class="feature-category">UPCOMING / EDITORIAL</p><h2><a href={href(lead)}>{lead.data.title}</a></h2><p class="lead-description">{lead.data.description}</p><div class="feature-bottom"><span>Editorial feature · {formatEditorialDate(lead.data.publishDate, 'short')}</span><a href={href(lead)} class="round-link" aria-label={`Read ${lead.data.title}`}>↗</a></div></div>
       {lead.data.coverImageSource && <a href={lead.data.coverImageSource} target="_blank" rel="noopener noreferrer" class="feature-credit">Publisher image · source ↗</a>}
     </article> : <article class="feature-lead"><Image src={editorialImages.review.src} alt={editorialImages.review.alt} width={1100} height={760} class="feature-background" /><div class="lead-content"><span class="feature-label lime">COMING SOON</span><h2>Something good is taking shape.</h2><p>Our first original guides are on their way.</p><a href="/about" class="magazine-button">Meet GameNews ↗</a></div></article>}
     <div class="feature-side">

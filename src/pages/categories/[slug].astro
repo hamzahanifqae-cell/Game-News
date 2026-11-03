@@ -21,6 +21,8 @@ const apps = (await getPublicCollection('apps')).filter((a) => a.data.category =
   title={category.data.name}
   description={category.data.description || `Browse ${category.data.name} content.`}
   canonicalPath={`/categories/${category.id}`}
+  noindex
+  pagefindIndex={false}
   adPageEligible={apps.length > 0 || articles.length > 0}
 >
   <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
@@ -28,6 +30,7 @@ const apps = (await getPublicCollection('apps')).filter((a) => a.data.category =
     {category.data.description && (
       <p class="mt-2 max-w-2xl text-ink-muted">{category.data.description}</p>
     )}
+    <p class="mt-4 max-w-2xl text-sm text-ink-muted">For the main lists, open <a class="text-brand-700 underline" href="/games">popular PC games</a> or the <a class="text-brand-700 underline" href="/blog">upcoming games watchlist</a>.</p>
 
     {apps.length > 0 && (
       <div class="mt-10">

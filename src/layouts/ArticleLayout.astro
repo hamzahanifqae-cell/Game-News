@@ -1,0 +1,34 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ArticleDetail from '../components/ArticleDetail.astro';
+import { shareImage } from '../lib/share-image';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+}
+
+const { article } = Astro.props;
+const typeToPath = {
+  review: 'reviews',
+  tutorial: 'tutorials',
+  troubleshooting: 'troubleshooting',
+  news: 'news',
+} as const;
+const image = await shareImage(article.data.coverImage);
+---
+
+<BaseLayout
+  title={article.data.seoTitle || article.data.title}
+  description={article.data.seoDescription || article.data.description}
+  canonicalPath={`/${typeToPath[article.data.type]}/${article.id}`}
+  ogType="article"
+  ogImage={image?.src}
+  ogImageAlt={article.data.coverImageAlt}
+  ogImageWidth={image?.width}
+  ogImageHeight={image?.height}
+  publishedTime={article.data.publishDate.toISOString()}
+  modifiedTime={article.data.updatedDate?.toISOString()}
+>
+  <ArticleDetail article={article} shareImage={image?.src} />
+</BaseLayout>
