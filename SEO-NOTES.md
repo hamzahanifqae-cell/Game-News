@@ -68,6 +68,16 @@ These are intent hypotheses from the page content. They are not search volumes, 
 - Node server on `127.0.0.1:4324`: `/news` is `301` to `/updates`, `/blog/` is `301` to `/blog`, the GTA VI article is `200`, and an unknown URL is `404` with `noindex`.
 - Browser pass: homepage title and H1, click through “Read the GTA VI release brief” to the article, breadcrumb to `/blog`, then `/games` and `/updates` showed the new headings and the editorial links.
 
+## Second pass, 5 November 2026
+
+Search Console baseline supplied for this pass, with no page-filtered queries. Zero clicks was not treated as a title failure or an indexing failure.
+
+- `/updates` and `/updates/`: live check showed `200` and `301` to `/updates`. Canonical and sitemap use the slash-free URL. The hub now groups the saved announcements by game. A patch token is shown only when it is already in the publisher title (`7.41f` is the one in the current snapshot). Link text includes the game and the publisher date when several briefs share a title. The meta description now names Phantom Blade Zero and The Wolf Among Us 2, which the page already listed.
+- `/tutorials` and `/tutorials/`: live check showed `200` and `301` to `/tutorials`. The page stays `noindex` because no tutorial is published. The title no longer says buying checklists are available. The empty page links to the Counter-Strike 2 download, the Dota 2 download, and `/updates`. Draft guides were not published.
+- `/categories` and `/categories/`: live check showed `200` and `301` to `/categories`. Canonical is `https://gamenews.online/categories`. Both are `noindex` and absent from the sitemap. Internal links already use the slash-free form. No page change. Search Console can still list the slash URL until it records the redirect.
+
+The first pass was deployed on 3 November 2026. This second pass is local until the next deploy.
+
 ## Remaining issues
 
 - Deploy is still required before Google can see any of this. After deploy, the old `/news` response should be checked on the public site. It was HTTP 200 there on 3 November 2026.

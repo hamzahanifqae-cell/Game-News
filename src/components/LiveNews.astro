@@ -1,24 +1,78 @@
 ---
 import snapshot from '../data/news-snapshot.json';
-import { newsPath } from '../lib/news';
-interface Props { limit?: number; }
-const { limit = 12 } = Astro.props;
-const date = (value: string) => new Date(value).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+import { newsGames, newsPath, type NewsItem } from '../lib/news';
+import { briefAnchor, patchToken } from '../lib/update-label';
+import { getPublicCollection } from '../lib/content';
+
+interface Props { limit?: number; grouped?: boolean }
+const { limit = 12, grouped = false } = Astro.props;
+const dateLabel = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const items = snapshot.items.slice(0, limit);
+
+const apps = grouped ? new Set((await getPublicCollection('apps')).map((app) => app.id)) : new Set<string>();
+const articles = grouped ? new Set((await getPublicCollection('articles')).map((article) => article.id)) : new Set<string>();
+const coverage = Object.fromEntries(newsGames.map((game) => {
+  const links = [
+    ...(apps.has(game.slug) ? [{ href: `/apps/${game.slug}`, label: `${game.name} official Steam download` }] : []),
+    ...(articles.has(`${game.slug}-watchlist`) ? [{ href: `/news/${game.slug}-watchlist`, label: `${game.name} release watchlist` }] : []),
+  ];
+  return [game.name, { slug: game.slug, links }];
+}));
+const groups = newsGames
+  .map((game) => ({ ...game, items: items.filter((item) => item.game === game.name) }))
+  .filter((group) => group.items.length > 0);
 ---
-<live-news data-limit={limit} class="live-news" data-pagefind-ignore>
-  <div class="news-heading"><div><p class="editorial-kicker text-brand-700">Direct from the publishers</p><h2 class="section-heading mt-2">Latest game updates.</h2></div><a class="news-more" href="/updates">All updates ↗</a></div>
-  <p class="news-intro">Release announcements, patch notes, and new content. Read the update brief here on GameNews.</p>
-  <div class="news-status"><p data-news-status role="status">Saved headlines · checked {date(snapshot.checkedAt)}. Checking for updates…</p><button type="button" data-news-refresh>Refresh news ↻</button></div>
-  <div data-news-list class="news-list">{snapshot.items.slice(0,limit).map(item => <article class="news-card"><div class="news-meta"><span>{item.game}</span><time datetime={item.publishedAt}>{date(item.publishedAt)}</time></div><h3><a href={newsPath(item)}>{item.title}<span class="sr-only"> (read update brief)</span></a></h3><p>Publisher update brief <span aria-hidden="true">↗</span></p></article>)}</div>
+<live-news data-limit={limit} data-layout={grouped ? 'by-game' : undefined} class:list={['live-news', { 'is-grouped': grouped }]} data-pagefind-ignore>
+  <div class="news-heading"><div><p class="editorial-kicker text-brand-700">Direct from the publishers</p><h2 class="section-heading mt-2">{grouped ? 'Updates by game' : 'Latest game updates.'}</h2></div>{!grouped && <a class="news-more" href="/updates">All updates ↗</a>}</div>
+  <p class="news-intro">{grouped ? 'Each line is one official announcement. A patch number is shown only when the publisher included it in the title. The date is the publisher’s post date.' : 'Release announcements, patch notes, and new content. Read the update brief here on GameNews.'}</p>
+  <div class="news-status"><p data-news-status role="status">Saved headlines · checked {dateLabel(snapshot.checkedAt)}. Checking for updates…</p><button type="button" data-news-refresh>Refresh news ↻</button></div>
+  {grouped && (
+    <script type="application/json" data-update-coverage set:html={JSON.stringify(coverage).replace(/</g, '\\u003c')} />
+  )}
+  <div data-news-list class="news-list">
+    {grouped ? groups.map((group) => (
+      <section class="game-group" id={`updates-${group.slug}`}>
+        <h3>{group.name}</h3>
+        {coverage[group.name].links.length > 0 && (
+          <p class="game-links">{coverage[group.name].links.map((link) => <a href={link.href}>{link.label}</a>)}</p>
+        )}
+        <ul>
+          {group.items.map((item) => (
+            <li>
+              <time datetime={item.publishedAt}>{dateLabel(item.publishedAt)}</time>
+              {patchToken(item.title) && <span class="patch">{patchToken(item.title)}</span>}
+              <a href={newsPath(item)}>{briefAnchor(item.game, item.title, dateLabel(item.publishedAt))}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )) : items.map((item) => (
+      <article class="news-card"><div class="news-meta"><span>{item.game}</span><time datetime={item.publishedAt}>{dateLabel(item.publishedAt)}</time></div><h3><a href={newsPath(item)}>{item.title}<span class="sr-only"> (read update brief)</span></a></h3><p>Publisher update brief <span aria-hidden="true">↗</span></p></article>
+    ))}
+  </div>
   <p class="news-note">Checks every 15 minutes while this page is open. Dates show when the publisher posted, not when you visited. Briefs are assembled automatically from official announcement metadata; they are not hands-on reporting.</p>
-  <noscript><p class="news-note">JavaScript is disabled. These saved headlines were checked {date(snapshot.checkedAt)}; open a brief for its original source link.</p></noscript>
+  <noscript><p class="news-note">JavaScript is disabled. These saved headlines were checked {dateLabel(snapshot.checkedAt)}; open a brief for its original source link.</p></noscript>
 </live-news>
 <style>
 .live-news{display:block;margin:48px 0;padding:30px;border:1px solid var(--color-line);border-radius:20px;background:white;}.news-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;}.news-more{font-size:13px;color:var(--color-brand-700);font-weight:600;white-space:nowrap;}.news-intro{font-size:15px;color:var(--color-ink-muted);margin:12px 0 18px;line-height:1.7;}.news-status{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-top:1px solid var(--color-line);font-size:13px;color:var(--color-ink-muted);}.news-status button{flex-shrink:0;color:var(--color-brand-700);font-weight:600;cursor:pointer;padding:8px;border:1px solid var(--color-line);border-radius:8px;}.news-status button:disabled{opacity:.5;cursor:wait;}.news-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}.news-list :global(.news-card){padding:20px;border:1px solid var(--color-line);border-radius:12px;background:var(--color-paper);}.news-list :global(.news-meta){display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--color-ink-muted);}.news-list :global(.news-meta span){font-weight:600;color:var(--color-brand-700);}.news-list :global(h3){margin:14px 0;font-size:17px;line-height:1.45;font-weight:700;overflow-wrap:anywhere;}.news-list :global(h3 a:hover){color:var(--color-brand-700);text-decoration:underline;}.news-list :global(.news-card p){display:flex;justify-content:space-between;font-size:13px;color:var(--color-ink-muted);}.news-note{margin-top:18px;font-size:13px;line-height:1.7;color:var(--color-ink-muted);}
+.is-grouped .news-list{display:flex;flex-direction:column;gap:22px;}
+.is-grouped :global(.game-group){padding-top:16px;border-top:1px solid var(--color-line);}
+.is-grouped :global(.game-group h3){margin:0;font-size:1.15rem;font-weight:700;}
+.is-grouped :global(.game-links){display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:8px;font-size:14px;font-weight:600;}
+.is-grouped :global(.game-links a){color:var(--color-brand-700);}
+.is-grouped :global(ul){margin-top:10px;}
+.is-grouped :global(li){display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--color-line);font-size:15px;}
+.is-grouped :global(time){min-width:8.5rem;color:var(--color-ink-muted);font-size:13px;}
+.is-grouped :global(.patch){font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--color-brand-700);}
+.is-grouped :global(li a){font-weight:600;color:var(--color-ink);}
+.is-grouped :global(li a:hover){color:var(--color-brand-700);text-decoration:underline;}
 @media(max-width:900px){.news-list{grid-template-columns:repeat(2,minmax(0,1fr));}}
-@media(max-width:600px){.live-news{padding:20px;margin:32px 0;}.news-list{grid-template-columns:1fr;}.news-heading{align-items:flex-start;}.news-more{font-size:13px;}.news-status{align-items:flex-start;}.news-heading h2{font-size:1.65rem;}}
+@media(max-width:600px){.live-news{padding:20px;margin:32px 0;}.news-list{grid-template-columns:1fr;}.news-heading{align-items:flex-start;}.news-more{font-size:13px;}.news-status{align-items:flex-start;}.news-heading h2{font-size:1.65rem;}.is-grouped :global(time){min-width:0;}}
 </style>
 <script>
+import { briefAnchor, patchToken } from '../lib/update-label';
+import type { NewsItem } from '../lib/news';
+
 class LiveNews extends HTMLElement {
   private timer?: ReturnType<typeof setInterval>;
   private controller?: AbortController;
@@ -45,36 +99,120 @@ class LiveNews extends HTMLElement {
     this.controller = new AbortController();
     const timeout = setTimeout(() => this.controller?.abort(), 12_000);
     try {
-      const response = await fetch('/api/news.json', {signal:this.controller.signal});
+      const response = await fetch('/api/news.json', { signal: this.controller.signal });
       if (!response.ok) throw new Error('News unavailable');
       const feed = await response.json();
       if (!Array.isArray(feed.items) || !Number.isFinite(Date.parse(feed.checkedAt))) throw new Error('Invalid feed');
       const list = this.querySelector('[data-news-list]');
-      const fragment = document.createDocumentFragment();
-      const format = (value: string) => new Date(value).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
-      for (const item of feed.items.slice(0,Number(this.dataset.limit) || 12)) {
-        const url = new URL(item.url);
-        if (url.protocol !== 'https:' || !['steamcommunity.com','store.steampowered.com','steamstore-a.akamaihd.net'].includes(url.hostname)) continue;
-        if (!Number.isFinite(Date.parse(item.publishedAt))) continue;
-        const article = document.createElement('article'); article.className='news-card';
-        const meta = document.createElement('div'); meta.className='news-meta';
-        const game = document.createElement('span'); game.textContent=item.game;
-        const time = document.createElement('time'); time.dateTime=item.publishedAt; time.textContent=format(item.publishedAt); meta.append(game,time);
-        const heading = document.createElement('h3'); const link = document.createElement('a');
-        const [appId,gid]=String(item.id).split(':');
-        if(!/^\d+$/.test(appId) || !/^\d+$/.test(gid)) continue;
-        link.href=`/updates/${appId}/${Math.floor(Date.parse(item.publishedAt)/1000)}-${gid}`;link.textContent=item.title;
-        const hint=document.createElement('span');hint.className='sr-only';hint.textContent=' (read update brief)';link.append(hint);heading.append(link);
-        const source=document.createElement('p');source.textContent='Publisher update brief ↗';article.append(meta,heading,source);fragment.append(article);
+      const accepted = this.acceptedItems(feed.items);
+      if (list && accepted.length) list.replaceChildren(this.dataset.layout === 'by-game' ? this.groupedList(accepted) : this.cardList(accepted));
+      else if (list && !feed.items.length) {
+        const empty = document.createElement('p');
+        empty.textContent = 'No official announcements are available for this selection yet.';
+        list.replaceChildren(empty);
       }
-      if (list && fragment.childElementCount) list.replaceChildren(fragment);
-      else if (list && !feed.items.length) { const empty=document.createElement('p');empty.textContent='No official announcements are available for this selection yet.';list.replaceChildren(empty); }
-      const checked = new Date(feed.checkedAt).toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'});
-      if(status) status.textContent = feed.stale ? `Updates temporarily unavailable · showing saved headlines last checked ${checked} UTC.` : feed.partial ? `Some sources are unavailable · latest check ${checked} UTC. Saved headlines retained for those sources.` : `Sources checked ${checked} UTC · refreshes automatically.`;
+      const checked = new Date(feed.checkedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+      if (status) status.textContent = feed.stale ? `Updates temporarily unavailable · showing saved headlines last checked ${checked} UTC.` : feed.partial ? `Some sources are unavailable · latest check ${checked} UTC. Saved headlines retained for those sources.` : `Sources checked ${checked} UTC · refreshes automatically.`;
     } catch {
-      if(status) status.textContent='Live updates unavailable. Showing saved headlines with their original publication dates. Try Refresh news again shortly.';
-    } finally { clearTimeout(timeout);this.busy=false;if(button)button.disabled=false; }
+      if (status) status.textContent = 'Live updates unavailable. Showing saved headlines with their original publication dates. Try Refresh news again shortly.';
+    } finally { clearTimeout(timeout); this.busy = false; if (button) button.disabled = false; }
   };
+  private acceptedItems(items: NewsItem[]) {
+    const accepted: NewsItem[] = [];
+    for (const item of items.slice(0, Number(this.dataset.limit) || 12)) {
+      const url = new URL(item.url);
+      if (url.protocol !== 'https:' || !['steamcommunity.com', 'store.steampowered.com', 'steamstore-a.akamaihd.net'].includes(url.hostname)) continue;
+      if (!Number.isFinite(Date.parse(item.publishedAt))) continue;
+      const [appId, gid] = String(item.id).split(':');
+      if (!/^\d+$/.test(appId) || !/^\d+$/.test(gid)) continue;
+      accepted.push(item);
+    }
+    return accepted;
+  }
+  private cardList(items: NewsItem[]) {
+    const fragment = document.createDocumentFragment();
+    const format = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    for (const item of items) {
+      const [appId, gid] = item.id.split(':');
+      const article = document.createElement('article');
+      article.className = 'news-card';
+      const meta = document.createElement('div');
+      meta.className = 'news-meta';
+      const game = document.createElement('span');
+      game.textContent = item.game;
+      const time = document.createElement('time');
+      time.dateTime = item.publishedAt;
+      time.textContent = format(item.publishedAt);
+      meta.append(game, time);
+      const heading = document.createElement('h3');
+      const link = document.createElement('a');
+      link.href = `/updates/${appId}/${Math.floor(Date.parse(item.publishedAt) / 1000)}-${gid}`;
+      link.textContent = item.title;
+      const hint = document.createElement('span');
+      hint.className = 'sr-only';
+      hint.textContent = ' (read update brief)';
+      link.append(hint);
+      heading.append(link);
+      const source = document.createElement('p');
+      source.textContent = 'Publisher update brief ↗';
+      article.append(meta, heading, source);
+      fragment.append(article);
+    }
+    return fragment;
+  }
+  private groupedList(items: NewsItem[]) {
+    const fragment = document.createDocumentFragment();
+    const format = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    const raw = this.querySelector('[data-update-coverage]')?.textContent;
+    const coverage = raw ? JSON.parse(raw) as Record<string, { slug: string; links: { href: string; label: string }[] }> : {};
+    const seen = new Set(items.map((item) => item.game));
+    const names = [...Object.keys(coverage).filter((name) => seen.has(name)), ...[...seen].filter((name) => !coverage[name])];
+    for (const name of names) {
+      const info = coverage[name];
+      const section = document.createElement('section');
+      section.className = 'game-group';
+      if (info?.slug) section.id = `updates-${info.slug}`;
+      const heading = document.createElement('h3');
+      heading.textContent = name;
+      section.append(heading);
+      if (info?.links.length) {
+        const links = document.createElement('p');
+        links.className = 'game-links';
+        for (const item of info.links) {
+          const link = document.createElement('a');
+          link.href = item.href;
+          link.textContent = item.label;
+          links.append(link);
+        }
+        section.append(links);
+      }
+      const list = document.createElement('ul');
+      for (const item of items.filter((entry) => entry.game === name)) {
+        const [appId, gid] = item.id.split(':');
+        const row = document.createElement('li');
+        const time = document.createElement('time');
+        const label = format(item.publishedAt);
+        time.dateTime = item.publishedAt;
+        time.textContent = label;
+        row.append(time);
+        const token = patchToken(item.title);
+        if (token) {
+          const patch = document.createElement('span');
+          patch.className = 'patch';
+          patch.textContent = token;
+          row.append(patch);
+        }
+        const link = document.createElement('a');
+        link.href = `/updates/${appId}/${Math.floor(Date.parse(item.publishedAt) / 1000)}-${gid}`;
+        link.textContent = briefAnchor(item.game, item.title, label);
+        row.append(link);
+        list.append(row);
+      }
+      section.append(list);
+      fragment.append(section);
+    }
+    return fragment;
+  }
 }
-if (!customElements.get('live-news')) customElements.define('live-news',LiveNews);
+if (!customElements.get('live-news')) customElements.define('live-news', LiveNews);
 </script>

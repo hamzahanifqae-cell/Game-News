@@ -1,23 +1,36 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleTypeListing from '../../components/ArticleTypeListing.astro';
-import { getSiteSettings, hasPublicArticlesOfType } from '../../lib/content';
+import { hasPublicArticlesOfType } from '../../lib/content';
 
-const settings = await getSiteSettings();
 const hasContent = await hasPublicArticlesOfType('tutorial');
 ---
 
 <BaseLayout
-  title="PC Game Guides & Buying Checklists"
-  description={`Practical PC game guides from ${settings.siteName}: what to check before you install or buy, with official store links.`}
+  title={hasContent ? 'PC Game Guides & Buying Checklists' : 'No Published PC Game Guides Yet'}
+  description={hasContent
+    ? 'Practical PC game guides: what to check before you install or buy, with official store links.'
+    : 'GameNews has not published install or beginner guides yet. The Counter-Strike 2 and Dota 2 pages link to the official Steam downloads, and the updates page lists publisher announcements.'}
   canonicalPath="/tutorials"
   noindex={!hasContent}
   pagefindIndex={hasContent}
   adPageEligible={hasContent}
 >
-  <ArticleTypeListing
-    type="tutorial"
-    heading="Tutorials"
-    intro="Checklists for what to look at before you install or buy, with links to the official store page."
-  />
+  {hasContent ? (
+    <ArticleTypeListing
+      type="tutorial"
+      heading="Tutorials"
+      intro="Checklists for what to look at before you install or buy, with links to the official store page."
+    />
+  ) : (
+    <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+      <h1 class="font-serif text-4xl font-medium tracking-tight text-ink sm:text-5xl">No game guides are published yet.</h1>
+      <p class="mt-4 max-w-2xl leading-7 text-ink-muted">This page does not have an install checklist or a beginner guide. These public pages are the closest match for those tasks:</p>
+      <ul class="mt-6 space-y-4 text-[17px] leading-7">
+        <li><a class="font-semibold text-brand-700 underline" href="/apps/counter-strike-2">Counter-Strike 2 official Steam download</a> — the store page for the free game, before you install it.</li>
+        <li><a class="font-semibold text-brand-700 underline" href="/apps/dota-2">Dota 2 official Steam download</a> — the store page for the free game, before a first match.</li>
+        <li><a class="font-semibold text-brand-700 underline" href="/updates">Official PC game updates by game</a> — publisher announcements, with a patch number only when that number is in the title.</li>
+      </ul>
+    </section>
+  )}
 </BaseLayout>

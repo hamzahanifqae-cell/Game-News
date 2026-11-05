@@ -6,7 +6,7 @@ import { getPublicCollection, sortByPublishDateDesc } from '../../lib/content';
 
 const stories = sortByPublishDateDesc(await getPublicCollection('articles')).filter((article) => article.data.type === 'news');
 ---
-<BaseLayout title="Latest PC Game Updates & Official Announcements" description="Latest PC game updates from official Steam announcements, including Fable, Counter-Strike 2, Dota 2, and PUBG, with links back to the publisher." canonicalPath="/updates" adPageEligible={false} pagefindIndex={false}>
+<BaseLayout title="Latest PC Game Updates & Official Announcements" description="Official Steam announcements for Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG, grouped by game with the publisher’s date." canonicalPath="/updates" adPageEligible={false} pagefindIndex={false}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
 <Breadcrumbs items={[{ label: 'Game updates' }]} />
 <p class="editorial-kicker text-brand-700">The news desk</p>
@@ -22,6 +22,6 @@ const stories = sortByPublishDateDesc(await getPublicCollection('articles')).fil
     </ul>
   </nav>
 )}
-<LiveNews limit={18} />
+<LiveNews limit={18} grouped />
 </section>
 </BaseLayout>
