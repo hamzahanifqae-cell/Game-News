@@ -2,9 +2,10 @@
 // Consent integration point — NOT a complete compliance solution by itself.
 //
 // This project uses Basic Consent Mode (see README "Consent & Analytics"):
-// neither the GA4 tag nor the AdSense ad-library script is injected at all
-// until the visitor's CMP reports consent for that category. No cookieless
-// pings are sent pre-consent. The actual wiring lives in
+// the GA4 tag is not injected until a CMP reports analytics consent. When no
+// other CMP is selected, the AdSense tag is loaded so Google can show the
+// published European regulations message. That tag is not told to request an
+// ad. The actual wiring lives in
 // src/lib/consent-client.ts, which reads each CMP's own documented
 // JavaScript event/object — it does not read or map raw IAB TCF purpose
 // flags itself, and it does not invent an event shape for providers it
@@ -14,16 +15,20 @@
 // not, by itself, complete consent compliance — see "cmpConfiguredAndVerified"
 // in Site Settings and README "CMP configuration safeguards".
 import type { CollectionEntry } from 'astro:content';
+import { adsMasterEnabled, googleConsentMessageSrc } from '../lib/ads';
 
 interface Props {
   settings: CollectionEntry<'siteSettings'>['data'];
   /** Same page-level flag passed to BaseLayout — see src/lib/ads.ts. */
   adsPageEligible: boolean;
+  pathname?: string;
 }
 
-const { settings, adsPageEligible } = Astro.props;
+const { settings, adsPageEligible, pathname = '/' } = Astro.props;
+const messageSrc = googleConsentMessageSrc(settings.adsensePublisherId, pathname, settings.cmpProvider);
+const pauseAdRequests = Boolean(messageSrc) && !adsMasterEnabled(settings);
 const needsConsentGate =
-  (settings.adsEnabled && adsPageEligible) || settings.analyticsProvider === 'ga4';
+  (settings.adsEnabled && adsPageEligible) || settings.analyticsProvider === 'ga4' || Boolean(messageSrc);
 
 const gateConfig = {
   cmpProvider: settings.cmpProvider,
@@ -51,6 +56,16 @@ const gateConfig = {
       wait_for_update: 2000,
     });
   </script>
+)}
+
+{pauseAdRequests && (
+  <script is:inline>
+    window.adsbygoogle = window.adsbygoogle || [];
+    window.adsbygoogle.pauseAdRequests = 1;
+  </script>
+)}
+{messageSrc && (
+  <script async src={messageSrc} crossorigin="anonymous"></script>
 )}
 
 {settings.cmpProvider === 'cookiebot' && settings.cmpSiteId && (

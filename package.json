@@ -15,7 +15,7 @@
     "launch-check:strict": "node scripts/launch-readiness.mjs --strict",
     "release": "npm run launch-check:strict && npm run build",
     "astro": "astro",
-    "test:news": "node --experimental-strip-types --test tests/news.test.mjs tests/steam-listing.test.mjs"
+    "test:news": "node --experimental-strip-types --test tests/news.test.mjs tests/steam-listing.test.mjs tests/ads-message.test.mjs"
   },
   "dependencies": {
     "@astrojs/markdoc": "^2.0.11",

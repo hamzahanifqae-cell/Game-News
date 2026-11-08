@@ -2,13 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { render } from 'astro:content';
 import { getLegalPage, getSiteSettings } from '../lib/content';
-import { adsMasterEnabled } from '../lib/ads';
+import { adsMasterEnabled, googleConsentMessageSrc } from '../lib/ads';
 
 const page = await getLegalPage('legalPrivacy');
 const { Content: AdditionalNotes } = await render(page);
 const hasAdditionalNotes = Boolean(page.body?.trim());
 const settings = await getSiteSettings();
 const adsActive = adsMasterEnabled(settings);
+const messageOnSite = Boolean(googleConsentMessageSrc(settings.adsensePublisherId, '/', settings.cmpProvider));
 
 const reviewDate = page.data.policyReviewDate?.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -60,7 +61,16 @@ const isDraft = !page.data.policyReviewDate;
           data about individual visitors.
         </p>
       )}
-      {settings.analyticsProvider === 'ga4' && (
+      {settings.analyticsProvider === 'ga4' && settings.cmpProvider === 'none' && (
+        <p>
+          We use Google Analytics 4 to understand how visitors use this site. The analytics script is not added on
+          these pages, so no analytics request is sent. Learn more about{' '}
+          <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
+            how Google uses information from sites that use its services
+          </a>.
+        </p>
+      )}
+      {settings.analyticsProvider === 'ga4' && settings.cmpProvider !== 'none' && (
         <p>
           We use Google Analytics 4 to understand how visitors use this site. This site uses Google's{' '}
           <a href="https://support.google.com/analytics/answer/9976101" target="_blank" rel="noopener noreferrer">
@@ -71,7 +81,6 @@ const isDraft = !page.data.policyReviewDate;
           <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
             how Google uses information from sites that use its services
           </a>.
-          {settings.cmpProvider === 'none' && ' No consent banner is active, so the analytics script is not added and no analytics request is sent.'}
         </p>
       )}
 
@@ -95,11 +104,20 @@ const isDraft = !page.data.policyReviewDate;
         The authorized seller is listed in <a href="/ads.txt">ads.txt</a>.
         {adsActive
           ? ' The AdSense library is not loaded until you grant advertising consent. After that, Google may use advertising cookies as described above.'
-          : ' Ad serving is currently off. The AdSense library is not loaded, and this site does not set Google advertising cookies, until advertising is turned on and you grant advertising consent.'}
+          : messageOnSite
+            ? ' Ad placement is currently off, so this site does not place an ad unit. The AdSense script loads on pages other than this privacy policy so Google can show its published European regulations message to visitors in the EEA, the UK, and Switzerland. An ad is not placed until advertising is turned on and you grant advertising consent.'
+            : ' Ad serving is currently off. The AdSense library is not loaded, and this site does not set Google advertising cookies, until advertising is turned on and you grant advertising consent.'}
       </p>
 
       <h2>Cookie and advertising consent</h2>
-      {settings.cmpProvider === 'none' && (
+      {settings.cmpProvider === 'none' && messageOnSite && (
+        <p>
+          Google’s European regulations message, published in AdSense for this site, is the consent message for
+          visitors in the EEA, the UK, and Switzerland. The AdSense script loads so Google can show that message.
+          This site does not serve personalized ads while ad placement is off.
+        </p>
+      )}
+      {settings.cmpProvider === 'none' && !messageOnSite && (
         <p>
           No consent management platform is currently configured. In line with Google's requirements, this site
           will not serve personalized ads to visitors in the European Economic Area, the UK, or Switzerland until a

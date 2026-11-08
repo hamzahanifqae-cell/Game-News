@@ -92,7 +92,7 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
       <meta name="google-site-verification" content={searchConsoleToken} />
     )}
 
-    <ConsentScripts settings={settings} adsPageEligible={adPageEligible} />
+    <ConsentScripts settings={settings} adsPageEligible={adPageEligible} pathname={Astro.url.pathname} />
 
     {settings.analyticsProvider === 'plausible' && settings.analyticsId && (
       <script is:inline defer data-domain={settings.analyticsId} src="https://plausible.io/js/script.js" />

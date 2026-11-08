@@ -20,6 +20,18 @@ function isValidPublisherId(value: string): boolean {
 }
 
 /**
+ * The AdSense tag Google uses to show a published European regulations message.
+ * It does not request an ad. It stays off the privacy policy, because that is
+ * the URL named in the message, and it stays off when another consent tool is
+ * selected so two tools are not loaded together.
+ */
+export function googleConsentMessageSrc(publisherId: string, pathname: string, cmpProvider: string): string | null {
+  const path = pathname.replace(/\/$/, '') || '/';
+  if (path === '/privacy' || cmpProvider !== 'none' || !isValidPublisherId(publisherId)) return null;
+  return `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId.trim()}`;
+}
+
+/**
  * Per-provider required-field check. "cmpConfiguredAndVerified" is an
  * operator's manual attestation, not proof of anything — this function is
  * what stops a contradictory state (verified=true with provider=none, or a
