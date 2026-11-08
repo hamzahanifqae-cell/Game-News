@@ -41,11 +41,12 @@ const isDraft = !page.data.policyReviewDate;
       <h2>Who we are</h2>
       <p>
         {settings.businessLegalName
-          ? `This site is operated by ${settings.businessLegalName}.`
-          : 'The legal entity operating this site has not been published yet.'}
+          ? <>{settings.siteName} is published by {settings.businessLegalName}. The site name and editorial byline remain {settings.siteName}.</>
+          : 'The publisher of this site has not been named yet.'}
+        {' '}
         {settings.contactEmail
-          ? ` You can reach us at ${settings.contactEmail}.`
-          : ' A contact email has not been published yet.'}
+          ? <>You can reach the publisher at <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>.</>
+          : <>A public contact email has not been published yet. See the <a href="/contact">contact page</a>.</>}
       </p>
 
       <h2>Information we collect</h2>
@@ -70,6 +71,7 @@ const isDraft = !page.data.policyReviewDate;
           <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
             how Google uses information from sites that use its services
           </a>.
+          {settings.cmpProvider === 'none' && ' No consent banner is active, so the analytics script is not added and no analytics request is sent.'}
         </p>
       )}
 
@@ -80,27 +82,21 @@ const isDraft = !page.data.policyReviewDate;
       </p>
 
       <h2>Advertising</h2>
-      {adsActive ? (
-        <p>
-          This site displays ads served by Google AdSense. Like analytics, the AdSense ad code is not loaded in
-          your browser until you grant advertising consent through the consent banner described below — no ad
-          request is made before that. Once loaded, Google and its advertising partners may use cookies or device
-          identifiers to serve ads based on your visits to this and other sites. You can learn more and opt out of
-          personalized advertising at{' '}
-          <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
-            Google's advertising policy page
-          </a>{' '}
-          and manage ad personalization at{' '}
-          <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">
-            Google Ad Settings
-          </a>.
-        </p>
-      ) : (
-        <p>
-          Advertising is not currently active on this site. This section will be updated to name the specific ad
-          network(s) used once ad serving is turned on and verified.
-        </p>
-      )}
+      <p>
+        Third-party vendors, including Google, use cookies to serve ads based on a user’s prior visits to this site or other sites.
+        Google’s advertising cookies allow Google and its partners to use those visits to select ads.
+        You can control ad personalization in{' '}
+        <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer">Google My Ad Center</a>.
+        This disclosure follows{' '}
+        <a href="https://support.google.com/adsense/answer/1348695" target="_blank" rel="noopener noreferrer">Google’s guidance for sites that use AdSense</a>.
+      </p>
+      <p>
+        Google AdSense is the only advertising service configured for {settings.siteName}. No other ad network serves ads here, so there is no separate opt-out for another network.
+        The authorized seller is listed in <a href="/ads.txt">ads.txt</a>.
+        {adsActive
+          ? ' The AdSense library is not loaded until you grant advertising consent. After that, Google may use advertising cookies as described above.'
+          : ' Ad serving is currently off. The AdSense library is not loaded, and this site does not set Google advertising cookies, until advertising is turned on and you grant advertising consent.'}
+      </p>
 
       <h2>Cookie and advertising consent</h2>
       {settings.cmpProvider === 'none' && (
@@ -126,14 +122,29 @@ const isDraft = !page.data.policyReviewDate;
         </p>
       )}
 
+      <h2>Contact and messages</h2>
+      <p>
+        This site has no account registration and no contact form. It does not store a message submitted on the site, and it does not show a success message for a message it did not send.
+        {settings.contactEmail
+          ? <> Questions can be sent to <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>.</>
+          : ' A public contact email has not been published yet, so the site cannot receive email through these pages.'}
+      </p>
+
+      <h2>Links and publisher feeds</h2>
+      <p>
+        A link to Steam, Rockstar, or another official site leaves {settings.siteName}. That site receives the request from your browser only after you follow the link.
+        Our server reads Steam’s public announcement feed to show a title, a date, and the official URL. It does not copy the announcement onto a {settings.siteName} page, and that server request is not tied to a visitor account.
+      </p>
+
       <h2>Your choices</h2>
       <p>
-        You can control cookies through your browser settings, and, where a consent banner is shown, through the
-        choices offered there. If you have questions about data we may hold about you,{' '}
+        You can control cookies through your browser settings and, where a consent banner is shown, through the choices offered there.
+        Ad personalization is managed in{' '}
+        <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer">Google My Ad Center</a>.
         {settings.contactEmail ? (
-          <>contact us at <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>.</>
+          <> Questions about data we may hold can be sent to <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>.</>
         ) : (
-          <>a contact method has not been published yet.</>
+          <> A public contact email has not been published yet.</>
         )}
       </p>
 

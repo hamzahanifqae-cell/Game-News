@@ -75,6 +75,15 @@ function contentLastmods() {
     return dates;
   }
   if (newestArticle) dates.set('/blog', newestArticle);
+  if (privacyPolicyReady) {
+    try {
+      const privacyPath = fileURLToPath(new URL('./src/content/legal/privacy.mdoc', import.meta.url));
+      const reviewed = readFileSync(privacyPath, 'utf8').match(/^policyReviewDate:\s*(\d{4}-\d{2}-\d{2})/m)?.[1];
+      if (reviewed) dates.set('/privacy', reviewed);
+    } catch {
+      // The privacy URL stays in the sitemap without a lastmod when the date cannot be read.
+    }
+  }
   try {
     const snapshotPath = fileURLToPath(new URL('./src/data/news-snapshot.json', import.meta.url));
     const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8'));
@@ -122,7 +131,16 @@ export default defineConfig({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '') || '/';
         if (path.startsWith('/keystatic') || path === '/search' || path === '/in-progress') return false;
-        if (path === '/404') return false;
+        if (path === '/404' || path === '/apps/vlc') return false;
+        if (path === '/contact') {
+          try {
+            const settingsPath = fileURLToPath(new URL('./src/content/site-settings.json', import.meta.url));
+            const email = JSON.parse(readFileSync(settingsPath, 'utf8')).contactEmail;
+            if (typeof email !== 'string' || !email.includes('@')) return false;
+          } catch {
+            return false;
+          }
+        }
         if (path.startsWith('/categories')) return false;
         if (path === '/news') return false;
         if (!privacyPolicyReady && path === '/privacy') return false;

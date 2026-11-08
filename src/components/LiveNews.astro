@@ -1,6 +1,6 @@
 ---
 import snapshot from '../data/news-snapshot.json';
-import { newsGames, newsPath, type NewsItem } from '../lib/news';
+import { newsGames, type NewsItem } from '../lib/news';
 import { briefAnchor, patchToken } from '../lib/update-label';
 import { getPublicCollection } from '../lib/content';
 
@@ -24,7 +24,7 @@ const groups = newsGames
 ---
 <live-news data-limit={limit} data-layout={grouped ? 'by-game' : undefined} class:list={['live-news', { 'is-grouped': grouped }]} data-pagefind-ignore>
   <div class="news-heading"><div><p class="editorial-kicker text-brand-700">Direct from the publishers</p><h2 class="section-heading mt-2">{grouped ? 'Updates by game' : 'Latest game updates.'}</h2></div>{!grouped && <a class="news-more" href="/updates">All updates ↗</a>}</div>
-  <p class="news-intro">{grouped ? 'Each line is one official announcement. A patch number is shown only when the publisher included it in the title. The date is the publisher’s post date.' : 'Release announcements, patch notes, and new content. Read the update brief here on GameNews.'}</p>
+  <p class="news-intro">{grouped ? 'Each line links to the official Steam announcement. A patch number is shown only when the publisher included it in the title. The date is the publisher’s post date. GameNews does not copy the announcement text.' : 'Release announcements and patch headlines, with a link to the official post. GameNews does not copy the announcement text.'}</p>
   <div class="news-status"><p data-news-status role="status">Saved headlines · checked {dateLabel(snapshot.checkedAt)}. Checking for updates…</p><button type="button" data-news-refresh>Refresh news ↻</button></div>
   {grouped && (
     <script type="application/json" data-update-coverage set:html={JSON.stringify(coverage).replace(/</g, '\\u003c')} />
@@ -41,17 +41,17 @@ const groups = newsGames
             <li>
               <time datetime={item.publishedAt}>{dateLabel(item.publishedAt)}</time>
               {patchToken(item.title) && <span class="patch">{patchToken(item.title)}</span>}
-              <a href={newsPath(item)}>{briefAnchor(item.game, item.title, dateLabel(item.publishedAt))}</a>
+              <a href={item.url} target="_blank" rel="noopener noreferrer">{briefAnchor(item.game, item.title, dateLabel(item.publishedAt))}<span class="sr-only"> (opens the official announcement in a new tab)</span></a>
             </li>
           ))}
         </ul>
       </section>
     )) : items.map((item) => (
-      <article class="news-card"><div class="news-meta"><span>{item.game}</span><time datetime={item.publishedAt}>{dateLabel(item.publishedAt)}</time></div><h3><a href={newsPath(item)}>{item.title}<span class="sr-only"> (read update brief)</span></a></h3><p>Publisher update brief <span aria-hidden="true">↗</span></p></article>
+      <article class="news-card"><div class="news-meta"><span>{item.game}</span><time datetime={item.publishedAt}>{dateLabel(item.publishedAt)}</time></div><h3><a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}<span class="sr-only"> (opens the official announcement in a new tab)</span></a></h3><p>Official announcement <span aria-hidden="true">↗</span></p></article>
     ))}
   </div>
-  <p class="news-note">Checks every 15 minutes while this page is open. Dates show when the publisher posted, not when you visited. Briefs are assembled automatically from official announcement metadata; they are not hands-on reporting.</p>
-  <noscript><p class="news-note">JavaScript is disabled. These saved headlines were checked {dateLabel(snapshot.checkedAt)}; open a brief for its original source link.</p></noscript>
+  <p class="news-note">Checks every 15 minutes while this page is open. Dates show when the publisher posted, not when you visited. Each headline opens the official announcement. GameNews does not republish that post.</p>
+  <noscript><p class="news-note">JavaScript is disabled. These saved headlines were checked {dateLabel(snapshot.checkedAt)}. Each link opens the official announcement.</p></noscript>
 </live-news>
 <style>
 .live-news{display:block;margin:48px 0;padding:30px;border:1px solid var(--color-line);border-radius:20px;background:white;}.news-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;}.news-more{font-size:13px;color:var(--color-brand-700);font-weight:600;white-space:nowrap;}.news-intro{font-size:15px;color:var(--color-ink-muted);margin:12px 0 18px;line-height:1.7;}.news-status{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-top:1px solid var(--color-line);font-size:13px;color:var(--color-ink-muted);}.news-status button{flex-shrink:0;color:var(--color-brand-700);font-weight:600;cursor:pointer;padding:8px;border:1px solid var(--color-line);border-radius:8px;}.news-status button:disabled{opacity:.5;cursor:wait;}.news-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}.news-list :global(.news-card){padding:20px;border:1px solid var(--color-line);border-radius:12px;background:var(--color-paper);}.news-list :global(.news-meta){display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--color-ink-muted);}.news-list :global(.news-meta span){font-weight:600;color:var(--color-brand-700);}.news-list :global(h3){margin:14px 0;font-size:17px;line-height:1.45;font-weight:700;overflow-wrap:anywhere;}.news-list :global(h3 a:hover){color:var(--color-brand-700);text-decoration:underline;}.news-list :global(.news-card p){display:flex;justify-content:space-between;font-size:13px;color:var(--color-ink-muted);}.news-note{margin-top:18px;font-size:13px;line-height:1.7;color:var(--color-ink-muted);}
@@ -133,7 +133,6 @@ class LiveNews extends HTMLElement {
     const fragment = document.createDocumentFragment();
     const format = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
     for (const item of items) {
-      const [appId, gid] = item.id.split(':');
       const article = document.createElement('article');
       article.className = 'news-card';
       const meta = document.createElement('div');
@@ -146,15 +145,17 @@ class LiveNews extends HTMLElement {
       meta.append(game, time);
       const heading = document.createElement('h3');
       const link = document.createElement('a');
-      link.href = `/updates/${appId}/${Math.floor(Date.parse(item.publishedAt) / 1000)}-${gid}`;
+      link.href = item.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       link.textContent = item.title;
       const hint = document.createElement('span');
       hint.className = 'sr-only';
-      hint.textContent = ' (read update brief)';
+      hint.textContent = ' (opens the official announcement in a new tab)';
       link.append(hint);
       heading.append(link);
       const source = document.createElement('p');
-      source.textContent = 'Publisher update brief ↗';
+      source.textContent = 'Official announcement ↗';
       article.append(meta, heading, source);
       fragment.append(article);
     }
@@ -188,7 +189,6 @@ class LiveNews extends HTMLElement {
       }
       const list = document.createElement('ul');
       for (const item of items.filter((entry) => entry.game === name)) {
-        const [appId, gid] = item.id.split(':');
         const row = document.createElement('li');
         const time = document.createElement('time');
         const label = format(item.publishedAt);
@@ -203,7 +203,9 @@ class LiveNews extends HTMLElement {
           row.append(patch);
         }
         const link = document.createElement('a');
-        link.href = `/updates/${appId}/${Math.floor(Date.parse(item.publishedAt) / 1000)}-${gid}`;
+        link.href = item.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
         link.textContent = briefAnchor(item.game, item.title, label);
         row.append(link);
         list.append(row);

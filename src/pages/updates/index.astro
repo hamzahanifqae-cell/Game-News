@@ -11,7 +11,7 @@ const stories = sortByPublishDateDesc(await getPublicCollection('articles')).fil
 <Breadcrumbs items={[{ label: 'Game updates' }]} />
 <p class="editorial-kicker text-brand-700">The news desk</p>
 <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Official PC game updates.</h1>
-<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Follow Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. We bring together their official Steam announcements so you can go straight to the source. Each brief below is automatic and links to the publisher. Dated editorial articles live on the <a class="underline text-brand-700" href="/blog">upcoming games watchlist</a>.</p>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Follow Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. Each line links to the official Steam announcement. GameNews does not copy that post. Dated editorial articles live on the <a class="underline text-brand-700" href="/blog">upcoming games watchlist</a>.</p>
 {stories.length > 0 && (
   <nav class="mt-8" aria-label="Editorial watchlist">
     <h2 class="text-lg font-semibold text-ink">Release-date articles</h2>

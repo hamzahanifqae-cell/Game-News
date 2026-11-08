@@ -37,6 +37,6 @@ const category = await getCategory(data.category);
     </h3>
     <p class="line-clamp-2 flex-1 text-[15px] leading-relaxed text-ink-muted">{data.description}</p>
     {data.developer && <p class="text-[13px] text-ink-muted/80">by {data.developer}</p>}
-    {data.category === 'games' && <a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary mt-3">Get on Steam <span aria-hidden="true">↗</span><span class="sr-only"> (official store, opens in a new tab)</span></a>}
+    {data.category === 'games' && <a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary mt-3">Open the official Steam page <span aria-hidden="true">↗</span><span class="sr-only"> (official store, opens in a new tab)</span></a>}
   </div>
 </article>

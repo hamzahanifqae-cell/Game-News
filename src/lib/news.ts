@@ -12,6 +12,15 @@ export interface NewsItem { id: string; game: string; title: string; url: string
 export interface NewsFeed { items: NewsItem[]; checkedAt: string; stale: boolean; partial: boolean }
 const allowedHosts = new Set(['steamcommunity.com', 'store.steampowered.com', 'steamstore-a.akamaihd.net']);
 
+export function isOfficialNewsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && allowedHosts.has(url.hostname) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
 // Never render upstream HTML or use an untrusted redirect destination.
 export function normalizeNews(raw: unknown, game: typeof newsGames[number], now: number): NewsItem[] {
   if (!raw || typeof raw !== 'object') return [];
@@ -19,11 +28,9 @@ export function normalizeNews(raw: unknown, game: typeof newsGames[number], now:
   if (!Array.isArray(items)) return [];
   return items.flatMap(item => {
     if (!item || item.feedname !== 'steam_community_announcements' || typeof item.gid !== 'string' || !/^\d{1,24}$/.test(item.gid) || typeof item.title !== 'string' || !item.title.trim() || !Number.isFinite(item.date) || item.date <= 0 || item.date * 1000 > now) return [];
-    try {
-      const url = new URL(item.url);
-      if (url.protocol !== 'https:' || !allowedHosts.has(url.hostname) || url.username || url.password) return [];
-      return [{id: `${game.appId}:${String(item.gid)}`, game: game.name, title: item.title.trim().slice(0, 240), url: url.href, publishedAt: new Date(item.date * 1000).toISOString(), preview: sourcePreview(item.contents, item.title)}];
-    } catch { return []; }
+    if (typeof item.url !== 'string' || !isOfficialNewsUrl(item.url)) return [];
+    const url = new URL(item.url);
+    return [{id: `${game.appId}:${String(item.gid)}`, game: game.name, title: item.title.trim().slice(0, 240), url: url.href, publishedAt: new Date(item.date * 1000).toISOString()}];
   });
 }
 
@@ -62,7 +69,7 @@ export function createNewsService(fetcher: typeof fetch = fetch, clock = Date.no
 export const getNews = createNewsService();
 
 
-// Keep quotations short; publisher content is never treated as GameNews reporting.
+// Kept for tests. Public feeds do not attach this text, and public pages do not render it.
 export function sourcePreview(contents: unknown, title: string): string {
   if (typeof contents !== 'string') return '';
   const text = contents.replace(/\\/g, '').replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]*>/g, ' ').replace(/\[img\][\s\S]*?\[\/img\]/gi, ' ').replace(/\[url=[^\]]*\]/gi, '').replace(/\[\/?[^\]]+\]/g, ' ').replace(/https?:\/\/\S+/g, '').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&[^; ]+;/g,' ').replace(/\s+/g,' ').trim();

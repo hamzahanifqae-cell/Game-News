@@ -1,0 +1,183 @@
+---
+import records from '../data/steam-listings.json';
+import snapshot from '../data/news-snapshot.json';
+import { isOfficialNewsUrl } from '../lib/news';
+import { listingLine, type SteamListingFacts } from '../lib/steam-listing-copy';
+import { watchedStoreApps } from '../lib/steam-listing';
+import { briefAnchor } from '../lib/update-label';
+
+const app = watchedStoreApps[0];
+const saved = records['4115450'];
+const platforms = saved.platforms.filter((platform): platform is SteamListingFacts['platforms'][number] => platform === 'windows' || platform === 'mac' || platform === 'linux');
+const facts: SteamListingFacts = { comingSoon: saved.comingSoon, releaseDate: saved.releaseDate, platforms, free: saved.free };
+const line = listingLine({ ...facts, name: app.name });
+const checkedLabel = new Date(saved.checkedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const posts = snapshot.items.filter((item) => item.game === app.name && isOfficialNewsUrl(item.url)).slice(0, 4);
+const postDate = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+---
+<steam-watch class="steam-watch" data-pagefind-ignore data-app-id={app.appId} data-game={app.name} data-store-url={app.storeUrl} data-recorded-soon={String(facts.comingSoon)} data-recorded-date={facts.releaseDate} data-recorded-platforms={facts.platforms.join(',')} data-recorded-free={String(facts.free)} data-recorded-label="8 November 2026">
+  <p class="kicker">Live Steam check</p>
+  <h2 id="steam-watch-heading">Store listing and official posts</h2>
+  <p data-status role="status">Saved store check · {checkedLabel}. Checking Steam…</p>
+  <p data-listing>{line}</p>
+  <p data-diff hidden>This store check differs from the 8 November 2026 article above. This line follows Steam. The article stays as written until it is rewritten.</p>
+  <p><a href={app.storeUrl} target="_blank" rel="noopener noreferrer">Open the Steam page for {app.name}</a></p>
+  <h3>Official posts</h3>
+  <ul data-posts>
+    {posts.map((item) => {
+      const label = postDate(item.publishedAt);
+      return (
+        <li>
+          <time datetime={item.publishedAt}>{label}</time>
+          <a href={item.url} target="_blank" rel="noopener noreferrer">{briefAnchor(item.game, item.title, label)}</a>
+        </li>
+      );
+    })}
+  </ul>
+  <button type="button" data-refresh>Refresh Steam check</button>
+  <p class="note">This check updates the store date, platforms, and official post links every 15 minutes while the page is open. It does not rewrite the article above. GameNews does not copy the announcement text.</p>
+  <noscript><p class="note">JavaScript is disabled. The store line and posts above are the saved check, not a live Steam response.</p></noscript>
+</steam-watch>
+<style>
+.steam-watch{display:block;margin-top:2.5rem;padding:22px;border:1px solid var(--color-line);border-radius:16px;background:white;}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--color-brand-700);}
+.steam-watch h2{margin:8px 0 0;font-size:1.35rem;font-weight:700;}
+.steam-watch h3{margin:18px 0 0;font-size:1rem;font-weight:700;}
+.steam-watch [data-status],.steam-watch [data-listing],.steam-watch [data-diff],.note{margin-top:12px;font-size:15px;line-height:1.7;color:var(--color-ink-muted);}
+.steam-watch [data-listing]{color:var(--color-ink);}
+.steam-watch a{color:var(--color-brand-700);font-weight:600;}
+.steam-watch ul{margin-top:8px;}
+.steam-watch li{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--color-line);font-size:15px;}
+.steam-watch time{color:var(--color-ink-muted);font-size:13px;}
+.steam-watch button{margin-top:14px;color:var(--color-brand-700);font-weight:600;cursor:pointer;padding:8px 10px;border:1px solid var(--color-line);border-radius:8px;background:white;}
+.steam-watch button:disabled{opacity:.5;cursor:wait;}
+</style>
+<script>
+import { isOfficialNewsUrl, type NewsItem } from '../lib/news';
+import { isStoreDate, listingLine, sameWatchFacts, type SteamListingFacts } from '../lib/steam-listing-copy';
+import { briefAnchor } from '../lib/update-label';
+
+class SteamWatch extends HTMLElement {
+  private timer?: ReturnType<typeof setInterval>;
+  private controller?: AbortController;
+  private busy = false;
+  connectedCallback() {
+    this.querySelector('[data-refresh]')?.addEventListener('click', this.refresh);
+    document.addEventListener('visibilitychange', this.onVisibility);
+    this.timer = setInterval(() => { if (!document.hidden) void this.refresh(); }, 15 * 60_000);
+    void this.refresh();
+  }
+  disconnectedCallback() {
+    clearInterval(this.timer);
+    this.controller?.abort();
+    this.querySelector('[data-refresh]')?.removeEventListener('click', this.refresh);
+    document.removeEventListener('visibilitychange', this.onVisibility);
+  }
+  private onVisibility = () => { if (!document.hidden) void this.refresh(); };
+  private refresh = async () => {
+    if (this.busy) return;
+    const appId = Number(this.dataset.appId);
+    const name = this.dataset.game || '';
+    const storeUrl = this.dataset.storeUrl || '';
+    if (!Number.isInteger(appId) || !name || !storeUrl) return;
+    this.busy = true;
+    const button = this.querySelector<HTMLButtonElement>('[data-refresh]');
+    const status = this.querySelector<HTMLElement>('[data-status]');
+    if (button) button.disabled = true;
+    this.controller = new AbortController();
+    const timeout = setTimeout(() => this.controller?.abort(), 12_000);
+    try {
+      const response = await fetch(`/api/steam-listing/${appId}.json`, { signal: this.controller.signal });
+      if (!response.ok) throw new Error('Listing unavailable');
+      const watch = acceptWatch(await response.json(), appId, name, storeUrl);
+      if (!watch) throw new Error('Invalid listing');
+      const listing = this.querySelector('[data-listing]');
+      if (listing) listing.textContent = listingLine({ ...watch.facts, name });
+      const diff = this.querySelector<HTMLElement>('[data-diff]');
+      const recorded = recordedFacts(this.dataset);
+      if (diff) diff.hidden = !recorded || sameWatchFacts(watch.facts, recorded);
+      const list = this.querySelector('[data-posts]');
+      if (list) list.replaceChildren(postList(watch.posts));
+      if (status) status.textContent = statusText(watch);
+    } catch {
+      if (status) status.textContent = 'Live Steam check unavailable. Showing the saved store line and saved posts.';
+    } finally {
+      clearTimeout(timeout);
+      this.busy = false;
+      if (button) button.disabled = false;
+    }
+  };
+}
+if (!customElements.get('steam-watch')) customElements.define('steam-watch', SteamWatch);
+
+function recordedFacts(data: DOMStringMap): SteamListingFacts | undefined {
+  const platforms = (data.recordedPlatforms || '').split(',').filter((platform): platform is SteamListingFacts['platforms'][number] => platform === 'windows' || platform === 'mac' || platform === 'linux');
+  if (data.recordedSoon !== 'true' && data.recordedSoon !== 'false') return;
+  if (data.recordedFree !== 'true' && data.recordedFree !== 'false') return;
+  if (!data.recordedDate || !isStoreDate(data.recordedDate) || !platforms.length) return;
+  return { comingSoon: data.recordedSoon === 'true', releaseDate: data.recordedDate, platforms, free: data.recordedFree === 'true' };
+}
+
+function acceptWatch(value: unknown, appId: number, name: string, storeUrl: string) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+  const watch = value as Record<string, unknown>;
+  if (watch.appId !== appId || watch.name !== name || watch.storeUrl !== storeUrl) return;
+  if (typeof watch.comingSoon !== 'boolean' || typeof watch.free !== 'boolean' || typeof watch.listingStale !== 'boolean' || typeof watch.postsStale !== 'boolean') return;
+  if (typeof watch.releaseDate !== 'string' || !isStoreDate(watch.releaseDate)) return;
+  if (typeof watch.checkedAt !== 'string' || typeof watch.postsCheckedAt !== 'string') return;
+  if (!Number.isFinite(Date.parse(watch.checkedAt)) || !Number.isFinite(Date.parse(watch.postsCheckedAt))) return;
+  if (!Array.isArray(watch.platforms) || watch.platforms.some((platform) => platform !== 'windows' && platform !== 'mac' && platform !== 'linux')) return;
+  if (!Array.isArray(watch.posts) || watch.posts.length > 4) return;
+  const posts: NewsItem[] = [];
+  for (const item of watch.posts) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return;
+    const post = item as Record<string, unknown>;
+    if (post.game !== name || typeof post.title !== 'string' || !post.title.trim() || post.title.length > 240) return;
+    if (typeof post.url !== 'string' || !isOfficialNewsUrl(post.url)) return;
+    if (typeof post.id !== 'string' || !new RegExp(`^${appId}:\\d{1,24}$`).test(post.id)) return;
+    if (typeof post.publishedAt !== 'string' || !Number.isFinite(Date.parse(post.publishedAt))) return;
+    posts.push({ id: post.id, game: name, title: post.title.trim(), url: post.url, publishedAt: post.publishedAt });
+  }
+  const facts: SteamListingFacts = {
+    comingSoon: watch.comingSoon,
+    releaseDate: watch.releaseDate,
+    free: watch.free,
+    platforms: (['windows', 'mac', 'linux'] as const).filter((platform) => watch.platforms.includes(platform)),
+  };
+  return { facts, posts, checkedAt: watch.checkedAt, postsCheckedAt: watch.postsCheckedAt, listingStale: watch.listingStale, postsStale: watch.postsStale };
+}
+
+function postList(items: NewsItem[]) {
+  const fragment = document.createDocumentFragment();
+  const format = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  if (!items.length) {
+    const empty = document.createElement('li');
+    empty.textContent = 'No official Steam announcements are in the current feed.';
+    fragment.append(empty);
+    return fragment;
+  }
+  for (const item of items) {
+    const row = document.createElement('li');
+    const time = document.createElement('time');
+    const label = format(item.publishedAt);
+    time.dateTime = item.publishedAt;
+    time.textContent = label;
+    const link = document.createElement('a');
+    link.href = item.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = briefAnchor(item.game, item.title, label);
+    row.append(time, link);
+    fragment.append(row);
+  }
+  return fragment;
+}
+
+function statusText(watch: { checkedAt: string; postsCheckedAt: string; listingStale: boolean; postsStale: boolean }) {
+  const format = (value: string) => new Date(value).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+  if (!watch.listingStale && !watch.postsStale) return `Steam checked ${format(watch.checkedAt)} UTC. This page asks again every 15 minutes while it is open.`;
+  if (watch.listingStale && watch.postsStale) return `Steam is unavailable. Showing the saved store check from ${format(watch.checkedAt)} UTC.`;
+  if (watch.listingStale) return `The store date is the saved check from ${format(watch.checkedAt)} UTC. Official posts were checked ${format(watch.postsCheckedAt)} UTC.`;
+  return `Steam store details were checked ${format(watch.checkedAt)} UTC. Official posts are the saved list from ${format(watch.postsCheckedAt)} UTC.`;
+}
+</script>

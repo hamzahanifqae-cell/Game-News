@@ -1,11 +1,10 @@
 ---
 import snapshot from '../data/news-snapshot.json';
-import { newsPath } from '../lib/news';
 import { getPublicCollection } from '../lib/content';
 const [articles, apps] = await Promise.all([getPublicCollection('articles'), getPublicCollection('apps')]);
 const paths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
 const entries = [
-  ...snapshot.items.map(item => ({ title: item.title, description: item.game, url: newsPath(item), type: 'update' })),
+  ...snapshot.items.map(item => ({ title: item.title, description: item.game, url: item.url, type: 'update' })),
   ...articles.map(({id, data}) => ({title: data.title, description: data.description, url: `/${paths[data.type]}/${id}`, type: data.type})),
   ...apps.map(({id, data}) => ({title: data.name, description: data.description, url: `/apps/${id}`, type: data.category === 'games' ? 'game' : 'app'})),
 ];
@@ -73,7 +72,9 @@ const payload = JSON.stringify({entries, production: import.meta.env.PROD}).repl
         const [appId,gid] = String(item.id).split(':');
         const stamp = Math.floor(Date.parse(item.publishedAt)/1000);
         if (!/^\d+$/.test(appId) || !/^\d+$/.test(gid) || !Number.isFinite(stamp)) continue;
-        const entry = {title:String(item.title), description:String(item.game), url:`/updates/${appId}/${stamp}-${gid}`, type:'update'};
+        const official = new URL(String(item.url));
+        if (official.protocol !== 'https:' || !['steamcommunity.com','store.steampowered.com','steamstore-a.akamaihd.net'].includes(official.hostname)) continue;
+        const entry = {title:String(item.title), description:String(item.game), url:official.href, type:'update'};
         if (!known.has(entry.url)) entries.push(entry);
         known.set(entry.url,entry);
       }
@@ -117,6 +118,7 @@ const payload = JSON.stringify({entries, production: import.meta.env.PROD}).repl
     for (const entry of matches.slice(0, 8)) {
       const li = document.createElement('li'), link = document.createElement('a');
       link.href = entry.url;
+      if (entry.url.startsWith('https://')) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
       const type = document.createElement('small'); type.textContent = entry.type;
       const title = document.createElement('strong'); title.textContent = entry.title;
       link.append(type, title); li.append(link); results.append(li);

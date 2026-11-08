@@ -251,6 +251,7 @@ export default config({
             { label: 'iOS', value: 'ios' },
             { label: 'Windows', value: 'windows' },
             { label: 'macOS', value: 'macos' },
+            { label: 'Linux', value: 'linux' },
             { label: 'Web', value: 'web' },
           ],
           defaultValue: [],

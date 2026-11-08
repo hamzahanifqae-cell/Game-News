@@ -1,32 +1,35 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import AppCard from '../../components/AppCard.astro';
-import { getPublicCollection, getSiteSettings } from '../../lib/content';
+import { getPublicCollection } from '../../lib/content';
 
-const settings = await getSiteSettings();
-const apps = (await getPublicCollection('apps')).filter(app => app.data.category !== 'games');
+const platformLabels: Record<string, string> = {
+  android: 'Android',
+  ios: 'iOS',
+  windows: 'Windows',
+  macos: 'macOS',
+  linux: 'Linux',
+  web: 'Web',
+};
+const games = (await getPublicCollection('apps'))
+  .filter((app) => app.data.category === 'games')
+  .sort((a, b) => a.data.name.localeCompare(b.data.name));
+const description = 'How to read a GameNews PC profile: the game, the platforms Steam listed, and where to compare editions and system requirements.';
 ---
-
-<BaseLayout
-  title="App Info, Specs & Official Downloads"
-  description={`App information from ${settings.siteName}: specifications and official download links. No installers are hosted here.`}
-  canonicalPath="/apps"
-  adPageEligible={apps.length > 0}
->
-  <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-    <h1 class="font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">Apps</h1>
-    <p class="mt-2 max-w-2xl text-ink-muted">
-      Specifications and official links for the apps we cover — no files hosted here.
-    </p>
-
-    {apps.length > 0 ? (
-      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {apps.map((app) => <AppCard app={app} />)}
-      </div>
-    ) : (
-      <div class="mt-10 rounded-xl border border-line bg-white p-8 text-center">
-        <p class="text-ink-muted">Nothing here yet — check back soon.</p>
-      </div>
-    )}
+<BaseLayout title="PC Game Profiles: Platforms, Editions, and Steam" description={description} canonicalPath="/apps" adPageEligible={games.length > 0}>
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+    <h1 class="font-sans text-3xl font-bold tracking-tight text-ink sm:text-4xl">PC game profiles.</h1>
+    <p class="mt-4 leading-7 text-ink-muted">Each profile explains the game and links to its official Steam page. The button labeled “Check system requirements on Steam” opens that page. Compare the edition you mean to buy, then match your operating system, processor, memory, graphics, and storage with the minimum and recommended columns. A minimum listing is not a frame-rate promise. GameNews does not host game files.</p>
+    <p class="mt-4 leading-7 text-ink-muted">The <a class="underline text-brand-700" href="/games">popular games catalog</a> is the browsable list. The profiles below are the same nine games, with the task named in the link.</p>
+    <ul class="mt-8 space-y-4 leading-7">
+      {games.map((game) => {
+        const platforms = game.data.platforms.map((platform) => platformLabels[platform] ?? platform).join(', ');
+        return (
+          <li>
+            <a class="font-semibold text-brand-700 underline" href={`/apps/${game.id}`}>Open the {game.data.name} profile and its official Steam page</a>
+            {' '}— {game.data.description} Steam platforms recorded on 8 November 2026: {platforms || 'see the Steam page'}.
+          </li>
+        );
+      })}
+    </ul>
   </section>
 </BaseLayout>

@@ -27,6 +27,7 @@ const platformLabels: Record<string, string> = {
   ios: 'iOS',
   windows: 'Windows',
   macos: 'macOS',
+  linux: 'Linux',
   web: 'Web',
 };
 
@@ -62,7 +63,7 @@ const rows = [
     target="_blank"
     class="btn-primary mt-5 w-full sm:w-auto"
   >
-    Visit official page
+    {data.category === 'games' ? 'Check system requirements on Steam' : 'Visit official page'}
     <span class="sr-only">(opens in a new tab)</span>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />

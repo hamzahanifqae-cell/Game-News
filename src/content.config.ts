@@ -30,7 +30,7 @@ const apps = defineCollection({
       category: z.string(),
       developer: z.string().default(''),
       officialLink: z.string().url(),
-      platforms: z.array(z.enum(['android', 'ios', 'windows', 'macos', 'web'])).default([]),
+      platforms: z.array(z.enum(['android', 'ios', 'windows', 'macos', 'linux', 'web'])).default([]),
       currentVersion: z.string().default(''),
       lastUpdated: z.coerce.date().optional(),
       fileSize: z.string().default(''),

@@ -1,13 +1,12 @@
 ---
 import snapshot from '../data/news-snapshot.json';
-import { newsPath } from '../lib/news';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getSiteSettings, getPublicCollection } from '../lib/content';
 const settings = await getSiteSettings();
 const paths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
 const [articles, apps] = await Promise.all([getPublicCollection('articles'), getPublicCollection('apps')]);
 const entries = [
-  ...snapshot.items.map(item => ({ title: item.title, description: item.game, url: newsPath(item), type: 'update' })),
+  ...snapshot.items.map(item => ({ title: item.title, description: item.game, url: item.url, type: 'update' })),
   ...articles.map(({ id, data }) => ({ title: data.title, description: data.description, url: `/${paths[data.type]}/${id}`, type: data.type })),
   ...apps.map(({ id, data }) => ({ title: data.name, description: data.description, url: `/apps/${id}`, type: 'app' })),
 ];
@@ -70,7 +69,7 @@ const searchData = JSON.stringify({ entries, production: import.meta.env.PROD })
         const row = document.createElement('li'); row.className = 'py-6';
         const label = document.createElement('p'); label.className = 'editorial-kicker text-brand-700'; label.textContent = entry.type;
         const heading = document.createElement('h2'); heading.className = 'mt-2 font-serif text-2xl text-ink';
-        const link = document.createElement('a'); link.href = entry.url; link.textContent = entry.title; link.className = 'hover:text-brand-700'; heading.append(link);
+        const link = document.createElement('a'); link.href = entry.url; link.textContent = entry.title; link.className = 'hover:text-brand-700'; if (entry.url.startsWith('https://')) { link.target = '_blank'; link.rel = 'noopener noreferrer'; } heading.append(link);
         const description = document.createElement('p'); description.className = 'mt-2 text-sm leading-6 text-ink-muted'; description.textContent = entry.description;
         row.append(label, heading, description); results.append(row);
       }

@@ -45,8 +45,8 @@ test('update anchors use a patch token only when the publisher title contains on
   const { patchToken, briefAnchor } = await import('../src/lib/update-label.ts');
   assert.equal(patchToken('7.41f Gameplay Patch'), '7.41f');
   assert.equal(patchToken('Special Drops - October 2026'), undefined);
-  assert.equal(briefAnchor('Dota 2', '7.41f Gameplay Patch', 'Oct 2, 2026'), 'Read the Dota 2 7.41f brief');
-  assert.equal(briefAnchor('Counter-Strike 2', 'Counter-Strike 2 Update', 'Oct 14, 2026'), 'Read Counter-Strike 2 Update from Oct 14, 2026');
-  assert.equal(briefAnchor('Dota 2', 'Inside the Trove of Terror', 'Oct 8, 2026'), 'Read the Dota 2 brief: Inside the Trove of Terror');
-  assert.equal(briefAnchor('The Wolf Among Us 2', 'Wolf Among Us 2 Reveal!', 'Jun 6, 2026'), 'Read Wolf Among Us 2 Reveal! from Jun 6, 2026');
+  assert.equal(briefAnchor('Dota 2', '7.41f Gameplay Patch', 'Oct 2, 2026'), 'Open the official Dota 2 7.41f announcement');
+  assert.equal(briefAnchor('Counter-Strike 2', 'Counter-Strike 2 Update', 'Oct 14, 2026'), 'Open the official announcement: Counter-Strike 2 Update (Oct 14, 2026)');
+  assert.equal(briefAnchor('Dota 2', 'Inside the Trove of Terror', 'Oct 8, 2026'), 'Open the official Dota 2 announcement: Inside the Trove of Terror');
+  assert.equal(briefAnchor('The Wolf Among Us 2', 'Wolf Among Us 2 Reveal!', 'Jun 6, 2026'), 'Open the official announcement: Wolf Among Us 2 Reveal! (Jun 6, 2026)');
 });

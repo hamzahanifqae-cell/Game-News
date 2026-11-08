@@ -1,0 +1,17 @@
+---
+export const prerender = false;
+Astro.response.status = 410;
+Astro.response.headers.set('Cache-Control', 'public, max-age=3600');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gone</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <h1>This page has been removed.</h1>
+    <p>VLC is not part of the GameNews game directory. <a href="/games">Browse popular PC games</a>.</p>
+  </body>
+</html>

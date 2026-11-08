@@ -70,12 +70,27 @@ const appJsonLd = {
     </h1>
     <p class="mt-3 text-ink-muted">{data.description}</p>
 
-    {data.category === 'games' && <div class="mt-6"><a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary">Download via Steam <span aria-hidden="true">↗</span><span class="sr-only"> (opens the official store in a new tab)</span></a><p class="mt-2 text-xs text-ink-muted">Opens the official store. Installation is handled by Steam; GameNews does not host game files.</p></div>}
+    {data.category === 'games' && <div class="mt-6"><a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary">Open the official Steam page for {data.name} <span aria-hidden="true">↗</span><span class="sr-only"> (opens the official store in a new tab)</span></a><p class="mt-2 text-xs text-ink-muted">Opens the official Steam page. Installation is handled by Steam; GameNews does not host game files. Publisher artwork stays on that page.</p></div>}
     <figure class="mt-7">
       <Image src={data.coverImage || editorialImages.review.src} alt={data.coverImage ? data.coverImageAlt : editorialImages.review.alt} width={1100} height={680} format="webp" class="aspect-[16/10] w-full rounded-sm bg-surface object-contain" />
       {data.coverImageCredit && <figcaption class="mt-2 text-xs leading-5 text-ink-muted">{data.coverImageCredit}{data.coverImageSource && <> · <a href={data.coverImageSource} target="_blank" rel="noopener noreferrer" class="underline">Image source</a></>}</figcaption>}
       {!data.coverImage && <figcaption class="mt-2 text-xs text-ink-muted">Illustrative editorial artwork · not an app screenshot</figcaption>}
     </figure>
+
+    {isGame && (
+      <div class="prose-article mt-8">
+        <h2>Platforms and editions</h2>
+        <p>Steam’s app details, checked 8 November 2026, list these PC platforms for {data.name}: {data.platforms.map((platform) => ({ android: 'Android', ios: 'iOS', windows: 'Windows', macos: 'macOS', linux: 'Linux', web: 'Web' })[platform] ?? platform).join(', ') || 'see the Steam page'}.</p>
+        <p>Editions, bundles, and add-ons are purchase options on that Steam page. Compare the exact product title before you pay. This profile does not quote a price, and a console edition is not the same as this PC listing.</p>
+        <h2>How to check system requirements</h2>
+        <ol>
+          <li>Open the official Steam page linked above.</li>
+          <li>Find the system requirements for the edition you intend to install.</li>
+          <li>Compare your operating system, processor, memory, graphics, and free storage with the minimum and recommended columns.</li>
+          <li>Treat a minimum listing as the publisher’s floor, not a promise of a particular frame rate.</li>
+        </ol>
+      </div>
+    )}
 
     <div class="mt-8">
       <SpecTable app={app} />

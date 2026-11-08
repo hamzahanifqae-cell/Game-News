@@ -7,6 +7,7 @@ import Breadcrumbs from './Breadcrumbs.astro';
 import TypeBadge from './TypeBadge.astro';
 import TableOfContents from './TableOfContents.astro';
 import AdSlot from './AdSlot.astro';
+import SteamWatch from './SteamWatch.astro';
 import ArticleCard from './ArticleCard.astro';
 import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { formatEditorialDate, jsonLd as serializeJsonLd, pageUrl } from '../lib/seo';
@@ -129,6 +130,8 @@ const structuredData = {
         <Content />
       </div>
     </div>
+
+    {article.id === 'phantom-blade-zero-watchlist' && <SteamWatch />}
 
     <AdSlot placement="articleBottom" format="in-article" />
 
