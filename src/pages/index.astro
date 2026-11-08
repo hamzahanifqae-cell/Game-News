@@ -7,6 +7,7 @@ import { Image } from 'astro:assets';
 import AdSlot from '../components/AdSlot.astro';
 import { getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { editorialImages } from '../lib/editorial-images';
+import gtaArtwork from '../assets/products/gta-vi-banner.jpg';
 import { formatEditorialDate, pageUrl } from '../lib/seo';
 import { shareImage } from '../lib/share-image';
 const settings = await getSiteSettings();
@@ -31,7 +32,7 @@ function claimImage(article: (typeof articles)[number] | undefined) {
   seen.add(article.data.coverImage.src); return true;
 }
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
-const homeShare = await shareImage(editorialImages.news.src);
+const homeShare = await shareImage(gtaArtwork);
 const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
 const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar’s page, checked 8 November 2026, still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S.';
 const site = Astro.site;
@@ -76,7 +77,7 @@ const topics = [
   {href:'/updates', title:'Catch the latest', copy:'Fresh publisher announcements, with dates and original sources.', icon:'fix', tone:'teal'},
 ];
 ---
-<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={homeShare?.src} ogImageAlt={editorialImages.news.alt} ogImageWidth={homeShare?.width} ogImageHeight={homeShare?.height} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
+<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={homeShare?.src} ogImageAlt="Official Grand Theft Auto VI artwork featuring Jason, Lucia, and scenes from Leonida." ogImageWidth={homeShare?.width} ogImageHeight={homeShare?.height} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
 <div class="magazine mx-auto max-w-6xl px-4 sm:px-6">
   <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/news/gta-vi-release-watchlist">GTA VI</a><a href="/games">PC gaming</a><a href="/apps">Game profiles</a><a href="/blog">Upcoming games</a><a href="/updates">Game updates</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
   <GtaSpotlight />
