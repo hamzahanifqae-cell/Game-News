@@ -70,7 +70,7 @@ const appJsonLd = {
     </h1>
     <p class="mt-3 text-ink-muted">{data.description}</p>
 
-    {data.category === 'games' && <div class="mt-6"><a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary">Open the official Steam page for {data.name} <span aria-hidden="true">↗</span><span class="sr-only"> (opens the official store in a new tab)</span></a><p class="mt-2 text-xs text-ink-muted">Opens the official Steam page. Installation is handled by Steam; GameNews does not host game files. Publisher artwork stays on that page.</p></div>}
+    {data.category === 'games' && <div class="mt-6"><a href={data.officialLink} target="_blank" rel="noopener noreferrer" class="btn-primary">Open the official Steam page for {data.name} <span aria-hidden="true">↗</span><span class="sr-only"> (opens the official store in a new tab)</span></a><p class="mt-2 text-xs text-ink-muted">Opens the official Steam page. Installation is handled by Steam; GameNews does not host game files. The cover is the publisher’s promotional artwork.</p></div>}
     <figure class="mt-7">
       <Image src={data.coverImage || editorialImages.review.src} alt={data.coverImage ? data.coverImageAlt : editorialImages.review.alt} width={1100} height={680} format="webp" class="aspect-[16/10] w-full rounded-sm bg-surface object-contain" />
       {data.coverImageCredit && <figcaption class="mt-2 text-xs leading-5 text-ink-muted">{data.coverImageCredit}{data.coverImageSource && <> · <a href={data.coverImageSource} target="_blank" rel="noopener noreferrer" class="underline">Image source</a></>}</figcaption>}
