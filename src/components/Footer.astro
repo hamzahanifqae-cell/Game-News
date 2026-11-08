@@ -34,6 +34,7 @@ const year = new Date().getFullYear();
           <li><a href="/about" class="hover:text-brand-700">About</a></li>
           <li><a href="/contact" class="hover:text-brand-700">Contact</a></li>
           <li><a href="/privacy" class="hover:text-brand-700">Privacy Policy</a></li>
+          <li><button type="button" id="privacy-choices" class="cursor-pointer bg-transparent p-0 text-left text-[13px] text-ink-muted hover:text-brand-700">Privacy and cookie settings</button></li>
           <li><a href="/terms" class="hover:text-brand-700">Terms of Use</a></li>
         </ul>
       </nav>
@@ -52,7 +53,25 @@ const year = new Date().getFullYear();
 
     <div class="mt-12 border-t border-line pt-6 text-[13px] text-ink-muted/80">
       <p>&copy; {year} {settings.businessLegalName || settings.siteName}. All rights reserved.</p>
-      <p class="mt-1">App names, logos, and screenshots belong to their respective owners. GameNews is not affiliated with the publishers it covers unless stated otherwise.</p>
+      <p class="mt-1">App names and publisher artwork belong to their respective owners. GameNews is not affiliated with the publishers it covers unless stated otherwise.</p>
     </div>
   </div>
 </footer>
+<script is:inline>
+  document.getElementById('privacy-choices')?.addEventListener('click', () => {
+    const tagged = document.querySelector('script[src*="adsbygoogle.js"]');
+    if (!tagged) {
+      window.location.assign('/privacy#cookie-and-advertising-consent');
+      return;
+    }
+    const fc = (window.googlefc = window.googlefc || {});
+    fc.callbackQueue = fc.callbackQueue || [];
+    if (typeof fc.showRevocationMessage === 'function') {
+      fc.callbackQueue.push(fc.showRevocationMessage);
+      return;
+    }
+    fc.callbackQueue.push({
+      CONSENT_DATA_READY: () => window.googlefc.showRevocationMessage(),
+    });
+  });
+</script>

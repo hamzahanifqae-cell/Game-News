@@ -109,11 +109,13 @@ const isDraft = !page.data.policyReviewDate;
             : ' Ad serving is currently off. The AdSense library is not loaded, and this site does not set Google advertising cookies, until advertising is turned on and you grant advertising consent.'}
       </p>
 
-      <h2>Cookie and advertising consent</h2>
+      <h2 id="cookie-and-advertising-consent">Cookie and advertising consent</h2>
       {settings.cmpProvider === 'none' && messageOnSite && (
         <p>
           Google’s European regulations message, published in AdSense for this site, is the consent message for
           visitors in the EEA, the UK, and Switzerland. The AdSense script loads so Google can show that message.
+          The message includes the choices to consent or not to consent. A “Privacy and cookie settings” control in the
+          footer asks Google to show that message again. This site does not load Cookiebot or a second consent message.
           This site does not serve personalized ads while ad placement is off.
         </p>
       )}

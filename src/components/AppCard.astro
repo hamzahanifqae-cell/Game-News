@@ -26,7 +26,7 @@ const category = await getCategory(data.category);
         class="h-full w-full object-contain bg-surface transition-transform duration-200 group-hover:scale-[1.03]"
       />
     ) : (
-      <Image src={editorialImages.review.src} alt="" width={640} height={400} format="webp" loading="lazy" class="h-full w-full object-contain bg-surface" />
+      <Image src={editorialImages.review.src} alt={editorialImages.review.alt} width={640} height={400} format="webp" loading="lazy" class="h-full w-full object-contain bg-surface" />
     )}
   </a>
   )}

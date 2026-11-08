@@ -26,7 +26,7 @@ const href = `/${typeToPath[data.type]}/${article.id}`;
     {data.coverImage ? (
       <Image src={data.coverImage} alt={data.coverImageAlt} width={640} height={400} format="webp" loading="lazy" class="h-full w-full object-contain bg-surface" />
     ) : (
-      <Image src={editorialImages[data.type].src} alt="" width={640} height={400} format="webp" loading="lazy" class="h-full w-full object-contain bg-surface" />
+      <Image src={editorialImages[data.type].src} alt={editorialImages[data.type].alt} width={640} height={400} format="webp" loading="lazy" class="h-full w-full object-contain bg-surface" />
     )}
   </a>
   )}

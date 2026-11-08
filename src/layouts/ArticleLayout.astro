@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import ArticleDetail from '../components/ArticleDetail.astro';
+import { editorialImages } from '../lib/editorial-images';
 import { shareImage } from '../lib/share-image';
 import BaseLayout from './BaseLayout.astro';
 
@@ -15,7 +16,8 @@ const typeToPath = {
   troubleshooting: 'troubleshooting',
   news: 'news',
 } as const;
-const image = await shareImage(article.data.coverImage);
+const ownedPreview = editorialImages[article.data.type];
+const image = await shareImage(article.data.coverImage ?? ownedPreview.src);
 ---
 
 <BaseLayout
@@ -24,11 +26,11 @@ const image = await shareImage(article.data.coverImage);
   canonicalPath={`/${typeToPath[article.data.type]}/${article.id}`}
   ogType="article"
   ogImage={image?.src}
-  ogImageAlt={article.data.coverImageAlt}
+  ogImageAlt={article.data.coverImage ? article.data.coverImageAlt : ownedPreview.alt}
   ogImageWidth={image?.width}
   ogImageHeight={image?.height}
   publishedTime={article.data.publishDate.toISOString()}
   modifiedTime={article.data.updatedDate?.toISOString()}
 >
-  <ArticleDetail article={article} shareImage={image?.src} />
+  <ArticleDetail article={article} shareImage={article.data.coverImage ? image?.src : undefined} />
 </BaseLayout>
