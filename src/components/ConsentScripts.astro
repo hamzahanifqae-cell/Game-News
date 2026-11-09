@@ -5,9 +5,9 @@
 // the GA4 tag is not injected until a CMP reports analytics consent. When no
 // other CMP is selected, the AdSense tag is loaded so Google can show the
 // published European regulations message. This site does not render its own
-// ad slots while advertising is off. It does not set
-// adsbygoogle.pauseAdRequests: Google's ad-settings preview waits on that
-// flag and then reports that the preview failed to load. The actual
+// ad slots while advertising is off, and it does not create Google's consent
+// object. Google's ad script reports adsense_fc_has_namespace_but_no_iframes
+// when that object exists before Google's own consent frame. The actual
 // wiring lives in
 // src/lib/consent-client.ts, which reads each CMP's own documented
 // JavaScript event/object — it does not read or map raw IAB TCF purpose
@@ -61,25 +61,6 @@ const gateConfig = {
 )}
 
 {messageSrc && (
-  <script is:inline>
-    window.googlefc = window.googlefc || {};
-    window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
-    window.gamenewsOpenPrivacyChoices = () => {
-      if (typeof window.googlefc.showRevocationMessage === 'function') {
-        window.gamenewsPrivacyChoicesPending = false;
-        window.googlefc.showRevocationMessage();
-        return;
-      }
-      window.gamenewsPrivacyChoicesPending = true;
-    };
-    const openPendingPrivacyChoices = () => {
-      if (window.gamenewsPrivacyChoicesPending) window.gamenewsOpenPrivacyChoices();
-    };
-    window.googlefc.callbackQueue.push({
-      CONSENT_API_READY: openPendingPrivacyChoices,
-      CONSENT_DATA_READY: openPendingPrivacyChoices,
-    });
-  </script>
   <script async src={messageSrc} crossorigin="anonymous"></script>
 )}
 

@@ -64,8 +64,20 @@ const year = new Date().getFullYear();
       window.location.assign('/privacy#cookie-and-advertising-consent');
       return;
     }
-    if (typeof window.gamenewsOpenPrivacyChoices === 'function') {
-      window.gamenewsOpenPrivacyChoices();
+    const openPrivacyChoices = () => {
+      if (typeof window.googlefc?.showRevocationMessage === 'function') {
+        window.googlefc.showRevocationMessage();
+      }
+    };
+    if (typeof window.googlefc?.showRevocationMessage === 'function') {
+      openPrivacyChoices();
+      return;
     }
+    const queue = window.googlefc?.callbackQueue;
+    if (queue && typeof queue.push === 'function') {
+      queue.push({ CONSENT_API_READY: openPrivacyChoices, CONSENT_DATA_READY: openPrivacyChoices });
+      return;
+    }
+    window.location.assign('/privacy#cookie-and-advertising-consent');
   });
 </script>
