@@ -158,6 +158,9 @@
   }
 }
 
+/* Plain class for the 15px card summary. The bracket form text-[15px] is invalid in an unescaped CSS selector. */
+.text-15 { font-size: 15px; }
+
 /* Publication layout primitives, shared by the homepage and article listings. */
 .editorial-kicker { font-size: .8125rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
 .editorial-rule { border-top: 1px solid var(--color-ink); }
