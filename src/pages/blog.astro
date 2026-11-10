@@ -33,7 +33,39 @@ const jsonLd = site && listUrl ? {
 <Breadcrumbs items={[{ label: 'Upcoming games' }]} />
 <p class="editorial-kicker text-brand-700">The watchlist</p>
 <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{pageHeading}</h1>
-<p class="mt-4 max-w-2xl leading-7 text-ink-muted">Look ahead with original features grounded in official sources. Each article is a dated editorial snapshot. For new announcements as they arrive, visit <a class="underline text-brand-700" href="/updates">game updates</a>. For games you can install now, see <a class="underline text-brand-700" href="/games">popular PC games</a>.</p>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">These upcoming PC game releases are dated editorial snapshots. A confirmed date is a calendar day on the official listing when that article was checked. A tentative entry has no calendar day. A console date is not a PC date. New publisher posts are on <a class="underline text-brand-700" href="/updates">game updates</a>. Games you can install now are on <a class="underline text-brand-700" href="/games">popular PC games</a>.</p>
+<h2 class="mt-10 text-2xl font-semibold tracking-tight text-ink">Upcoming PC game releases by month</h2>
+<div class="mt-6 grid gap-8 md:grid-cols-2">
+  <section>
+    <h3 class="text-lg font-semibold text-ink">January 2027</h3>
+    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
+      <li><a class="font-semibold text-brand-700 underline" href="/news/stranger-than-heaven-watchlist">Stranger Than Heaven</a> — confirmed 14 January 2027 on Steam, checked 16 October 2026.</li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="text-lg font-semibold text-ink">February 2027</h3>
+    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
+      <li><a class="font-semibold text-brand-700 underline" href="/news/metro-2039-watchlist">Metro 2039</a> — confirmed 4 February 2027 on Steam, checked 16 October 2026.</li>
+      <li><a class="font-semibold text-brand-700 underline" href="/news/persona-4-revival-watchlist">Persona 4 Revival</a> — 17 February 2027 on the English Steam listing, checked 16 October 2026. Another region can show a different day.</li>
+      <li><a class="font-semibold text-brand-700 underline" href="/news/fable-watchlist">Fable</a> — confirmed 23 February 2027 on Steam, checked 15 October 2026.</li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="text-lg font-semibold text-ink">April 2027</h3>
+    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
+      <li><a class="font-semibold text-brand-700 underline" href="/news/final-fantasy-vii-revelation-watchlist">Final Fantasy VII Revelation</a> — confirmed 8 April 2027 on Steam, checked 16 October 2026.</li>
+    </ul>
+  </section>
+  <section>
+    <h3 class="text-lg font-semibold text-ink">No PC calendar date</h3>
+    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
+      <li><a class="font-semibold text-brand-700 underline" href="/news/gta-vi-release-watchlist">GTA VI</a> — Rockstar lists 19 November 2026 for PlayStation 5 and Xbox Series X|S. The same page does not list a PC date. Checked 8 November 2026.</li>
+      <li><a class="font-semibold text-brand-700 underline" href="/news/light-no-fire-watchlist">Light No Fire</a> — tentative. Steam said to be announced, checked 16 October 2026.</li>
+      <li><a class="font-semibold text-brand-700 underline" href="/news/the-wolf-among-us-2-watchlist">The Wolf Among Us 2</a> — tentative. Steam said coming soon and gave no calendar day, checked 15 October 2026.</li>
+    </ul>
+  </section>
+</div>
+<p class="mt-8 max-w-2xl text-sm leading-6 text-ink-muted"><a class="font-semibold text-brand-700 underline" href="/news/phantom-blade-zero-watchlist">Phantom Blade Zero</a> is no longer an upcoming release. Steam lists it as released on 28 October 2026 for Windows, checked 8 November 2026.</p>
 <div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{articles.map(article => <ArticleCard article={article} />)}</div>
 </section>
 </BaseLayout>
