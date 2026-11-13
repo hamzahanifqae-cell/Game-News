@@ -81,5 +81,5 @@
     }
   ],
   "otherPublisherImages": "Other files in src/assets/products/ are publisher promotional images recorded in sources.json. Each entry still says no separate reuse license is claimed. They stay published only until you choose the text-only or site-owned replacement path above. Attribution alone does not verify reuse rights.",
-  "decisionNeeded": "Choose one path before AdSense resubmission: (A) keep publisher artwork and accept that monetized reuse permission is not documented, (B) switch Rockstar and Xbox images listed above to site-owned illustrations, or (C) use text-only cards that link out to the official pages."
+  "publicationDecision": "Publisher artwork without documented reuse permission is omitted from the website and social previews. GameNews uses original editorial illustrations where a fallback is needed."
 }
