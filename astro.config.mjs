@@ -119,6 +119,11 @@ export default defineConfig({
   // Canonicals are written without a trailing slash. Keep the sitemap on the same form.
   trailingSlash: 'never',
 
+  // Shared hosting LVE kills parallel Astro builds (EXIT:137). One page at a time.
+  build: {
+    concurrency: 1,
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },
