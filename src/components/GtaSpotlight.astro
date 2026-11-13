@@ -2,9 +2,9 @@
 import { Image } from 'astro:assets';
 import artwork from '../assets/products/gta-vi-banner.jpg';
 const updates = [
+  { date: '2026-11-10', label: 'November 10, 2026', type: 'Pre-load', title: 'Pre-loading is available now.', description: 'Rockstar says digital pre-orders can pre-load now. Code-in-box buyers can start after they redeem the code. PlayStation 5 and Xbox Series X|S are the listed platforms.', source: 'https://www.rockstargames.com/newswire/article/89834o94713o21/pre-load-grand-theft-auto-vi-now', action: 'Read Rockstar’s pre-load post' },
+  { date: '2026-11-13', label: 'Checked November 13, 2026', type: 'Release watch', title: 'November 19 is still the target.', description: 'Rockstar’s page still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S, and it now shows Pre-Load Now. No PC date is listed.', source: 'https://www.rockstargames.com/VI', action: 'Check official release details' },
   { date: '2026-10-15', label: 'October 15, 2026', type: 'Trailer', title: 'The launch trailer is here.', description: 'Rockstar has featured the GTA VI launch trailer on its official site. Watch the original video for the latest look at the game.', source: 'https://www.rockstargames.com/newswire/article/517572321a549a', action: 'Watch at Rockstar' },
-  { date: '2026-10-08', label: 'October 8, 2026', type: 'Music', title: 'Tune in to the sound of Leonida.', description: 'Rockstar’s radio-station announcement offers a closer look at GTA VI’s in-game music. Explore the publisher’s post for the lineup and details.', source: 'https://www.rockstargames.com/newswire/article/o3982oa93a23k4/the-music-of-grand-theft-auto-vi-in-game-radio-stations', action: 'Explore the announcement' },
-  { date: '2026-11-08', label: 'Checked November 8, 2026', type: 'Release watch', title: 'November 19 is still the target.', description: 'Rockstar’s page still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S. It also says pre-load begins November 10. No PC date is listed.', source: 'https://www.rockstargames.com/VI', action: 'Check official release details' },
 ];
 ---
 <section class="gta-spotlight" aria-labelledby="gta-title">
@@ -15,7 +15,7 @@ const updates = [
     <a href="https://www.rockstargames.com/VI" target="_blank" rel="noopener noreferrer" class="gta-credit">Official artwork © Rockstar Games · source ↗</a>
   </div>
   <div class="gta-updates" id="gta-updates">
-    <div class="gta-updates-heading"><div><p class="gta-eyebrow">THE LATEST FROM LEONIDA</p><h2>GTA VI, in focus.</h2></div><p>Official sources.<br />Checked November 8, 2026.</p></div>
+    <div class="gta-updates-heading"><div><p class="gta-eyebrow">THE LATEST FROM LEONIDA</p><h2>GTA VI, in focus.</h2></div><p>Official sources.<br />Checked November 13, 2026.</p></div>
     <div class="gta-update-grid">{updates.map((update,index) => <article class="gta-update"><div class="gta-update-meta"><span>{update.type}</span><span class="gta-number" aria-hidden="true">0{index+1}</span></div><h3>{update.title}</h3><p>{update.description}</p><time datetime={update.date}>{update.label}</time><a href={update.source} target="_blank" rel="noopener noreferrer">{update.action}<span aria-hidden="true">↗</span><span class="sr-only"> (opens Rockstar in a new tab)</span></a></article>)}</div>
     <p class="gta-source-note">Dated coverage of Rockstar’s official announcements. New developments may follow; use the source links for the publisher’s current information. <a href="/news/gta-vi-release-watchlist">Read the GTA VI release brief</a>.</p>
   </div>

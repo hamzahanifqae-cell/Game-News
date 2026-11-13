@@ -34,7 +34,7 @@ function claimImage(article: (typeof articles)[number] | undefined) {
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
 const homeShare = await shareImage(gtaArtwork);
 const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
-const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar’s page, checked 8 November 2026, still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S.';
+const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar’s page, checked 13 November 2026, still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S, and pre-loading is available now.';
 const site = Astro.site;
 const homeUrl = pageUrl(site, '/');
 const organizationId = site ? new URL('/#organization', site).toString() : undefined;

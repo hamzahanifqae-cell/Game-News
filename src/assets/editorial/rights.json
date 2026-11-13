@@ -1,0 +1,85 @@
+{
+  "checked": "2026-11-13",
+  "retained": [
+    {
+      "file": "src/assets/editorial/digital-everyday.png",
+      "usedFor": ["Homepage social preview fallback", "News and review illustrations when no publisher cover is shown"],
+      "source": "Illustration created for GameNews and stored in this repository.",
+      "terms": "Site-owned illustration. It is not a publisher image, screenshot, or official key art. Shown only with alt text that describes it as an illustration.",
+      "permission": "documented-site-owned"
+    },
+    {
+      "file": "src/assets/editorial/practical-guides.png",
+      "usedFor": ["Tutorial illustrations"],
+      "source": "Illustration created for GameNews and stored in this repository.",
+      "terms": "Site-owned illustration. It is not a publisher image, screenshot, or official key art. Shown only with alt text that describes it as an illustration.",
+      "permission": "documented-site-owned"
+    },
+    {
+      "file": "src/assets/editorial/everyday-fixes.png",
+      "usedFor": ["Troubleshooting illustrations"],
+      "source": "Illustration created for GameNews and stored in this repository.",
+      "terms": "Site-owned illustration. It is not a publisher image, screenshot, or official key art. Shown only with alt text that describes it as an illustration.",
+      "permission": "documented-site-owned"
+    },
+    {
+      "file": "public/favicon.svg",
+      "usedFor": ["Browser icon"],
+      "source": "Original GameNews mark created for this site.",
+      "terms": "Site-owned mark.",
+      "permission": "documented-site-owned"
+    },
+    {
+      "file": "public/gamenews-logo.png",
+      "usedFor": ["AdSense European regulations message logo"],
+      "source": "Original GameNews wordmark created for this site.",
+      "terms": "Site-owned mark.",
+      "permission": "documented-site-owned"
+    }
+  ],
+  "publisherAudit": [
+    {
+      "file": "src/assets/products/gta-vi-banner.jpg",
+      "publisher": "Rockstar Games",
+      "usedOn": ["Homepage GTA spotlight", "/news/gta-vi-release-watchlist", "Homepage Open Graph image"],
+      "sourceUrl": "https://www.rockstargames.com/VI",
+      "assetUrl": "https://www.rockstargames.com/VI/_next/static/media/poster_full.0az_iud2g3y4j.jpg",
+      "creditOnPage": "Official artwork © Rockstar Games with a link to rockstargames.com/VI",
+      "termsChecked": "Rockstar’s GTA VI media page at https://www.rockstargames.com/VI/media says “Download and share trailers, imagery, and more.” No written license for monetized third-party editorial hosting was found. Rockstar’s site copyright notice reserves rights. Attribution alone does not establish reuse permission for AdSense.",
+      "permission": "not-established",
+      "proposal": "Replace the hosted banner with a text-only GTA VI spotlight that links to Rockstar, or host only a file downloaded from Rockstar’s media kit after you confirm that kit covers monetized editorial sites. Preferred safe default: text-only treatment plus the site-owned illustration for social preview."
+    },
+    {
+      "file": "src/assets/products/gta-v-enhanced.jpg",
+      "publisher": "Rockstar Games",
+      "usedOn": ["/apps/gta-v-enhanced", "Homepage popular-game cards", "/games"],
+      "sourceUrl": "https://store.steampowered.com/app/3240220/?l=english",
+      "creditOnPage": "Official publisher artwork · © Rockstar Games with a Steam source link",
+      "termsChecked": "Steam capsule used for identification. sources.json records no separate reuse license. Attribution alone does not establish monetized reuse permission.",
+      "permission": "not-established",
+      "proposal": "Use the site-owned editorial illustration, or a text-only card that links to the official Steam page."
+    },
+    {
+      "file": "src/assets/products/red-dead-redemption-2.jpg",
+      "publisher": "Rockstar Games",
+      "usedOn": ["/apps/red-dead-redemption-2", "Homepage popular-game cards", "/games"],
+      "sourceUrl": "https://store.steampowered.com/app/1174180/?l=english",
+      "creditOnPage": "Official publisher artwork · © Rockstar Games with a Steam source link",
+      "termsChecked": "Steam capsule. No separate reuse license recorded.",
+      "permission": "not-established",
+      "proposal": "Use the site-owned editorial illustration, or a text-only card that links to Steam."
+    },
+    {
+      "file": "src/assets/products/fable.jpg",
+      "publisher": "Xbox Game Studios",
+      "usedOn": ["/news/fable-watchlist", "Homepage feature cards when selected"],
+      "sourceUrl": "https://store.steampowered.com/app/2769570/?l=english",
+      "creditOnPage": "Publisher promotional artwork · © Xbox Game Studios with a Steam source link",
+      "termsChecked": "Steam capsule credited to Xbox Game Studios. No Xbox or Microsoft brand-permission grant for monetized third-party hosting is recorded. Attribution alone does not establish reuse permission.",
+      "permission": "not-established",
+      "proposal": "Use the site-owned editorial illustration, or a text-only Fable card that links to the official Steam page."
+    }
+  ],
+  "otherPublisherImages": "Other files in src/assets/products/ are publisher promotional images recorded in sources.json. Each entry still says no separate reuse license is claimed. They stay published only until you choose the text-only or site-owned replacement path above. Attribution alone does not verify reuse rights.",
+  "decisionNeeded": "Choose one path before AdSense resubmission: (A) keep publisher artwork and accept that monetized reuse permission is not documented, (B) switch Rockstar and Xbox images listed above to site-owned illustrations, or (C) use text-only cards that link out to the official pages."
+}
