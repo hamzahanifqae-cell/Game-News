@@ -15,12 +15,12 @@ const checkedLabel = new Date(saved.checkedAt).toLocaleDateString('en-US', { mon
 const posts = snapshot.items.filter((item) => item.game === app.name && isOfficialNewsUrl(item.url)).slice(0, 4);
 const postDate = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
-<steam-watch class="steam-watch" data-pagefind-ignore data-app-id={app.appId} data-game={app.name} data-store-url={app.storeUrl} data-recorded-soon={String(facts.comingSoon)} data-recorded-date={facts.releaseDate} data-recorded-platforms={facts.platforms.join(',')} data-recorded-free={String(facts.free)} data-recorded-label="8 November 2026">
+<steam-watch class="steam-watch" data-pagefind-ignore data-app-id={app.appId} data-game={app.name} data-store-url={app.storeUrl} data-recorded-soon={String(facts.comingSoon)} data-recorded-date={facts.releaseDate} data-recorded-platforms={facts.platforms.join(',')} data-recorded-free={String(facts.free)} data-recorded-label="18 November 2026">
   <p class="kicker">Live Steam check</p>
   <h2 id="steam-watch-heading">Store listing and official posts</h2>
   <p data-status role="status">Saved store check · {checkedLabel}. Checking Steam…</p>
   <p data-listing>{line}</p>
-  <p data-diff hidden>This store check differs from the 8 November 2026 article above. This line follows Steam. The article stays as written until it is rewritten.</p>
+  <p data-diff hidden>This store check differs from the 18 November 2026 article above. This line follows Steam. The article stays as written until it is rewritten.</p>
   <p><a href={app.storeUrl} target="_blank" rel="noopener noreferrer">Open the Steam page for {app.name}</a></p>
   <h3>Official posts</h3>
   <ul data-posts>

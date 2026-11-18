@@ -1,9 +1,9 @@
 {
-  "checked": "2026-11-13",
+  "checked": "2026-11-18",
   "retained": [
     {
       "file": "src/assets/editorial/digital-everyday.png",
-      "usedFor": ["Homepage social preview fallback", "News and review illustrations when no publisher cover is shown"],
+      "usedFor": ["Homepage social preview fallback", "News and review illustrations when no publisher cover is shown", "App profile fallbacks"],
       "source": "Illustration created for GameNews and stored in this repository.",
       "terms": "Site-owned illustration. It is not a publisher image, screenshot, or official key art. Shown only with alt text that describes it as an illustration.",
       "permission": "documented-site-owned"
@@ -41,45 +41,45 @@
     {
       "file": "src/assets/products/gta-vi-banner.jpg",
       "publisher": "Rockstar Games",
-      "usedOn": ["Homepage GTA spotlight", "/news/gta-vi-release-watchlist", "Homepage Open Graph image"],
+      "usedOn": [],
       "sourceUrl": "https://www.rockstargames.com/VI",
       "assetUrl": "https://www.rockstargames.com/VI/_next/static/media/poster_full.0az_iud2g3y4j.jpg",
-      "creditOnPage": "Official artwork © Rockstar Games with a link to rockstargames.com/VI",
-      "termsChecked": "Rockstar’s GTA VI media page at https://www.rockstargames.com/VI/media says “Download and share trailers, imagery, and more.” No written license for monetized third-party editorial hosting was found. Rockstar’s site copyright notice reserves rights. Attribution alone does not establish reuse permission for AdSense.",
+      "creditOnPage": "Not shown on public pages.",
+      "termsChecked": "Rockstar’s GTA VI media page says “Download and share trailers, imagery, and more.” No written license for monetized third-party editorial hosting was found. Attribution alone does not establish reuse permission for AdSense.",
       "permission": "not-established",
-      "proposal": "Replace the hosted banner with a text-only GTA VI spotlight that links to Rockstar, or host only a file downloaded from Rockstar’s media kit after you confirm that kit covers monetized editorial sites. Preferred safe default: text-only treatment plus the site-owned illustration for social preview."
+      "proposal": "Keep omitted from public pages until a press-kit license covering monetized editorial hosting is confirmed in writing."
     },
     {
       "file": "src/assets/products/gta-v-enhanced.jpg",
       "publisher": "Rockstar Games",
-      "usedOn": ["/apps/gta-v-enhanced", "Homepage popular-game cards", "/games"],
+      "usedOn": [],
       "sourceUrl": "https://store.steampowered.com/app/3240220/?l=english",
-      "creditOnPage": "Official publisher artwork · © Rockstar Games with a Steam source link",
-      "termsChecked": "Steam capsule used for identification. sources.json records no separate reuse license. Attribution alone does not establish monetized reuse permission.",
+      "creditOnPage": "Not shown on public pages.",
+      "termsChecked": "Steam capsule. sources.json records no separate reuse license.",
       "permission": "not-established",
-      "proposal": "Use the site-owned editorial illustration, or a text-only card that links to the official Steam page."
+      "proposal": "Keep omitted; public profiles use site-owned editorial illustration."
     },
     {
       "file": "src/assets/products/red-dead-redemption-2.jpg",
       "publisher": "Rockstar Games",
-      "usedOn": ["/apps/red-dead-redemption-2", "Homepage popular-game cards", "/games"],
+      "usedOn": [],
       "sourceUrl": "https://store.steampowered.com/app/1174180/?l=english",
-      "creditOnPage": "Official publisher artwork · © Rockstar Games with a Steam source link",
+      "creditOnPage": "Not shown on public pages.",
       "termsChecked": "Steam capsule. No separate reuse license recorded.",
       "permission": "not-established",
-      "proposal": "Use the site-owned editorial illustration, or a text-only card that links to Steam."
+      "proposal": "Keep omitted; public profiles use site-owned editorial illustration."
     },
     {
       "file": "src/assets/products/fable.jpg",
       "publisher": "Xbox Game Studios",
-      "usedOn": ["/news/fable-watchlist", "Homepage feature cards when selected"],
+      "usedOn": [],
       "sourceUrl": "https://store.steampowered.com/app/2769570/?l=english",
-      "creditOnPage": "Publisher promotional artwork · © Xbox Game Studios with a Steam source link",
-      "termsChecked": "Steam capsule credited to Xbox Game Studios. No Xbox or Microsoft brand-permission grant for monetized third-party hosting is recorded. Attribution alone does not establish reuse permission.",
+      "creditOnPage": "Not shown on public pages.",
+      "termsChecked": "Steam capsule. No Xbox or Microsoft brand-permission grant for monetized third-party hosting is recorded.",
       "permission": "not-established",
-      "proposal": "Use the site-owned editorial illustration, or a text-only Fable card that links to the official Steam page."
+      "proposal": "Keep omitted; public pages use site-owned editorial illustration."
     }
   ],
-  "otherPublisherImages": "Other files in src/assets/products/ are publisher promotional images recorded in sources.json. Each entry still says no separate reuse license is claimed. They stay published only until you choose the text-only or site-owned replacement path above. Attribution alone does not verify reuse rights.",
-  "publicationDecision": "Publisher artwork without documented reuse permission is omitted from the website and social previews. GameNews uses original editorial illustrations where a fallback is needed."
+  "otherPublisherImages": "Files remaining under src/assets/products/ are archived source copies recorded in sources.json. They are not imported by live pages. published is false for every entry. Attribution alone does not verify reuse rights.",
+  "publicationDecision": "Publisher artwork without documented reuse permission is omitted from the website and social previews. Live pages use only the site-owned illustrations listed under retained."
 }

@@ -1,11 +1,13 @@
 # GameNews editorial artwork
 
-Three original AI-generated illustrations created for GameNews on 2026-10-15:
+Three original illustrations created for GameNews and stored in this folder:
 
-- digital-everyday.png — homepage hero and review fallback
-- practical-guides.png — tutorials and guide navigation
-- everyday-fixes.png — troubleshooting and help navigation
+- `digital-everyday.png` — social preview fallback, news/review/app profile fallbacks
+- `practical-guides.png` — tutorials and guide navigation
+- `everyday-fixes.png` — troubleshooting and help navigation
 
-These are illustrative lifestyle scenes, not photographs of tested products, real app screenshots, or evidence for review claims. CMS cover images take precedence. Replace fallback artwork with relevant authorized screenshots or editorial imagery when publishing real app-specific content.
+These are illustrative lifestyle scenes, not photographs of tested products, real app screenshots, publisher key art, or evidence for review claims. See `rights.json` for the permission inventory.
 
-Astro generates local WebP assets for delivery; the original PNGs are source files only. Homepage hero loads eagerly, navigation and card images load lazily. Do not remove these files while they are imported by src/lib/editorial-images.ts.
+Publisher promotional files under `src/assets/products/` are archived audit copies only. They are not imported by live pages while reuse permission remains unconfirmed.
+
+Astro generates local WebP assets for delivery; the original PNGs are source files only. Do not remove these files while they are imported by `src/lib/editorial-images.ts`.

@@ -147,7 +147,7 @@ export default defineConfig({
           }
         }
         if (path.startsWith('/categories')) return false;
-        if (path === '/news') return false;
+        if (path === '/news' || path === '/updates') return false;
         if (!privacyPolicyReady && path === '/privacy') return false;
         if (emptyListingPaths.includes(path)) return false;
         return true;

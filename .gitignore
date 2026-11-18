@@ -1,5 +1,6 @@
 # build output
 dist/
+gamenews-dist.zip
 # generated types
 .astro/
 

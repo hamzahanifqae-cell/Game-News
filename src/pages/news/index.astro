@@ -1,5 +1,6 @@
 ---
-// Served by the Node app so /news is an HTTP 301, not a 200 meta-refresh file.
+// Editorial articles live under /news/[slug]. The /news listing redirects to the
+// watchlist hub rather than the Steam-headline utility at /updates.
 export const prerender = false;
-return Astro.redirect('/updates', 301);
+return Astro.redirect('/blog', 301);
 ---

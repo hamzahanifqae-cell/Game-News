@@ -6,12 +6,12 @@ import { getPublicCollection, sortByPublishDateDesc } from '../../lib/content';
 
 const stories = sortByPublishDateDesc(await getPublicCollection('articles')).filter((article) => article.data.type === 'news');
 ---
-<BaseLayout title="Latest PC Game Updates & Official Announcements" description="Game update news from official Steam announcements, grouped by game with the publisher’s date. A patch version is shown only when the title already includes it." canonicalPath="/updates" adPageEligible={false} pagefindIndex={false}>
+<BaseLayout title="Official Steam Headlines (External Links)" description="Utility index of official Steam announcement headlines for selected PC games. Each line opens the publisher’s post. Not an editorial news feed." canonicalPath="/updates" noindex adPageEligible={false} pagefindIndex={false}>
 <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-<Breadcrumbs items={[{ label: 'Game updates' }]} />
-<p class="editorial-kicker text-brand-700">The news desk</p>
-<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Official PC game updates.</h1>
-<p class="mt-4 max-w-2xl leading-7 text-ink-muted">This page is game update news from official Steam announcements for Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. Each line links to the publisher’s post. GameNews does not copy that post. Release-date articles stay on the <a class="underline text-brand-700" href="/blog">upcoming PC games watchlist</a>.</p>
+<Breadcrumbs items={[{ label: 'Official Steam headlines' }]} />
+<p class="editorial-kicker text-brand-700">External headlines</p>
+<h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Official Steam headlines.</h1>
+<p class="mt-4 max-w-2xl leading-7 text-ink-muted">This is a utility page of automatically refreshed Steam announcement headlines for Fable, Phantom Blade Zero, The Wolf Among Us 2, Counter-Strike 2, Dota 2, and PUBG. Each line shows the game, the publisher’s date, and a link to the official post. GameNews does not rewrite or copy that post. For original GameNews features, use the <a class="underline text-brand-700" href="/blog">upcoming PC games watchlist</a>.</p>
 <nav class="mt-8" aria-label="Updates by game">
   <h2 class="text-lg font-semibold text-ink">Scan by game</h2>
   <ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-brand-700">

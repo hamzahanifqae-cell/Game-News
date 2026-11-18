@@ -10,7 +10,7 @@ const hasContent = await hasPublicArticlesOfType('tutorial');
   title={hasContent ? 'PC Game Guides & Buying Checklists' : 'No Published PC Game Guides Yet'}
   description={hasContent
     ? 'Practical PC game guides: what to check before you install or buy, with official store links.'
-    : 'GameNews has not published install or beginner guides yet. The Counter-Strike 2 and Dota 2 pages link to the official Steam downloads, and the updates page lists publisher announcements.'}
+    : 'GameNews has not published install or beginner guides yet. The Counter-Strike 2 and Dota 2 pages link to the official Steam downloads.'}
   canonicalPath="/tutorials"
   noindex={!hasContent}
   pagefindIndex={hasContent}
@@ -29,7 +29,7 @@ const hasContent = await hasPublicArticlesOfType('tutorial');
       <ul class="mt-6 space-y-4 text-[17px] leading-7">
         <li><a class="font-semibold text-brand-700 underline" href="/apps/counter-strike-2">Counter-Strike 2 official Steam download</a> — the store page for the free game, before you install it.</li>
         <li><a class="font-semibold text-brand-700 underline" href="/apps/dota-2">Dota 2 official Steam download</a> — the store page for the free game, before a first match.</li>
-        <li><a class="font-semibold text-brand-700 underline" href="/updates">Official PC game updates by game</a> — publisher announcements, with a patch number only when that number is in the title.</li>
+        <li><a class="font-semibold text-brand-700 underline" href="/blog">Upcoming PC games watchlist</a> — dated editorial features for games that are not yet released.</li>
       </ul>
     </section>
   )}

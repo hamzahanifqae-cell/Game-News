@@ -1,7 +1,6 @@
 ---
 import GtaSpotlight from '../components/GtaSpotlight.astro';
 import AppCard from '../components/AppCard.astro';
-import LiveNews from '../components/LiveNews.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import AdSlot from '../components/AdSlot.astro';
@@ -33,7 +32,7 @@ function claimImage(article: (typeof articles)[number] | undefined) {
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
 const homeShare = await shareImage(editorialImages.news.src);
 const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
-const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar’s page, checked 13 November 2026, still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S, and pre-loading is available now.';
+const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar’s page, checked 18 November 2026, still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S, and pre-loading is available now.';
 const site = Astro.site;
 const homeUrl = pageUrl(site, '/');
 const organizationId = site ? new URL('/#organization', site).toString() : undefined;
@@ -72,13 +71,13 @@ const homeJsonLd = site && homeUrl && organizationId && websiteId ? {
 } : undefined;
 const topics = [
   {href:'/games', title:'Find your next game', copy:'Explore the shortlist. Check the details. Pick your next adventure.', icon:'game', tone:'violet'},
-  {href:'/blog', title:'See what’s coming', copy:'Upcoming games, official reveals, and the questions worth asking.', icon:'guide', tone:'orange'},
-  {href:'/updates', title:'Catch the latest', copy:'Fresh publisher announcements, with dates and original sources.', icon:'fix', tone:'teal'},
+  {href:'/blog', title:'See what’s coming', copy:'Upcoming games, release dates, and the questions worth asking.', icon:'guide', tone:'orange'},
+  {href:'/news/gta-vi-release-watchlist', title:'Read the GTA VI brief', copy:'Dated Rockstar sources for the console launch window and pre-load rules.', icon:'fix', tone:'teal'},
 ];
 ---
 <BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={homeShare?.src} ogImageAlt={editorialImages.news.alt} ogImageWidth={homeShare?.width} ogImageHeight={homeShare?.height} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
 <div class="magazine mx-auto max-w-6xl px-4 sm:px-6">
-  <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/news/gta-vi-release-watchlist">GTA VI</a><a href="/games">PC gaming</a><a href="/apps">Game profiles</a><a href="/blog">Upcoming games</a><a href="/updates">Game updates</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
+  <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/news/gta-vi-release-watchlist">GTA VI</a><a href="/games">PC gaming</a><a href="/apps">Game profiles</a><a href="/blog">Upcoming games</a><a href="/about">How we write</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
   <GtaSpotlight />
   <section class="popular-downloads" aria-label="Popular games"><div class="section-top"><div><p class="section-eyebrow">READY TO PLAY</p><h2>Popular games. Official downloads.</h2></div><a href="/games" class="text-link">All popular games ↗</a></div><div class="grid gap-5 md:grid-cols-3">{games.map(game => <AppCard app={game} showImage={Boolean(game.data.coverImage)} />)}</div>
   {otherGames.length > 0 && <nav class="crawl-links" aria-label="More popular PC games">{otherGames.map(game => <a href={`/apps/${game.id}`}>{game.data.name}</a>)}</nav>}
@@ -96,13 +95,12 @@ const topics = [
     </div>
   </section>
   {moreStories.length > 0 && <nav class="crawl-links" aria-label="More upcoming game articles">{moreStories.map(article => <a href={href(article)}>{article.data.seoTitle || article.data.title}</a>)}</nav>}
-  <div class="reading-note"><span class="reading-note-icon" aria-hidden="true">✦</span><strong>A little context goes a long way.</strong><p>Original features. Official announcements. Clearly dated sources.</p><a href="/about">How we write ↗</a></div>
-  <LiveNews limit={6} />
+  <div class="reading-note"><span class="reading-note-icon" aria-hidden="true">✦</span><strong>A little context goes a long way.</strong><p>Original features. Clearly dated sources. Links to official store pages.</p><a href="/about">How we write ↗</a></div>
   <section class="discovery-section"><div class="section-top"><div><p class="section-eyebrow">PICK A DIRECTION</p><h2>What brings you here?</h2></div><span class="section-aside">A good place to start.</span></div><div class="discovery-grid">{topics.map((topic, index) => <a href={topic.href} class={`discovery-card ${topic.tone}`}><span class="discovery-icon" aria-hidden="true">{topic.icon === 'game' ? <svg viewBox="0 0 32 32" fill="none"><path d="M10 11h12c5 0 7 13 3 14-2 1-4-3-5-3h-8c-1 0-3 4-5 3-4-1-2-14 3-14Z" stroke="currentColor" stroke-width="1.8"/><path d="M9 16h6m-3-3v6m9-4h.1m3 3h.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg> : topic.icon === 'guide' ? <svg viewBox="0 0 32 32" fill="none"><path d="M7 5h18v23H7zM12 11h8m-8 5h8m-8 5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> : <svg viewBox="0 0 32 32" fill="none"><path d="m19 4-10 14h7l-2 10 10-15h-7l2-9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>}</span><span class="discovery-number">0{index+1}</span><h3>{topic.title}</h3><p>{topic.copy}</p><span class="discovery-arrow" aria-hidden="true">↗</span></a>)}</div></section>
   <AdSlot placement="homeMid" format="banner" pageEligible={articles.length > 0} />
   {appStory && <section class:list={['app-spotlight', { 'text-only': !appImage }]}>{appImage && <div class="app-visual"><Image src={appStory.data.coverImage!} alt={appStory.data.coverImageAlt} width={800} height={600} format="webp" loading="lazy" class="spotlight-image" /><span class="image-caption">{appStory.data.coverImageCredit}</span></div>}<div class="app-copy"><span class="feature-label soft">A LITTLE LESS FRUSTRATION</span><h2>{appStory.data.title}</h2><p>{appStory.data.description}</p><a href={href(appStory)} class="magazine-button">Get the practical steps <span aria-hidden="true">↗</span></a><span class="research-note">Research-based guidance. No invented test results.</span></div></section>}
 
-  <section class="journal-invitation"><div><p class="section-eyebrow">THERE’S MORE TO EXPLORE</p><h2>Follow your curiosity.</h2><p>Explore upcoming games and follow the latest publisher announcements.</p></div><a href="/blog" class="magazine-button">Explore the watchlist ↗</a></section>
+  <section class="journal-invitation"><div><p class="section-eyebrow">THERE’S MORE TO EXPLORE</p><h2>Follow your curiosity.</h2><p>Read dated release watchlists and open official store pages for games you can install now.</p></div><a href="/blog" class="magazine-button">Explore the watchlist ↗</a></section>
 </div>
 </BaseLayout>
 <style>

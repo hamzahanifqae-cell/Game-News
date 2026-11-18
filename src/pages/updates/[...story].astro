@@ -10,10 +10,10 @@ const retired = /^\d{1,10}\/\d{1,12}-\d{1,24}$/.test(path) && newsGames.some((ga
 Astro.response.status = retired ? 410 : 404;
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---
-<BaseLayout title={retired ? 'Update brief removed' : 'Update not found'} description="Automatic Steam update briefs are not published. Official announcements are linked from the updates page." canonicalPath="/updates" noindex pagefindIndex={false} adPageEligible={false}>
+<BaseLayout title={retired ? 'Update brief removed' : 'Update not found'} description="Automatic Steam update briefs are not published. Open the official Steam post or the upcoming games watchlist instead." canonicalPath="/updates" noindex pagefindIndex={false} adPageEligible={false}>
   <article class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
     <h1 class="text-3xl font-bold">{retired ? 'This update brief is no longer published.' : 'Update not found.'}</h1>
-    <p class="mt-4 leading-7 text-ink-muted">{retired ? 'GameNews does not republish Steam announcements. The updates page lists the headline, date, and a link to the official post.' : 'Check the address or browse the current game updates.'}</p>
-    <p class="mt-6"><a class="font-semibold text-brand-700 underline" href="/updates">Official PC game updates by game</a></p>
+    <p class="mt-4 leading-7 text-ink-muted">{retired ? 'GameNews does not republish Steam announcements into their own pages. Use the publisher’s original post, or read a dated GameNews feature on the upcoming games watchlist.' : 'Check the address or open the upcoming games watchlist.'}</p>
+    <p class="mt-6"><a class="font-semibold text-brand-700 underline" href="/blog">Upcoming PC games watchlist</a></p>
   </article>
 </BaseLayout>

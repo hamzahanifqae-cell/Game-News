@@ -6,11 +6,11 @@ const currentPath = Astro.url.pathname;
 const appSlug = currentPath.startsWith('/apps/') ? currentPath.split('/')[2] : undefined;
 const currentApp = appSlug ? await getPublicEntry('apps', appSlug) : undefined;
 const gamePage = currentPath === '/games' || currentPath.startsWith('/games/') || currentApp?.data.category === 'games';
-const journalPage = ['/updates', '/news', '/blog', '/reviews', '/tutorials', '/troubleshooting', '/categories'].some(path => currentPath === path || currentPath.startsWith(path + '/'));
+const journalPage = ['/news', '/blog', '/reviews', '/tutorials', '/troubleshooting', '/categories'].some(path => currentPath === path || currentPath.startsWith(path + '/'));
+// /updates is a utility Steam-headline index (noindex). Keep it off primary nav.
 const navLinks = [
   { href: '/games', label: 'Popular Games', description: 'Games with official store downloads', active: gamePage },
-  { href: '/blog', label: 'Upcoming Games', description: 'Games on the horizon & original features', active: journalPage && !currentPath.startsWith('/updates') },
-  { href: '/updates', label: 'Game Updates', description: 'Official publisher announcements', active: currentPath.startsWith('/updates') },
+  { href: '/blog', label: 'Upcoming Games', description: 'Games on the horizon & original features', active: journalPage },
 ];
 ---
 <header class="site-header sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-md" data-pagefind-ignore>
