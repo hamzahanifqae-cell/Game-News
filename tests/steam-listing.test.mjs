@@ -66,12 +66,12 @@ test('unknown apps are not fetched and a live check replaces the saved record fo
   assert.equal(calls, 4);
 });
 
-test('a store outage keeps the saved 8 November listing and saved posts', async () => {
+test('a store outage keeps the saved 18 November listing and saved posts', async () => {
   const service = createSteamWatchService(async () => { throw new Error('offline'); }, () => now);
   const watch = await service(app.appId);
   assert.equal(watch.listingStale, true);
   assert.equal(watch.postsStale, true);
-  assert.equal(watch.checkedAt, '2026-11-08T00:00:00.000Z');
+  assert.equal(watch.checkedAt, '2026-11-18T00:00:00.000Z');
   assert.equal(watch.releaseDate, '28 Oct, 2026');
   assert.equal(watch.posts.length > 0, true);
   assert.equal(watch.storeUrl, app.storeUrl);

@@ -32,7 +32,7 @@ function claimImage(article: (typeof articles)[number] | undefined) {
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
 const homeShare = await shareImage(editorialImages.news.src);
 const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
-const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar’s page, checked 18 November 2026, still lists November 19, 2026 for PlayStation 5 and Xbox Series X|S, and pre-loading is available now.';
+const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar says GTA VI has been available on PlayStation 5 and Xbox Series X|S since November 19, 2026. Checked 23 November 2026.';
 const site = Astro.site;
 const homeUrl = pageUrl(site, '/');
 const organizationId = site ? new URL('/#organization', site).toString() : undefined;
@@ -72,7 +72,7 @@ const homeJsonLd = site && homeUrl && organizationId && websiteId ? {
 const topics = [
   {href:'/games', title:'Find your next game', copy:'Explore the shortlist. Check the details. Pick your next adventure.', icon:'game', tone:'violet'},
   {href:'/blog', title:'See what’s coming', copy:'Upcoming games, release dates, and the questions worth asking.', icon:'guide', tone:'orange'},
-  {href:'/news/gta-vi-release-watchlist', title:'Read the GTA VI brief', copy:'Dated Rockstar sources for the console launch window and pre-load rules.', icon:'fix', tone:'teal'},
+  {href:'/news/gta-vi-release-watchlist', title:'Read the GTA VI brief', copy:'Dated Rockstar sources for the November 19 console launch and the platforms listed.', icon:'fix', tone:'teal'},
 ];
 ---
 <BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={homeShare?.src} ogImageAlt={editorialImages.news.alt} ogImageWidth={homeShare?.width} ogImageHeight={homeShare?.height} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>

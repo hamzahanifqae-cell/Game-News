@@ -28,7 +28,22 @@ const hasEmail = email.includes('@');
       ) : (
         <p>A public contact email has not been published yet. This page does not offer a form, and it will not show a success message for a message the site cannot deliver.</p>
       )}
-      <p>Read <a href="/about">how GameNews is written</a> or the <a href="/privacy">privacy policy</a>.</p>
+      {hasEmail && (
+        <>
+          <h2>What to write about</h2>
+          <ul>
+            <li><strong>Corrections.</strong> A release date, platform, edition, or store link that no longer matches the official source. Include the page URL and, if you can, the official page that shows the current information.</li>
+            <li><strong>Broken or wrong links.</strong> An official Steam, Rockstar, or publisher link on a {settings.siteName} page that goes to the wrong place or no longer loads.</li>
+            <li><strong>Images and rights.</strong> A rights holder asking about a cover image or other artwork shown on the site.</li>
+            <li><strong>Privacy.</strong> Questions about the cookies, consent message, or analytics described in the <a href="/privacy">privacy policy</a>.</li>
+          </ul>
+          <h2>What this address cannot help with</h2>
+          <p>
+            {settings.siteName} is not the developer, publisher, or store for any game it covers. It cannot help with purchases, refunds, accounts, installs, or game support. Contact the store or publisher for those. Each profile and article links to the official source.
+          </p>
+        </>
+      )}
+      <p>Read <a href="/about">how GameNews is written</a>, the <a href="/terms">terms of use</a>, or the <a href="/privacy">privacy policy</a>.</p>
     </div>
   </article>
 </BaseLayout>
