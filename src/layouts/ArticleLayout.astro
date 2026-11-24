@@ -16,8 +16,10 @@ const typeToPath = {
   troubleshooting: 'troubleshooting',
   news: 'news',
 } as const;
-const ownedPreview = editorialImages[article.data.type];
-const image = await shareImage(article.data.coverImage ?? ownedPreview.src);
+// The generic desk illustration is not game artwork, so news and review pages get no share image
+// unless they have their own cover. Tutorial and troubleshooting keep their topic illustration.
+const topicPreview = article.data.type === 'tutorial' || article.data.type === 'troubleshooting' ? editorialImages[article.data.type] : undefined;
+const image = await shareImage(article.data.coverImage ?? topicPreview?.src);
 ---
 
 <BaseLayout
@@ -26,7 +28,7 @@ const image = await shareImage(article.data.coverImage ?? ownedPreview.src);
   canonicalPath={`/${typeToPath[article.data.type]}/${article.id}`}
   ogType="article"
   ogImage={image?.src}
-  ogImageAlt={article.data.coverImage ? article.data.coverImageAlt : ownedPreview.alt}
+  ogImageAlt={article.data.coverImage ? article.data.coverImageAlt : topicPreview?.alt}
   ogImageWidth={image?.width}
   ogImageHeight={image?.height}
   publishedTime={article.data.publishDate.toISOString()}

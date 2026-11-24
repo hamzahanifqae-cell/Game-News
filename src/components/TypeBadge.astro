@@ -1,10 +1,12 @@
 ---
 interface Props {
   type: 'review' | 'tutorial' | 'troubleshooting' | 'news';
+  /** News about a game that is already out gets a neutral label instead of "Upcoming". */
+  released?: boolean;
   class?: string;
 }
 
-const { type, class: className = '' } = Astro.props;
+const { type, released = false, class: className = '' } = Astro.props;
 
 const labels: Record<Props['type'], string> = {
   news: 'Upcoming',
@@ -22,5 +24,5 @@ const styles: Record<Props['type'], string> = {
 ---
 
 <span class={`inline-flex items-center text-[12px] uppercase tracking-[.13em] font-semibold ${styles[type]} ${className}`}>
-  {labels[type]}
+  {type === 'news' && released ? 'Game news' : labels[type]}
 </span>

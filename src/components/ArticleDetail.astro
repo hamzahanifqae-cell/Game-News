@@ -44,7 +44,7 @@ const publisherUrl = Astro.site ? new URL('/', Astro.site).toString() : undefine
 const authorUrl = author?.data.kind === 'Organization' ? pageUrl(Astro.site, '/about') : undefined;
 const imageUrl = shareImage ? pageUrl(Astro.site, shareImage) : undefined;
 const section = data.type === 'news'
-  ? { label: 'Upcoming games', href: '/blog' }
+  ? { label: data.released ? 'Game news' : 'Upcoming games', href: '/blog' }
   : { label: typeToLabel[data.type], href: `/${typeToPath[data.type]}` };
 const categoryHref = category?.id === 'games' ? '/blog' : category ? `/categories/${category.id}` : undefined;
 
@@ -80,7 +80,7 @@ const structuredData = {
 
   <article>
     <div class="flex items-center gap-2">
-      <TypeBadge type={data.type} />
+      <TypeBadge type={data.type} released={data.released} />
       {category && categoryHref && (
         <a href={categoryHref} class="text-xs font-medium text-ink-muted hover:text-brand-700">
           {category.data.name}
@@ -107,11 +107,13 @@ const structuredData = {
       {formattedUpdated && <span>· Updated {formattedUpdated}</span>}
     </div>
 
+    {(data.coverImage || data.type === 'tutorial' || data.type === 'troubleshooting') && (
     <figure class="mt-7">
       <Image src={data.coverImage || editorialImages[data.type].src} alt={data.coverImage ? data.coverImageAlt : editorialImages[data.type].alt} width={1100} height={680} widths={[480, 768, 1100]} sizes="(min-width: 768px) 720px, 100vw" format="webp" class="aspect-[16/10] w-full rounded-sm bg-surface object-contain" />
       {data.coverImageCredit && <figcaption class="mt-2 text-xs leading-5 text-ink-muted">{data.coverImageCredit}{data.coverImageSource && <> · <a href={data.coverImageSource} target="_blank" rel="noopener noreferrer" class="underline">Image source</a></>}</figcaption>}
       {!data.coverImage && <figcaption class="mt-2 text-xs text-ink-muted">Illustrative editorial artwork · not an app screenshot</figcaption>}
     </figure>
+    )}
 
     {relatedApp && (
       <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-y border-line py-5">

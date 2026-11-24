@@ -1,21 +1,27 @@
 ---
 import GtaSpotlight from '../components/GtaSpotlight.astro';
 import AppCard from '../components/AppCard.astro';
+import ArticleCard from '../components/ArticleCard.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import AdSlot from '../components/AdSlot.astro';
 import { getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { editorialImages } from '../lib/editorial-images';
 import { formatEditorialDate, pageUrl } from '../lib/seo';
-import { shareImage } from '../lib/share-image';
 const settings = await getSiteSettings();
 const homepageStories = ['fable-watchlist', 'phantom-blade-zero-watchlist', 'the-wolf-among-us-2-watchlist'];
-const articles = sortByPublishDateDesc(await getPublicCollection('articles')).filter(article => homepageStories.includes(article.id)).sort((a,b) => homepageStories.indexOf(a.id) - homepageStories.indexOf(b.id));
+const publishedStories = sortByPublishDateDesc(await getPublicCollection('articles'));
+// The upcoming section only holds games that have not launched. Chosen stories come first; open
+// slots are filled with other unreleased news so the layout keeps its shape.
+const pickedUpcoming = publishedStories.filter(article => homepageStories.includes(article.id) && !article.data.released).sort((a,b) => homepageStories.indexOf(a.id) - homepageStories.indexOf(b.id));
+const otherUpcoming = publishedStories.filter(article => article.data.type === 'news' && !article.data.released && !homepageStories.includes(article.id));
+const articles = [...pickedUpcoming, ...otherUpcoming].slice(0, 3);
+const releasedStories = publishedStories.filter(article => article.data.released);
 const featuredGames = ['gta-v-enhanced', 'cyberpunk-2077', 'red-dead-redemption-2'];
 const allGames = (await getPublicCollection('apps')).filter(app => app.data.category === 'games');
 const games = allGames.filter(app => featuredGames.includes(app.id)).sort((a, b) => featuredGames.indexOf(a.id) - featuredGames.indexOf(b.id));
 const otherGames = allGames.filter(app => !featuredGames.includes(app.id)).sort((a, b) => a.data.name.localeCompare(b.data.name));
-const moreStories = sortByPublishDateDesc(await getPublicCollection('articles')).filter(article => !homepageStories.includes(article.id));
+const moreStories = publishedStories.filter(article => !articles.includes(article) && !article.data.released);
 const lead = articles[0];
 const rest = articles.filter(a => a.id !== lead?.id);
 const secondary = rest[0];
@@ -30,7 +36,6 @@ function claimImage(article: (typeof articles)[number] | undefined) {
   seen.add(article.data.coverImage.src); return true;
 }
 const leadImage = claimImage(lead), secondaryImage = claimImage(secondary), thirdImage = claimImage(third), appImage = claimImage(appStory);
-const homeShare = await shareImage(editorialImages.news.src);
 const homeTitle = 'GameNews: GTA VI News & Upcoming PC Games';
 const homeDescription = 'GameNews covers the GTA VI release date, upcoming PC games, and official Steam downloads. Rockstar says GTA VI has been available on PlayStation 5 and Xbox Series X|S since November 19, 2026. Checked 23 November 2026.';
 const site = Astro.site;
@@ -75,7 +80,7 @@ const topics = [
   {href:'/news/gta-vi-release-watchlist', title:'Read the GTA VI brief', copy:'Dated Rockstar sources for the November 19 console launch and the platforms listed.', icon:'fix', tone:'teal'},
 ];
 ---
-<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" ogImage={homeShare?.src} ogImageAlt={editorialImages.news.alt} ogImageWidth={homeShare?.width} ogImageHeight={homeShare?.height} jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
+<BaseLayout title={homeTitle} description={homeDescription} canonicalPath="/" jsonLd={homeJsonLd} adPageEligible={articles.length > 0}>
 <div class="magazine mx-auto max-w-6xl px-4 sm:px-6">
   <nav class="topic-strip" aria-label="Explore topics"><span class="explore-label">EXPLORE</span><a href="/news/gta-vi-release-watchlist">GTA VI</a><a href="/games">PC gaming</a><a href="/apps">Game profiles</a><a href="/blog">Upcoming games</a><a href="/about">How we write</a><a href="/blog" class="all-topics">All stories <span aria-hidden="true">↗</span></a></nav>
   <GtaSpotlight />
@@ -86,15 +91,16 @@ const topics = [
   <section class="feature-grid" aria-label="Featured stories">
     {lead ? <article class:list={['feature-lead', { 'no-art': !leadImage }]}>
       {leadImage && <Image src={lead.data.coverImage!} alt={lead.data.coverImageAlt} width={1100} height={760} widths={[480,768,1100]} sizes="(min-width: 900px) 700px, 100vw" format="webp" quality={85} loading="lazy" class="feature-background" />}
-      <div class="lead-content"><span class="feature-label lime">ON THE WATCHLIST</span><p class="feature-category">UPCOMING / EDITORIAL</p><h2><a href={href(lead)}>{lead.data.title}</a></h2><p class="lead-description">{lead.data.description}</p><div class="feature-bottom"><span>Editorial feature · {formatEditorialDate(lead.data.publishDate, 'short')}</span><a href={href(lead)} class="round-link" aria-label={`Read ${lead.data.title}`}>↗</a></div></div>
+      <div class="lead-content"><span class="feature-label lime">{lead.data.released ? 'NOW RELEASED' : 'ON THE WATCHLIST'}</span><p class="feature-category">{lead.data.released ? 'GAME NEWS / EDITORIAL' : 'UPCOMING / EDITORIAL'}</p><h2><a href={href(lead)}>{lead.data.title}</a></h2><p class="lead-description">{lead.data.description}</p><div class="feature-bottom"><span>Editorial feature · {formatEditorialDate(lead.data.publishDate, 'short')}</span><a href={href(lead)} class="round-link" aria-label={`Read ${lead.data.title}`}>↗</a></div></div>
       {lead.data.coverImageSource && <a href={lead.data.coverImageSource} target="_blank" rel="noopener noreferrer" class="feature-credit">Publisher image · source ↗</a>}
     </article> : <article class="feature-lead"><Image src={editorialImages.review.src} alt={editorialImages.review.alt} width={1100} height={760} class="feature-background" /><div class="lead-content"><span class="feature-label lime">COMING SOON</span><h2>Something good is taking shape.</h2><p>Our first original guides are on their way.</p><a href="/about" class="magazine-button">Meet GameNews ↗</a></div></article>}
     <div class="feature-side">
-      {secondary && <article class:list={['side-feature', { 'no-art': !secondaryImage }]}>{secondaryImage && <Image src={secondary.data.coverImage!} alt={secondary.data.coverImageAlt} width={700} height={430} format="webp" class="feature-background" />}<div class="side-content"><span class="feature-label">NEXT ON THE RADAR</span><h2><a href={href(secondary)}>{secondary.data.title}</a></h2><a class="text-link" href={href(secondary)}>Read the feature <span aria-hidden="true">↗</span></a></div></article>}
-      {third && <article class:list={['side-comparison', { 'text-only': !thirdImage }]}>{thirdImage && <Image src={third.data.coverImage!} alt={third.data.coverImageAlt} width={400} height={400} format="webp" class="comparison-image" />}<div><span class="section-eyebrow">COMING INTO FOCUS</span><h2><a href={href(third)}>{third.data.title}</a></h2><a href={href(third)} class="text-link">Explore the story ↗</a></div></article>}
+      {secondary && <article class:list={['side-feature', { 'no-art': !secondaryImage }]}>{secondaryImage && <Image src={secondary.data.coverImage!} alt={secondary.data.coverImageAlt} width={700} height={430} format="webp" class="feature-background" />}<div class="side-content"><span class="feature-label">{secondary.data.released ? 'NOW RELEASED' : 'NEXT ON THE RADAR'}</span><h2><a href={href(secondary)}>{secondary.data.title}</a></h2><a class="text-link" href={href(secondary)}>Read the feature <span aria-hidden="true">↗</span></a></div></article>}
+      {third && <article class:list={['side-comparison', { 'text-only': !thirdImage }]}>{thirdImage && <Image src={third.data.coverImage!} alt={third.data.coverImageAlt} width={400} height={400} format="webp" class="comparison-image" />}<div><span class="section-eyebrow">{third.data.released ? 'NOW RELEASED' : 'COMING INTO FOCUS'}</span><h2><a href={href(third)}>{third.data.title}</a></h2><a href={href(third)} class="text-link">Explore the story ↗</a></div></article>}
     </div>
   </section>
   {moreStories.length > 0 && <nav class="crawl-links" aria-label="More upcoming game articles">{moreStories.map(article => <a href={href(article)}>{article.data.seoTitle || article.data.title}</a>)}</nav>}
+  {releasedStories.length > 0 && <section class="released-stories" aria-labelledby="released-title"><div class="section-top"><div><p class="section-eyebrow">OUT NOW</p><h2 id="released-title">Recently released games.</h2></div><a href="/blog" class="text-link">All stories ↗</a></div><div class="grid gap-8 sm:grid-cols-2">{releasedStories.map(article => <ArticleCard article={article} />)}</div></section>}
   <div class="reading-note"><span class="reading-note-icon" aria-hidden="true">✦</span><strong>A little context goes a long way.</strong><p>Original features. Clearly dated sources. Links to official store pages.</p><a href="/about">How we write ↗</a></div>
   <section class="discovery-section"><div class="section-top"><div><p class="section-eyebrow">PICK A DIRECTION</p><h2>What brings you here?</h2></div><span class="section-aside">A good place to start.</span></div><div class="discovery-grid">{topics.map((topic, index) => <a href={topic.href} class={`discovery-card ${topic.tone}`}><span class="discovery-icon" aria-hidden="true">{topic.icon === 'game' ? <svg viewBox="0 0 32 32" fill="none"><path d="M10 11h12c5 0 7 13 3 14-2 1-4-3-5-3h-8c-1 0-3 4-5 3-4-1-2-14 3-14Z" stroke="currentColor" stroke-width="1.8"/><path d="M9 16h6m-3-3v6m9-4h.1m3 3h.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg> : topic.icon === 'guide' ? <svg viewBox="0 0 32 32" fill="none"><path d="M7 5h18v23H7zM12 11h8m-8 5h8m-8 5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> : <svg viewBox="0 0 32 32" fill="none"><path d="m19 4-10 14h7l-2 10 10-15h-7l2-9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>}</span><span class="discovery-number">0{index+1}</span><h3>{topic.title}</h3><p>{topic.copy}</p><span class="discovery-arrow" aria-hidden="true">↗</span></a>)}</div></section>
   <AdSlot placement="homeMid" format="banner" pageEligible={articles.length > 0} />
@@ -104,6 +110,7 @@ const topics = [
 </div>
 </BaseLayout>
 <style>
+.released-stories { margin-top:48px; }
 .magazine { padding-bottom: 12px; }
 .topic-strip { display:flex; align-items:center; gap:24px; padding:18px 0; border-bottom:1px solid var(--color-line); font-size:16px; font-weight:500; color:var(--color-ink-muted); flex-wrap:wrap; line-height:1.6; }
 .explore-label { color:var(--color-brand-600); font-size:13px; font-weight:700; letter-spacing:.15em; }

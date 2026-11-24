@@ -319,6 +319,10 @@ export default config({
           label: 'Sample content (always excluded from production build)',
           defaultValue: false,
         }),
+        released: fields.checkbox({
+          label: 'Game already released (news label shows “Game news” instead of “Upcoming”)',
+          defaultValue: false,
+        }),
         body: fields.markdoc({ label: 'Body' }),
       },
     }),

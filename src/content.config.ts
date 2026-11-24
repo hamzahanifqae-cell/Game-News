@@ -65,6 +65,8 @@ const articles = defineCollection({
       seoDescription: z.string().default(''),
       draft: z.boolean().default(true),
       sample: z.boolean().default(false),
+      // News about a game that has already launched: labeled "Game news" instead of "Upcoming".
+      released: z.boolean().default(false),
     }),
 });
 
