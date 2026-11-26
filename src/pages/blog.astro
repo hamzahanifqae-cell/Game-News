@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
+import AdSidebar from '../components/AdSidebar.astro';
 import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
 import { formatEditorialDate, pageUrl } from '../lib/seo';
 const articles = sortByPublishDateDesc(await getPublicCollection('articles'));
@@ -47,7 +48,8 @@ const jsonLd = site && listUrl ? {
 } : undefined;
 ---
 <BaseLayout title={pageTitle} description={pageDescription} canonicalPath="/blog" jsonLd={jsonLd} adPageEligible={articles.length > 0}>
-<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+<div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:grid lg:grid-cols-[minmax(0,1fr)_160px] lg:gap-10">
+<section class="min-w-0">
 <Breadcrumbs items={[{ label: 'Upcoming games' }]} />
 <p class="editorial-kicker text-brand-700">The watchlist</p>
 <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{pageHeading}</h1>
@@ -77,4 +79,6 @@ const jsonLd = site && listUrl ? {
   <div class="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{guides.map(article => <ArticleCard article={article} />)}</div>
 </section>}
 </section>
+<AdSidebar />
+</div>
 </BaseLayout>

@@ -1,0 +1,67 @@
+---
+/**
+ * One Adsterra iframe banner. Every Adsterra banner script reads a global `atOptions`, so two
+ * banners in the same document overwrite each other. Each banner therefore runs inside its own
+ * iframe document (srcdoc) with its own atOptions and invoke script.
+ *
+ * The iframe is kept in a <template> and only created when `media` matches, so a banner hidden on
+ * this screen size (for example the desktop leaderboard on a phone) never loads or requests an ad.
+ */
+import { ADSTERRA_BANNER_SRC } from '../lib/adsterra';
+
+interface Props {
+  adKey: string;
+  width: number;
+  height: number;
+  /** Media query the banner is shown for. Pair it with matching CSS classes on `class`. */
+  media?: string;
+  class?: string;
+}
+
+const { adKey, width, height, media = 'all', class: className = '' } = Astro.props;
+
+const srcdoc = `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;overflow:hidden;background:transparent}</style></head><body><script>atOptions = {'key':'${adKey}','format':'iframe','height':${height},'width':${width},'params':{}};</scr` + `ipt><script data-cfasync="false" src="${ADSTERRA_BANNER_SRC}${adKey}"></scr` + `ipt></body></html>`;
+---
+
+<div class:list={['ad-banner', className]} data-ad-media={media} data-pagefind-ignore>
+  <div class="ad-banner-inner">
+  <p class="ad-label">Advertisement</p>
+  <div class="ad-frame" style={`width:${width}px;height:${height}px`}>
+    <template>
+      <iframe
+        srcdoc={srcdoc}
+        width={width}
+        height={height}
+        frameborder="0"
+        scrolling="no"
+        loading="lazy"
+        title="Advertisement"></iframe>
+    </template>
+  </div>
+  </div>
+</div>
+
+<style>
+  /* No display rule on .ad-banner itself, so placement classes such as "hidden md:block" decide
+     whether the slot is visible. */
+  .ad-banner { max-width: 100%; }
+  .ad-banner-inner { display: flex; flex-direction: column; align-items: center; max-width: 100%; }
+  .ad-label { margin: 0 0 4px; font-size: 11px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; color: #8a8f98; }
+  /* Never wider than the screen: on very narrow phones a 300px unit is clipped, not overflowing. */
+  .ad-frame { max-width: 100%; overflow: hidden; }
+  .ad-frame :global(iframe) { display: block; border: 0; }
+</style>
+
+<script>
+  // Create each banner's iframe only where its media query matches, then drop the template.
+  function mountAdBanners() {
+    document.querySelectorAll<HTMLElement>('.ad-banner[data-ad-media]').forEach((banner) => {
+      const template = banner.querySelector('template');
+      if (!template) return;
+      if (window.matchMedia(banner.dataset.adMedia || 'all').matches) {
+        template.replaceWith(template.content.cloneNode(true));
+      }
+    });
+  }
+  mountAdBanners();
+</script>

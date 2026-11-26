@@ -6,6 +6,8 @@ import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ConsentScripts from '../components/ConsentScripts.astro';
+import AdBanner from '../components/AdBanner.astro';
+import { adsterraBanners, AD_MEDIA, ADSTERRA_SOCIAL_BAR_SRC, ADSTERRA_POPUNDER_SRC } from '../lib/adsterra';
 import { getSiteSettings } from '../lib/content';
 import { searchConsoleVerification } from '../lib/seo';
 
@@ -87,6 +89,8 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
     {settings.adsensePublisherId && (
       <meta name="google-adsense-account" content={settings.adsensePublisherId} />
     )}
+    {/* Adsterra site-ownership check: support asked for this code in the homepage source. */}
+    {Astro.url.pathname === '/' && <meta name="adsterra-site-verification" content="29571d0" />}
     {/* Search Console ownership verification — independent of AdSense. */}
     {searchConsoleToken && (
       <meta name="google-site-verification" content={searchConsoleToken} />
@@ -106,9 +110,18 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
       Skip to content
     </a>
     <Header />
+    {/* Adsterra header banners: below the sticky header, never inside the navigation. */}
+    <div class="header-ad mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6" data-pagefind-ignore>
+      <AdBanner {...adsterraBanners.leaderboard728x90} media={AD_MEDIA.desktop} class="hidden md:block" />
+      <AdBanner {...adsterraBanners.mobile320x50} media={AD_MEDIA.mobile} class="block md:hidden" />
+    </div>
     <main id="main-content" class="flex-1" data-pagefind-body={pagefindIndex ? true : undefined}>
       <slot />
     </main>
     <Footer />
+    <!-- Adsterra Social Bar -->
+    <script is:inline data-cfasync="false" src={ADSTERRA_SOCIAL_BAR_SRC}></script>
+    <!-- Adsterra Popunder -->
+    <script is:inline data-cfasync="false" src={ADSTERRA_POPUNDER_SRC}></script>
   </body>
 </html>

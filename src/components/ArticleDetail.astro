@@ -9,6 +9,9 @@ import TableOfContents from './TableOfContents.astro';
 import AdSlot from './AdSlot.astro';
 import SteamWatch from './SteamWatch.astro';
 import ArticleCard from './ArticleCard.astro';
+import AdBanner from './AdBanner.astro';
+import AdSidebar from './AdSidebar.astro';
+import { adsterraBanners, ADSTERRA_NATIVE_KEY, ADSTERRA_NATIVE_SRC } from '../lib/adsterra';
 import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { formatEditorialDate, jsonLd as serializeJsonLd, pageUrl } from '../lib/seo';
 
@@ -75,7 +78,8 @@ const structuredData = {
 };
 ---
 
-<div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+<div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14 lg:grid lg:max-w-[calc(48rem+160px+5.5rem)] lg:grid-cols-[minmax(0,48rem)_160px] lg:gap-10">
+<div class="min-w-0">
   <Breadcrumbs items={[section, { label: data.title }]} />
 
   <article>
@@ -128,14 +132,33 @@ const structuredData = {
     <div class="mt-8">
       <TableOfContents headings={headings} />
 
-      <div class="prose-article">
+      <div class="prose-article" id="article-body">
         <Content />
       </div>
+      {/* Adsterra 300x250: rendered after the body, then moved after the 2nd paragraph before it loads. */}
+      <AdBanner {...adsterraBanners.rectangle300x250} class="in-article-ad my-8" />
+      <script is:inline>
+        (function () {
+          var ad = document.currentScript && document.currentScript.previousElementSibling;
+          var body = document.getElementById('article-body');
+          if (!ad || !body) return;
+          // Markdoc wraps the content in its own <article>, so count top-level paragraphs there too.
+          var paragraphs = body.querySelectorAll(':scope > p, :scope > article > p');
+          if (paragraphs.length >= 2) paragraphs[1].after(ad);
+        })();
+      </script>
     </div>
 
     {article.id === 'phantom-blade-zero-watchlist' && <SteamWatch />}
 
     <AdSlot placement="articleBottom" format="in-article" />
+
+    {/* Adsterra Native Banner: end of the article, before the author box and related reading. */}
+    <div class="native-ad mt-10" data-pagefind-ignore>
+      <p class="mb-1 text-center text-[11px] uppercase tracking-[.06em] text-[#8a8f98]">Advertisement</p>
+      <script is:inline async fetchpriority="high" data-cfasync="false" src={ADSTERRA_NATIVE_SRC}></script>
+      <div id={`container-${ADSTERRA_NATIVE_KEY}`}></div>
+    </div>
 
     {author && (
       <div class="mt-10 flex items-center gap-3 border-t border-line pt-6">
@@ -158,6 +181,8 @@ const structuredData = {
       </div>
     </div>
   )}
+</div>
+<AdSidebar />
 </div>
 
 <script type="application/ld+json" set:html={serializeJsonLd(structuredData)} />

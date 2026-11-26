@@ -1,0 +1,25 @@
+---
+/**
+ * Right-hand ad column for article and blog pages, shown from 1024px up. The 160x600 unit stays
+ * in view while the reader scrolls; its sticky area ends above the 160x300 unit, so the two never
+ * overlap.
+ */
+import AdBanner from './AdBanner.astro';
+import { adsterraBanners, AD_MEDIA } from '../lib/adsterra';
+---
+
+<aside class="ad-sidebar hidden lg:flex" aria-label="Advertisements" data-pagefind-ignore>
+  <div class="ad-sidebar-sticky-area">
+    <div class="ad-sidebar-sticky">
+      <AdBanner {...adsterraBanners.skyscraper160x600} media={AD_MEDIA.wide} />
+    </div>
+  </div>
+  <AdBanner {...adsterraBanners.skyscraper160x300} media={AD_MEDIA.wide} class="mt-8" />
+</aside>
+
+<style>
+  .ad-sidebar { width: 160px; flex-direction: column; }
+  .ad-sidebar-sticky-area { flex: 1 1 auto; }
+  /* The site header is 76px tall and sticky; keep the unit clear of it. */
+  .ad-sidebar-sticky { position: sticky; top: 96px; }
+</style>

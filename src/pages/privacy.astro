@@ -101,13 +101,33 @@ const isDraft = !page.data.policyReviewDate;
         <a href="https://support.google.com/adsense/answer/1348695" target="_blank" rel="noopener noreferrer">Google’s guidance for sites that use AdSense</a>.
       </p>
       <p>
-        Google AdSense is the only advertising service configured for {settings.siteName}. No other ad network serves ads here, so there is no separate opt-out for another network.
-        The authorized seller is listed in <a href="/ads.txt">ads.txt</a>.
+        Google AdSense is one of the advertising services {settings.siteName} uses. Every partner is listed under
+        <a href="#advertising-partners">Advertising partners</a> below.
+        Authorized sellers are listed in <a href="/ads.txt">ads.txt</a>.
         {adsActive
           ? ' The AdSense library is not loaded until you grant advertising consent. After that, Google may use advertising cookies as described above.'
           : messageOnSite
             ? ' Ad placement is currently off, so this site does not place an ad unit. The AdSense script loads on pages other than this privacy policy so Google can show its published European regulations message to visitors in the EEA, the UK, and Switzerland. An ad is not placed until advertising is turned on and you grant advertising consent.'
             : ' Ad serving is currently off. The AdSense library is not loaded, and this site does not set Google advertising cookies, until advertising is turned on and you grant advertising consent.'}
+      </p>
+
+      <h2 id="advertising-partners">Advertising partners</h2>
+      <p>
+        {settings.siteName} uses these advertising partners to show ads:
+      </p>
+      <ul>
+        <li>
+          <strong>Google AdSense</strong>: see{' '}
+          <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">how Google uses cookies in advertising</a>.
+        </li>
+        <li>
+          <strong><a href="https://adsterra.com" target="_blank" rel="noopener noreferrer">Adsterra</a></strong>: see the{' '}
+          <a href="https://adsterra.com/privacy-policy/" target="_blank" rel="noopener noreferrer">Adsterra privacy policy</a>.
+        </li>
+      </ul>
+      <p>
+        These partners may use cookies and similar technologies to serve ads and to measure how they perform. Each
+        partner handles that data under its own privacy policy, linked above.
       </p>
 
       <h2 id="cookie-and-advertising-consent">Cookie and advertising consent</h2>
@@ -162,6 +182,8 @@ const isDraft = !page.data.policyReviewDate;
         You can control cookies through your browser settings and, where a consent banner is shown, through the choices offered there.
         Ad personalization is managed in{' '}
         <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer">Google My Ad Center</a>.
+        For Adsterra, see the choices described in the{' '}
+        <a href="https://adsterra.com/privacy-policy/" target="_blank" rel="noopener noreferrer">Adsterra privacy policy</a>.
         {settings.contactEmail ? (
           <> Questions about data we may hold can be sent to <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>.</>
         ) : (
