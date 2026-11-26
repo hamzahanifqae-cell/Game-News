@@ -2,13 +2,9 @@
 // Consent integration point — NOT a complete compliance solution by itself.
 //
 // This project uses Basic Consent Mode (see README "Consent & Analytics"):
-// the GA4 tag is not injected until a CMP reports analytics consent. When no
-// other CMP is selected, the AdSense tag is loaded so Google can show the
-// published European regulations message. This site does not render its own
-// ad slots while advertising is off, and it does not create Google's consent
-// object. Google's ad script reports adsense_fc_has_namespace_but_no_iframes
-// when that object exists before Google's own consent frame. The actual
-// wiring lives in
+// the GA4 tag is not injected until a CMP reports analytics consent. Google
+// AdSense has been removed from this site, so no Google ad script or Google
+// consent message is loaded here. The actual wiring lives in
 // src/lib/consent-client.ts, which reads each CMP's own documented
 // JavaScript event/object — it does not read or map raw IAB TCF purpose
 // flags itself, and it does not invent an event shape for providers it
@@ -18,7 +14,6 @@
 // not, by itself, complete consent compliance — see "cmpConfiguredAndVerified"
 // in Site Settings and README "CMP configuration safeguards".
 import type { CollectionEntry } from 'astro:content';
-import { googleConsentMessageSrc } from '../lib/ads';
 
 interface Props {
   settings: CollectionEntry<'siteSettings'>['data'];
@@ -28,15 +23,12 @@ interface Props {
 }
 
 const { settings, adsPageEligible, pathname = '/' } = Astro.props;
-const messageSrc = googleConsentMessageSrc(settings.adsensePublisherId, pathname, settings.cmpProvider);
-const needsConsentGate =
-  (settings.adsEnabled && adsPageEligible) || settings.analyticsProvider === 'ga4' || Boolean(messageSrc);
+// Google AdSense was removed from this site; the gate only controls Google Analytics now.
+const needsConsentGate = settings.analyticsProvider === 'ga4';
 
 const gateConfig = {
   cmpProvider: settings.cmpProvider,
   ga4MeasurementId: settings.analyticsProvider === 'ga4' && settings.analyticsId ? settings.analyticsId : null,
-  adsClientId: settings.adsensePublisherId || null,
-  adsPageEligible,
 };
 ---
 
@@ -58,10 +50,6 @@ const gateConfig = {
       wait_for_update: 2000,
     });
   </script>
-)}
-
-{messageSrc && (
-  <script async src={messageSrc} crossorigin="anonymous"></script>
 )}
 
 {settings.cmpProvider === 'cookiebot' && settings.cmpSiteId && (

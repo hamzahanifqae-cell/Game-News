@@ -33,7 +33,7 @@ const year = new Date().getFullYear();
           <li><a href="/about" class="hover:text-brand-700">About</a></li>
           <li><a href="/contact" class="hover:text-brand-700">Contact</a></li>
           <li><a href="/privacy" class="hover:text-brand-700">Privacy Policy</a></li>
-          <li><button type="button" id="privacy-choices" class="cursor-pointer bg-transparent p-0 text-left text-[13px] text-ink-muted hover:text-brand-700">Privacy and cookie settings</button></li>
+          <li><a href="/privacy#cookie-and-advertising-consent" class="hover:text-brand-700">Privacy and cookie settings</a></li>
           <li><a href="/terms" class="hover:text-brand-700">Terms of Use</a></li>
         </ul>
       </nav>
@@ -56,27 +56,3 @@ const year = new Date().getFullYear();
     </div>
   </div>
 </footer>
-<script is:inline>
-  document.getElementById('privacy-choices')?.addEventListener('click', () => {
-    const tagged = document.querySelector('script[src*="adsbygoogle.js"]');
-    if (!tagged) {
-      window.location.assign('/privacy#cookie-and-advertising-consent');
-      return;
-    }
-    const openPrivacyChoices = () => {
-      if (typeof window.googlefc?.showRevocationMessage === 'function') {
-        window.googlefc.showRevocationMessage();
-      }
-    };
-    if (typeof window.googlefc?.showRevocationMessage === 'function') {
-      openPrivacyChoices();
-      return;
-    }
-    const queue = window.googlefc?.callbackQueue;
-    if (queue && typeof queue.push === 'function') {
-      queue.push({ CONSENT_API_READY: openPrivacyChoices, CONSENT_DATA_READY: openPrivacyChoices });
-      return;
-    }
-    window.location.assign('/privacy#cookie-and-advertising-consent');
-  });
-</script>

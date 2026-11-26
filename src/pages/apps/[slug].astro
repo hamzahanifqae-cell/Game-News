@@ -3,7 +3,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import SpecTable from '../../components/SpecTable.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
-import AdSlot from '../../components/AdSlot.astro';
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import { getCategory, getPublicCollection } from '../../lib/content';
@@ -101,7 +100,6 @@ const appJsonLd = {
       <Content />
     </div>
 
-    <AdSlot placement="appBottom" format="in-article" />
 
     {relatedArticles.length > 0 && (
       <div class="mt-12 border-t border-line pt-10">

@@ -5,18 +5,18 @@
 export const ADSTERRA_BANNER_SRC = 'https://bauval.org/22/';
 
 export const adsterraBanners = {
-  rectangle300x250: { adKey: '21bf474dbffc92988bb7df0ccd7a3c9a', width: 300, height: 250 },
-  leaderboard728x90: { adKey: 'f683e4b4dfdd6983cc7e031675873224', width: 728, height: 90 },
-  banner468x60: { adKey: '340eaf14a9c4add067bf30e0fa4d5b6a', width: 468, height: 60 },
-  skyscraper160x300: { adKey: '6a454de7ad4048cab6262213828ae077', width: 160, height: 300 },
-  mobile320x50: { adKey: 'c995545aa0911bcfba0024e35243e7e2', width: 320, height: 50 },
-  skyscraper160x600: { adKey: '6e2ba1566faca611ba801d7f972350c1', width: 160, height: 600 },
+  rectangle300x250: { adKey: '81ef00acec5f2ca29511c1e20baf73c2', width: 300, height: 250 },
+  leaderboard728x90: { adKey: '413bf59883af0d7558cecc6c92de9f51', width: 728, height: 90 },
+  banner468x60: { adKey: '1d774ed4f30734de0240d5a23b164b82', width: 468, height: 60 },
+  skyscraper160x300: { adKey: '2a5d66d6a0c4ab04c8bb1096009bbe1a', width: 160, height: 300 },
+  mobile320x50: { adKey: '3a7f7915e0554ad378be5703366157e2', width: 320, height: 50 },
+  skyscraper160x600: { adKey: '4fcafad22c758c511b79356003cd99ef', width: 160, height: 600 },
 } as const;
 
-export const ADSTERRA_NATIVE_KEY = '35c5a9c688f86175f1dc3564314841f1';
+export const ADSTERRA_NATIVE_KEY = '8a06355af567ff3c8b9f69df4cde6094';
 export const ADSTERRA_NATIVE_SRC = `https://bauval.org/21/${ADSTERRA_NATIVE_KEY}`;
-export const ADSTERRA_SOCIAL_BAR_SRC = 'https://bauval.org/14/95c729b5549baaeeb40fef353746d16b';
-export const ADSTERRA_POPUNDER_SRC = 'https://abscloud.org/1/6649a7867620c86f9602d32cffc94979';
+export const ADSTERRA_SOCIAL_BAR_SRC = 'https://bauval.org/14/06f205a60c274329d77187c6598a975a';
+export const ADSTERRA_POPUNDER_SRC = 'https://abscloud.org/1/017f788aaa300a445c2e5f48e98f83ca';
 
 /** Breakpoints used by the placements (match Tailwind md and lg). */
 export const AD_MEDIA = {

@@ -1,11 +1,15 @@
 ---
 /**
- * One Adsterra iframe banner. Every Adsterra banner script reads a global `atOptions`, so two
- * banners in the same document overwrite each other. Each banner therefore runs inside its own
- * iframe document (srcdoc) with its own atOptions and invoke script.
+ * One Adsterra banner, using Adsterra's own tag exactly as the dashboard gives it: an inline
+ * `atOptions` script followed by the invoke script, placed in the HTML where the ad should show.
  *
- * The iframe is kept in a <template> and only created when `media` matches, so a banner hidden on
- * this screen size (for example the desktop leaderboard on a phone) never loads or requests an ad.
+ * Adsterra's publisher terms (clause 4.7) do not allow wrapping the tag in an iframe or altering
+ * it. Because the browser runs the two scripts in page order as it reads the HTML, each banner's
+ * invoke script reads its own atOptions before the next banner sets a new one.
+ *
+ * For a banner limited to some screen sizes (`media`), a one-line check writes the same tag only
+ * when the size matches, so a banner that would be hidden is never loaded (the terms also forbid
+ * making an ad invisible).
  */
 import { ADSTERRA_BANNER_SRC } from '../lib/adsterra';
 
@@ -20,24 +24,34 @@ interface Props {
 
 const { adKey, width, height, media = 'all', class: className = '' } = Astro.props;
 
-const srcdoc = `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;overflow:hidden;background:transparent}</style></head><body><script>atOptions = {'key':'${adKey}','format':'iframe','height':${height},'width':${width},'params':{}};</scr` + `ipt><script data-cfasync="false" src="${ADSTERRA_BANNER_SRC}${adKey}"></scr` + `ipt></body></html>`;
+const optionsScript = `
+  atOptions = {
+    'key' : '${adKey}',
+    'format' : 'iframe',
+    'height' : ${height},
+    'width' : ${width},
+    'params' : {}
+  };
+`;
+const invokeSrc = `${ADSTERRA_BANNER_SRC}${adKey}`;
+const tagHtml = `<script>${optionsScript}</script><script data-cfasync="false" src="${invokeSrc}"></script>`;
+// Written from inside a <script>, so "</" must not appear literally.
+const gatedWrite = `if (window.matchMedia(${JSON.stringify(media)}).matches) { document.write(${JSON.stringify(tagHtml).replace(/<\//g, '<\\/')}); }`;
 ---
 
-<div class:list={['ad-banner', className]} data-ad-media={media} data-pagefind-ignore>
+<div class:list={['ad-banner', className]} data-pagefind-ignore>
   <div class="ad-banner-inner">
-  <p class="ad-label">Advertisement</p>
-  <div class="ad-frame" style={`width:${width}px;height:${height}px`}>
-    <template>
-      <iframe
-        srcdoc={srcdoc}
-        width={width}
-        height={height}
-        frameborder="0"
-        scrolling="no"
-        loading="lazy"
-        title="Advertisement"></iframe>
-    </template>
-  </div>
+    <p class="ad-label">Advertisement</p>
+    <div class="ad-slot" style={`width:${width}px;min-height:${height}px`}>
+      {media === 'all' ? (
+        <>
+          <script is:inline set:html={optionsScript}></script>
+          <script is:inline data-cfasync="false" src={invokeSrc}></script>
+        </>
+      ) : (
+        <script is:inline set:html={gatedWrite}></script>
+      )}
+    </div>
   </div>
 </div>
 
@@ -48,20 +62,5 @@ const srcdoc = `<!doctype html><html><head><meta charset="utf-8"><style>html,bod
   .ad-banner-inner { display: flex; flex-direction: column; align-items: center; max-width: 100%; }
   .ad-label { margin: 0 0 4px; font-size: 11px; line-height: 1; letter-spacing: .06em; text-transform: uppercase; color: #8a8f98; }
   /* Never wider than the screen: on very narrow phones a 300px unit is clipped, not overflowing. */
-  .ad-frame { max-width: 100%; overflow: hidden; }
-  .ad-frame :global(iframe) { display: block; border: 0; }
+  .ad-slot { max-width: 100%; overflow: hidden; }
 </style>
-
-<script>
-  // Create each banner's iframe only where its media query matches, then drop the template.
-  function mountAdBanners() {
-    document.querySelectorAll<HTMLElement>('.ad-banner[data-ad-media]').forEach((banner) => {
-      const template = banner.querySelector('template');
-      if (!template) return;
-      if (window.matchMedia(banner.dataset.adMedia || 'all').matches) {
-        template.replaceWith(template.content.cloneNode(true));
-      }
-    });
-  }
-  mountAdBanners();
-</script>

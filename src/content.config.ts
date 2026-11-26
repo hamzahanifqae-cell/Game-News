@@ -72,6 +72,15 @@ const articles = defineCollection({
       releaseDate: z.coerce.date().optional(),
       // Short source note shown next to the date on /blog, e.g. "confirmed on Steam, checked 18 November 2026".
       releaseDateNote: z.string().default(''),
+      // Official trailer, embedded with YouTube's player. Only uploads verified (via YouTube oEmbed)
+      // to be on the publisher's own channel; nothing is downloaded or re-hosted.
+      trailer: z
+        .object({
+          youtubeId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
+          title: z.string(),
+          channel: z.string(),
+        })
+        .optional(),
     }),
 });
 

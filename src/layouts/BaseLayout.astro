@@ -28,13 +28,9 @@ interface Props {
   /** Set false for error/utility pages (404, search) that shouldn't appear in on-site search results. */
   pagefindIndex?: boolean;
   /**
-   * Single page-level ad-eligibility flag. Governs BOTH whether the AdSense
-   * ad-library script can ever load on this page (via the consent gate) and
-   * whether any AdSlot on this page renders its <ins> markup — one source of
-   * truth instead of two independent checks that could disagree. Defaults to
-   * true for ordinary content pages; pages should pass false for 404/search
-   * and for any page without substantive published content. See
-   * src/lib/ads.ts and README "Page-level ad eligibility".
+   * Page-level ad-eligibility flag. It was used by Google AdSense, which has
+   * been removed from this site. It is kept so existing pages keep compiling;
+   * the Adsterra units are placed directly in the layout and components.
    */
   adPageEligible?: boolean;
 }
@@ -85,13 +81,7 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
       jsonLd={jsonLd}
     />
 
-    {/* AdSense ownership verification — independent of ad serving and of Search Console. */}
-    {settings.adsensePublisherId && (
-      <meta name="google-adsense-account" content={settings.adsensePublisherId} />
-    )}
-    {/* Adsterra site-ownership check: support asked for this code in the homepage source. */}
-    {Astro.url.pathname === '/' && <meta name="adsterra-site-verification" content="29571d0" />}
-    {/* Search Console ownership verification — independent of AdSense. */}
+    {/* Search Console ownership verification. */}
     {searchConsoleToken && (
       <meta name="google-site-verification" content={searchConsoleToken} />
     )}

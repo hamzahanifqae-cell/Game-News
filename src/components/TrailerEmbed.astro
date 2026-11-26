@@ -1,0 +1,64 @@
+---
+/**
+ * An official trailer from the publisher's own YouTube channel, embedded with YouTube's player.
+ *
+ * Copyright: the video stays on YouTube and plays in YouTube's embedded player, which the
+ * channel owner allows (the oEmbed check fails for videos with embedding turned off). GameNews
+ * does not download, re-host, or edit publisher footage or images. Only uploads verified to be
+ * on the publisher's own channel are used; see `trailer` in src/content.config.ts.
+ *
+ * Until the reader presses play, only YouTube's thumbnail image is shown, so no YouTube player or
+ * cookies load on page view. The player uses youtube-nocookie.com (privacy-enhanced mode).
+ */
+interface Props {
+  youtubeId: string;
+  title: string;
+  channel: string;
+}
+
+const { youtubeId, title, channel } = Astro.props;
+const thumbnail = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+const embedSrc = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`;
+const watchUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+---
+
+<figure class="trailer mt-7" data-pagefind-ignore>
+  <div class="trailer-frame">
+    <button type="button" class="trailer-play" data-embed-src={embedSrc} data-title={title} aria-label={`Play the official trailer: ${title}`}>
+      <img src={thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" />
+      <span class="trailer-badge" aria-hidden="true">
+        <svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.2.2 34 .2 34 .2s-21.2 0-26.5 1.5a8.6 8.6 0 0 0-6 6C0 13 0 24 0 24s0 11 1.5 16.3a8.6 8.6 0 0 0 6 6C12.8 47.8 34 47.8 34 47.8s21.2 0 26.5-1.5a8.6 8.6 0 0 0 6-6C68 35 68 24 68 24s0-11-1.5-16.3Z" fill="#000" fill-opacity=".8"/><path d="m27 34 18-10-18-10v20Z" fill="#fff"/></svg>
+      </span>
+      <span class="trailer-label">Watch the official trailer</span>
+    </button>
+  </div>
+  <figcaption class="mt-2 text-xs leading-5 text-ink-muted">
+    Official trailer: <span class="text-ink">{title}</span>, from the {channel} YouTube channel.{' '}
+    <a href={watchUrl} target="_blank" rel="noopener noreferrer" class="underline">Watch on YouTube</a>
+  </figcaption>
+</figure>
+
+<style>
+  .trailer-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 4px; background: #0f1424; }
+  .trailer-play { position: absolute; inset: 0; display: block; width: 100%; height: 100%; padding: 0; border: 0; cursor: pointer; background: #0f1424; }
+  .trailer-play img { width: 100%; height: 100%; object-fit: cover; }
+  .trailer-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transition: transform .15s; }
+  .trailer-play:hover .trailer-badge, .trailer-play:focus-visible .trailer-badge { transform: translate(-50%, -50%) scale(1.08); }
+  .trailer-play:hover .trailer-badge path:first-child { fill: #f00; fill-opacity: 1; }
+  .trailer-label { position: absolute; left: 12px; bottom: 12px; padding: 5px 9px; border-radius: 4px; background: #000000b3; color: #fff; font-size: 13px; font-weight: 600; }
+  .trailer-frame :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.trailer-play').forEach((button) => {
+    button.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = button.dataset.embedSrc!;
+      iframe.title = button.dataset.title || 'Official trailer';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      button.replaceWith(iframe);
+    });
+  });
+</script>
