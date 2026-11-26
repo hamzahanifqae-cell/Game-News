@@ -3,8 +3,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
-import { pageUrl } from '../lib/seo';
+import { formatEditorialDate, pageUrl } from '../lib/seo';
 const articles = sortByPublishDateDesc(await getPublicCollection('articles'));
+// Each article appears once: upcoming games by release month, then undated ones, then games
+// that are out, then guides. A game whose releaseDate has passed moves to "Recently released"
+// on the next build (see hasReleased in lib/content.ts).
+const news = articles.filter(article => article.data.type === 'news');
+const upcoming = news.filter(article => !article.data.released);
+const dated = upcoming.filter(article => article.data.releaseDate).sort((a, b) => a.data.releaseDate!.valueOf() - b.data.releaseDate!.valueOf());
+const undated = upcoming.filter(article => !article.data.releaseDate);
+const released = news.filter(article => article.data.released);
+const guides = articles.filter(article => article.data.type !== 'news');
+const monthFormat = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const monthMap = new Map<string, { key: string; label: string; entries: typeof dated }>();
+for (const article of dated) {
+  const date = article.data.releaseDate!;
+  const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+  if (!monthMap.has(key)) monthMap.set(key, { key, label: monthFormat.format(date), entries: [] });
+  monthMap.get(key)!.entries.push(article);
+}
+const months = [...monthMap.values()].map(month => [month, month.entries] as const);
 const articlePaths = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
 const pageTitle = 'Upcoming PC Games: Release Dates & Watchlist';
 const pageHeading = 'Upcoming PC games and release dates.';
@@ -35,37 +53,28 @@ const jsonLd = site && listUrl ? {
 <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{pageHeading}</h1>
 <p class="mt-4 max-w-2xl leading-7 text-ink-muted">These upcoming PC game releases are dated editorial snapshots. A confirmed date is a calendar day on the official listing when that article was checked. A tentative entry has no calendar day. A console date is not a PC date. Games you can install now are on <a class="underline text-brand-700" href="/games">popular PC games</a>.</p>
 <h2 class="mt-10 text-2xl font-semibold tracking-tight text-ink">Upcoming PC game releases by month</h2>
-<div class="mt-6 grid gap-8 md:grid-cols-2">
-  <section>
-    <h3 class="text-lg font-semibold text-ink">January 2027</h3>
-    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
-      <li><a class="font-semibold text-brand-700 underline" href="/news/stranger-than-heaven-watchlist">Stranger Than Heaven</a> — confirmed 14 January 2027 on Steam, checked 18 November 2026.</li>
-    </ul>
+{months.map(([month, entries]) => (
+  <section class="mt-8" aria-labelledby={`month-${month.key}`}>
+    <h3 id={`month-${month.key}`} class="text-lg font-semibold text-ink">{month.label}</h3>
+    <div class="mt-4 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{entries.map(article => (
+      <div><p class="mb-2 text-[13px] leading-5 text-ink-muted"><strong class="text-ink">{formatEditorialDate(article.data.releaseDate!)}</strong>{article.data.releaseDateNote && ` — ${article.data.releaseDateNote}`}</p><ArticleCard article={article} showImage={false} /></div>
+    ))}</div>
   </section>
-  <section>
-    <h3 class="text-lg font-semibold text-ink">February 2027</h3>
-    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
-      <li><a class="font-semibold text-brand-700 underline" href="/news/metro-2039-watchlist">Metro 2039</a> — confirmed 4 February 2027 on Steam, checked 18 November 2026.</li>
-      <li><a class="font-semibold text-brand-700 underline" href="/news/persona-4-revival-watchlist">Persona 4 Revival</a> — 17 February 2027 on the English Steam listing, checked 18 November 2026. Another region can show a different day.</li>
-      <li><a class="font-semibold text-brand-700 underline" href="/news/fable-watchlist">Fable</a> — confirmed 23 February 2027 on Steam, checked 18 November 2026.</li>
-    </ul>
-  </section>
-  <section>
-    <h3 class="text-lg font-semibold text-ink">April 2027</h3>
-    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
-      <li><a class="font-semibold text-brand-700 underline" href="/news/final-fantasy-vii-revelation-watchlist">Final Fantasy VII Revelation</a> — confirmed 8 April 2027 on Steam, checked 18 November 2026.</li>
-    </ul>
-  </section>
-  <section>
-    <h3 class="text-lg font-semibold text-ink">No PC calendar date</h3>
-    <ul class="mt-3 space-y-2 text-15 leading-relaxed text-ink-muted">
-      <li><a class="font-semibold text-brand-700 underline" href="/news/gta-vi-release-watchlist">GTA VI</a> — Rockstar says the game has been available on PlayStation 5 and Xbox Series X|S since 19 November 2026. No PC version is listed. Checked 23 November 2026.</li>
-      <li><a class="font-semibold text-brand-700 underline" href="/news/light-no-fire-watchlist">Light No Fire</a> — tentative. Steam said to be announced, checked 18 November 2026.</li>
-      <li><a class="font-semibold text-brand-700 underline" href="/news/the-wolf-among-us-2-watchlist">The Wolf Among Us 2</a> — tentative. Steam said coming soon and gave no calendar day, checked 18 November 2026.</li>
-    </ul>
-  </section>
-</div>
-<p class="mt-8 max-w-2xl text-sm leading-6 text-ink-muted"><a class="font-semibold text-brand-700 underline" href="/news/phantom-blade-zero-watchlist">Phantom Blade Zero</a> is no longer an upcoming release. Steam lists it as released on 28 October 2026 for Windows, checked 18 November 2026.</p>
-<div class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{articles.map(article => <ArticleCard article={article} />)}</div>
+))}
+{undated.length > 0 && <section class="mt-10" aria-labelledby="no-date">
+  <h3 id="no-date" class="text-lg font-semibold text-ink">No PC calendar date yet</h3>
+  <div class="mt-4 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{undated.map(article => (
+    <div>{article.data.releaseDateNote && <p class="mb-2 text-[13px] leading-5 text-ink-muted">{article.data.releaseDateNote.charAt(0).toUpperCase() + article.data.releaseDateNote.slice(1)}</p>}<ArticleCard article={article} showImage={false} /></div>
+  ))}</div>
+</section>}
+{released.length > 0 && <section class="mt-14" aria-labelledby="recently-released">
+  <h2 id="recently-released" class="text-2xl font-semibold tracking-tight text-ink">Recently released</h2>
+  <p class="mt-2 max-w-2xl text-sm leading-6 text-ink-muted">These games have left the watchlist. Each article was updated with the official release details.</p>
+  <div class="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{released.map(article => <ArticleCard article={article} showImage={false} />)}</div>
+</section>}
+{guides.length > 0 && <section class="mt-14" aria-labelledby="guides">
+  <h2 id="guides" class="text-2xl font-semibold tracking-tight text-ink">Guides and checklists</h2>
+  <div class="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">{guides.map(article => <ArticleCard article={article} />)}</div>
+</section>}
 </section>
 </BaseLayout>

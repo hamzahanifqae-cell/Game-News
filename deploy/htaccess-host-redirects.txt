@@ -10,7 +10,10 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  RewriteCond %{HTTP_HOST} ^www\.gamenews\.online$ [NC]
+  # Any other host (www, or cPanel's gamenews.online.techshaker.com alias,
+  # which serves the same files) goes to the one real domain.
+  RewriteCond %{HTTP_HOST} !^gamenews\.online$ [NC]
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
   RewriteRule ^ https://gamenews.online%{REQUEST_URI} [L,R=301]
 
   RewriteCond %{HTTPS} !=on
@@ -24,3 +27,4 @@
 #   curl -sI http://gamenews.online/ | head -3
 #   curl -sI https://www.gamenews.online/ | head -3
 #   curl -sI https://gamenews.online/sitemap.xml | head -3
+#   curl -sI https://gamenews.online.techshaker.com/ | head -3

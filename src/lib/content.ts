@@ -10,9 +10,27 @@ function isPublic(data: { draft?: boolean; sample?: boolean }): boolean {
   return true;
 }
 
+/**
+ * True when the game an article covers is out: either an editor set `released`, or the
+ * official `releaseDate` is on or before `now`. Pages are prerendered, so `now` is the
+ * build time; each deploy refreshes the Upcoming lists.
+ */
+export function hasReleased(
+  data: { released?: boolean; releaseDate?: Date },
+  now: Date = new Date()
+): boolean {
+  if (data.released) return true;
+  return data.releaseDate !== undefined && data.releaseDate.valueOf() <= now.valueOf();
+}
+
 export async function getPublicCollection<C extends 'articles' | 'apps'>(collection: C) {
-  const entries = await getCollection(collection);
-  return entries.filter((entry) => isPublic(entry.data));
+  const entries = (await getCollection(collection)).filter((entry) => isPublic(entry.data));
+  if (collection !== 'articles') return entries;
+  // Resolve the release status once so every page reads the same `data.released`.
+  return (entries as CollectionEntry<'articles'>[]).map((entry) => ({
+    ...entry,
+    data: { ...entry.data, released: hasReleased(entry.data) },
+  })) as typeof entries;
 }
 
 /**

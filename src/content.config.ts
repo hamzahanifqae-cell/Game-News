@@ -67,6 +67,11 @@ const articles = defineCollection({
       sample: z.boolean().default(false),
       // News about a game that has already launched: labeled "Game news" instead of "Upcoming".
       released: z.boolean().default(false),
+      // Official release day, when one is announced. Once this day has passed at build time the
+      // article is treated as released and leaves every Upcoming list without editing `released`.
+      releaseDate: z.coerce.date().optional(),
+      // Short source note shown next to the date on /blog, e.g. "confirmed on Steam, checked 18 November 2026".
+      releaseDateNote: z.string().default(''),
     }),
 });
 
