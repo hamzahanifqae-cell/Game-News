@@ -1,0 +1,26 @@
+# Paste these lines at the TOP of ~/public_html/.htaccess for gamenews.online,
+# ABOVE the "# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN" block.
+# Do not replace the Passenger block; cPanel writes it and the Node app needs it.
+#
+# Why: on 25 Nov 2026 http://gamenews.online/ and https://www.gamenews.online/
+# both returned HTTP 200 instead of redirecting, so Google sees three copies of
+# every page. Apache applies these rules before the request reaches Node,
+# which also covers prerendered pages that skip Astro middleware.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  RewriteCond %{HTTP_HOST} ^www\.gamenews\.online$ [NC]
+  RewriteRule ^ https://gamenews.online%{REQUEST_URI} [L,R=301]
+
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://gamenews.online%{REQUEST_URI} [L,R=301]
+
+  RewriteRule ^sitemap\.xml$ https://gamenews.online/sitemap-index.xml [L,R=301]
+</IfModule>
+
+# Check after saving (each should print 301 and the https://gamenews.online URL):
+#   curl -sI http://gamenews.online/ | head -3
+#   curl -sI https://www.gamenews.online/ | head -3
+#   curl -sI https://gamenews.online/sitemap.xml | head -3

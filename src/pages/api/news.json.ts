@@ -7,6 +7,6 @@ export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(body), {headers: {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': feed.stale || feed.partial ? 'public, max-age=60' : 'public, max-age=60, s-maxage=900',
-    'X-Content-Type-Options': 'nosniff',
+    'X-Content-Type-Options': 'nosniff', 'X-Robots-Tag': 'noindex',
   }});
 };
