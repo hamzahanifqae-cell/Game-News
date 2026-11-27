@@ -10,7 +10,7 @@ import TrailerEmbed from './TrailerEmbed.astro';
 import SteamWatch from './SteamWatch.astro';
 import ArticleCard from './ArticleCard.astro';
 import AdSidebar from './AdSidebar.astro';
-import { ADSTERRA_NATIVE_KEY, ADSTERRA_NATIVE_SRC } from '../lib/adsterra';
+import { ADSTERRA_NATIVE_KEY, ADSTERRA_NATIVE_SRC, adsterraWriteScript } from '../lib/adsterra';
 import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { formatEditorialDate, jsonLd as serializeJsonLd, pageUrl } from '../lib/seo';
 
@@ -144,7 +144,7 @@ const structuredData = {
     {/* Adsterra Native Banner: end of the article, before the author box and related reading. */}
     <div class="native-ad mt-10" data-pagefind-ignore>
       <p class="mb-1 text-center text-[11px] uppercase tracking-[.06em] text-[#8a8f98]">Advertisement</p>
-      <script is:inline async fetchpriority="high" data-cfasync="false" src={ADSTERRA_NATIVE_SRC}></script>
+      <script is:inline set:html={adsterraWriteScript(`<script async fetchpriority="high" data-cfasync="false" src="${ADSTERRA_NATIVE_SRC}"></script>`)}></script>
       <div id={`container-${ADSTERRA_NATIVE_KEY}`}></div>
     </div>
 

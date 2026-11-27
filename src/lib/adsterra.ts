@@ -24,3 +24,32 @@ export const AD_MEDIA = {
   mobile: '(max-width: 767.98px)',
   wide: '(min-width: 1024px)',
 } as const;
+
+/**
+ * Inline JavaScript that writes an Adsterra tag into the page at this exact spot, unchanged,
+ * but only when the visitor has not rejected advertising cookies (see ConsentBanner.astro,
+ * which sets window.gnAdsAllowed in the <head>) and, if given, the media query matches.
+ *
+ * The tag HTML is passed base64-encoded so it needs no quote escaping (Markdoc escapes quotes,
+ * and a literal "</script>" would end the surrounding script). document.write keeps Adsterra's
+ * requirement that its scripts run where the ad appears, in page order.
+ */
+export function adsterraWriteScript(tagHtml: string, media?: string): string {
+  const encoded = Buffer.from(tagHtml, 'utf8').toString('base64');
+  const mediaCheck = media && media !== 'all' ? ` && window.matchMedia(\`${media}\`).matches` : '';
+  return `if (window.gnAdsAllowed !== false${mediaCheck}) { document.write(atob(\`${encoded}\`)); }`;
+}
+
+/** Adsterra's banner tag exactly as the dashboard gives it. */
+export function adsterraBannerTag(adKey: string, width: number, height: number): string {
+  return `<script>
+  atOptions = {
+    'key' : '${adKey}',
+    'format' : 'iframe',
+    'height' : ${height},
+    'width' : ${width},
+    'params' : {}
+  };
+</script>
+<script data-cfasync="false" src="${ADSTERRA_BANNER_SRC}${adKey}"></script>`;
+}

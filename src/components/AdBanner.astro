@@ -7,11 +7,11 @@
  * it. Because the browser runs the two scripts in page order as it reads the HTML, each banner's
  * invoke script reads its own atOptions before the next banner sets a new one.
  *
- * For a banner limited to some screen sizes (`media`), a one-line check writes the same tag only
- * when the size matches, so a banner that would be hidden is never loaded (the terms also forbid
- * making an ad invisible).
+ * A one-line check writes that same tag only when the visitor has not rejected advertising
+ * cookies and, for a banner limited to some screen sizes (`media`), the size matches. A banner
+ * that would be hidden is never loaded (the terms also forbid making an ad invisible).
  */
-import { ADSTERRA_BANNER_SRC } from '../lib/adsterra';
+import { adsterraBannerTag, adsterraWriteScript } from '../lib/adsterra';
 
 interface Props {
   adKey: string;
@@ -23,34 +23,16 @@ interface Props {
 }
 
 const { adKey, width, height, media = 'all', class: className = '' } = Astro.props;
-
-const optionsScript = `
-  atOptions = {
-    'key' : '${adKey}',
-    'format' : 'iframe',
-    'height' : ${height},
-    'width' : ${width},
-    'params' : {}
-  };
-`;
-const invokeSrc = `${ADSTERRA_BANNER_SRC}${adKey}`;
-const tagHtml = `<script>${optionsScript}</script><script data-cfasync="false" src="${invokeSrc}"></script>`;
-// Written from inside a <script>, so "</" must not appear literally.
-const gatedWrite = `if (window.matchMedia(${JSON.stringify(media)}).matches) { document.write(${JSON.stringify(tagHtml).replace(/<\//g, '<\\/')}); }`;
+// Adsterra's exact tag, written in place only if the visitor allows advertising cookies and
+// the screen size matches (see adsterraWriteScript).
+const writeScript = adsterraWriteScript(adsterraBannerTag(adKey, width, height), media);
 ---
 
 <div class:list={['ad-banner', className]} data-pagefind-ignore>
   <div class="ad-banner-inner">
     <p class="ad-label">Advertisement</p>
     <div class="ad-slot" style={`width:${width}px;min-height:${height}px`}>
-      {media === 'all' ? (
-        <>
-          <script is:inline set:html={optionsScript}></script>
-          <script is:inline data-cfasync="false" src={invokeSrc}></script>
-        </>
-      ) : (
-        <script is:inline set:html={gatedWrite}></script>
-      )}
+      <script is:inline set:html={writeScript}></script>
     </div>
   </div>
 </div>

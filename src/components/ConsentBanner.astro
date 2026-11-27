@@ -1,0 +1,175 @@
+---
+/**
+ * Cookie consent banner (vanilla-cookieconsent v3, MIT, self-hosted: no account or fee).
+ *
+ * Categories:
+ * - necessary: always on (stores the visitor's choice).
+ * - advertising (Adsterra): loads unless the visitor rejects it. A rejection takes effect at once
+ *   (the page reloads without ads) and on every later page.
+ * - analytics (Google Analytics 4): loads only after the visitor accepts it.
+ *
+ * Adsterra requires a consent message when ads set cookies (publisher terms, clause 4.9).
+ *
+ * Render <ConsentBanner part="head" /> inside <head> (before any ad tag) and
+ * <ConsentBanner part="body" /> at the end of <body>.
+ */
+interface Props {
+  part: 'head' | 'body';
+  ga4MeasurementId?: string | null;
+}
+
+const { part, ga4MeasurementId = null } = Astro.props;
+---
+
+{part === 'head' && (
+  /* Read the saved choice before any ad tag runs. No choice yet = ads allowed. */
+  <script is:inline>
+    window.gnAdsAllowed = (function () {
+      try {
+        var match = document.cookie.match(/(?:^|;\s*)cc_cookie=([^;]*)/);
+        if (!match) return true;
+        var saved = JSON.parse(decodeURIComponent(match[1]));
+        return Array.isArray(saved.categories) ? saved.categories.indexOf('advertising') !== -1 : true;
+      } catch (error) {
+        return true;
+      }
+    })();
+    // No ads will load, so hide the empty "Advertisement" spaces too.
+    if (window.gnAdsAllowed === false) document.documentElement.classList.add('gn-no-ads');
+  </script>
+)}
+
+{part === 'body' && (
+  <div id="consent-config" data-ga4={ga4MeasurementId || ''} hidden></div>
+)}
+
+{part === 'body' && (
+  <script>
+    import 'vanilla-cookieconsent/dist/cookieconsent.css';
+    import * as CookieConsent from 'vanilla-cookieconsent';
+
+    declare global {
+      interface Window {
+        gnAdsAllowed?: boolean;
+        dataLayer: unknown[];
+        gtag: (...args: unknown[]) => void;
+      }
+    }
+
+    const ga4Id = document.getElementById('consent-config')?.dataset.ga4 || '';
+    let analyticsLoaded = false;
+
+    function loadAnalytics() {
+      if (analyticsLoaded || !ga4Id) return;
+      analyticsLoaded = true;
+      window.dataLayer = window.dataLayer || [];
+      const gtag = window.gtag || function (...args: unknown[]) { window.dataLayer.push(args); };
+      window.gtag = gtag;
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${ga4Id}`;
+      document.head.appendChild(script);
+      gtag('js', new Date());
+      gtag('config', ga4Id);
+    }
+
+    function applyChoice() {
+      if (CookieConsent.acceptedCategory('analytics')) loadAnalytics();
+      // Ads are written while the page loads, so a change only shows after a reload.
+      const adsNow = CookieConsent.acceptedCategory('advertising');
+      if (adsNow !== (window.gnAdsAllowed !== false)) window.location.reload();
+    }
+
+    CookieConsent.run({
+      cookie: { name: 'cc_cookie', expiresAfterDays: 182 },
+      guiOptions: {
+        consentModal: { layout: 'bar inline', position: 'bottom', equalWeightButtons: true, flipButtons: false },
+        preferencesModal: { layout: 'box', equalWeightButtons: true, flipButtons: false },
+      },
+      categories: {
+        necessary: { enabled: true, readOnly: true },
+        advertising: { enabled: true },
+        analytics: { enabled: false },
+      },
+      onConsent: () => {
+        if (CookieConsent.acceptedCategory('analytics')) loadAnalytics();
+      },
+      onFirstConsent: applyChoice,
+      onChange: applyChoice,
+      language: {
+        default: 'en',
+        translations: {
+          en: {
+            consentModal: {
+              title: 'Cookies on GameNews',
+              description:
+                'GameNews shows ads from Adsterra, which may use cookies to serve and measure ads. With your permission we also use Google Analytics to see which pages people read. <a href="/privacy#cookie-and-advertising-consent">Privacy Policy</a>',
+              acceptAllBtn: 'Accept all',
+              acceptNecessaryBtn: 'Reject all',
+              showPreferencesBtn: 'Manage choices',
+            },
+            preferencesModal: {
+              title: 'Cookie choices',
+              acceptAllBtn: 'Accept all',
+              acceptNecessaryBtn: 'Reject all',
+              savePreferencesBtn: 'Save my choices',
+              closeIconLabel: 'Close',
+              sections: [
+                {
+                  description:
+                    'You can change these choices at any time with "Privacy and cookie settings" at the bottom of every page.',
+                },
+                {
+                  title: 'Strictly necessary',
+                  description: 'Remembers the choices you make here. This cookie cannot be turned off.',
+                  linkedCategory: 'necessary',
+                },
+                {
+                  title: 'Advertising',
+                  description:
+                    'Lets Adsterra show ads and measure how they perform. If you turn this off, GameNews does not load Adsterra ads for you.',
+                  linkedCategory: 'advertising',
+                },
+                {
+                  title: 'Analytics',
+                  description:
+                    'Lets Google Analytics count visits and popular pages. Off unless you turn it on.',
+                  linkedCategory: 'analytics',
+                },
+                {
+                  title: 'More information',
+                  description: 'See the <a href="/privacy">Privacy Policy</a> for details about each partner.',
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+  </script>
+)}
+
+<style is:global>
+  .gn-no-ads .ad-banner,
+  .gn-no-ads .native-ad,
+  .gn-no-ads .ad-sidebar,
+  .gn-no-ads .header-ad { display: none !important; }
+
+  #cc-main {
+    --cc-font-family: inherit;
+    --cc-bg: #ffffff;
+    --cc-primary-color: #162039;
+    --cc-secondary-color: #4a5270;
+    --cc-btn-primary-bg: #4b52d8;
+    --cc-btn-primary-border-color: #4b52d8;
+    --cc-btn-primary-hover-bg: #3a40b8;
+    --cc-btn-primary-hover-border-color: #3a40b8;
+    --cc-btn-secondary-bg: #eef0ff;
+    --cc-btn-secondary-border-color: #eef0ff;
+    --cc-btn-secondary-hover-bg: #e1e4ff;
+    --cc-btn-secondary-hover-border-color: #e1e4ff;
+    --cc-toggle-on-bg: #4b52d8;
+    --cc-link-color: #4b52d8;
+  }
+</style>

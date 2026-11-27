@@ -1,5 +1,5 @@
 import { defineMarkdocConfig, nodes, Markdoc } from '@astrojs/markdoc/config';
-import { adsterraBanners, ADSTERRA_BANNER_SRC } from './src/lib/adsterra.ts';
+import { adsterraBanners, adsterraBannerTag, adsterraWriteScript } from './src/lib/adsterra.ts';
 
 const { Tag } = Markdoc;
 
@@ -13,23 +13,14 @@ const { Tag } = Markdoc;
  */
 function inArticleAdTag() {
   const { adKey, width, height } = adsterraBanners.rectangle300x250;
-  // Markdoc HTML-escapes ' and " in text, and a browser does not decode entities inside
-  // <script>, so the same atOptions object is written with backtick strings.
-  const options = `
-  atOptions = {
-    key : \`${adKey}\`,
-    format : \`iframe\`,
-    height : ${height},
-    width : ${width},
-    params : {}
-  };
-`;
+  // Same consent-gated writer as AdBanner.astro: the exact Adsterra tag, base64-encoded so
+  // Markdoc's quote escaping cannot change it.
+  const write = adsterraWriteScript(adsterraBannerTag(adKey, width, height));
   return new Tag('div', { class: 'ad-banner in-article-ad not-prose', 'data-pagefind-ignore': '' }, [
     new Tag('div', { class: 'ad-banner-inner' }, [
       new Tag('p', { class: 'ad-label' }, ['Advertisement']),
       new Tag('div', { class: 'ad-slot', style: `width:${width}px;min-height:${height}px` }, [
-        new Tag('script', {}, [options]),
-        new Tag('script', { 'data-cfasync': 'false', src: `${ADSTERRA_BANNER_SRC}${adKey}` }, []),
+        new Tag('script', {}, [write]),
       ]),
     ]),
   ]);
