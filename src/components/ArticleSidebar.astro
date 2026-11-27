@@ -30,8 +30,12 @@ const upcoming = articles
   .slice(0, 5);
 const latest = sortByPublishDateDesc(articles).slice(0, 5);
 const shortDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-// Titles are written for the article page; the part before ":" names the game.
-const gameName = (title: string) => title.split(':')[0].trim();
+// Titles are written for the article page; the part before the last ":" names the game
+// (the last one, so names that contain a colon, such as "Tomb Raider: Legacy of Atlantis", stay whole).
+const gameName = (title: string) => {
+  const cut = title.lastIndexOf(':');
+  return (cut === -1 ? title : title.slice(0, cut)).trim();
+};
 ---
 
 <aside class="article-sidebar hidden lg:flex" aria-label="More from GameNews" data-pagefind-ignore>
