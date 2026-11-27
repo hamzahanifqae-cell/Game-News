@@ -8,6 +8,7 @@ import TypeBadge from './TypeBadge.astro';
 import TableOfContents from './TableOfContents.astro';
 import TrailerEmbed from './TrailerEmbed.astro';
 import SteamWatch from './SteamWatch.astro';
+import SteamWidget from './SteamWidget.astro';
 import ArticleCard from './ArticleCard.astro';
 import AdSidebar from './AdSidebar.astro';
 import { ADSTERRA_NATIVE_KEY, ADSTERRA_NATIVE_SRC, adsterraWriteScript } from '../lib/adsterra';
@@ -138,6 +139,8 @@ const structuredData = {
         <Content inArticleAd={true} />
       </div>
     </div>
+
+    {data.steamAppIds && data.steamAppIds.length > 0 && <SteamWidget appIds={data.steamAppIds} />}
 
     {article.id === 'phantom-blade-zero-watchlist' && <SteamWatch />}
 

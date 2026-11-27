@@ -81,6 +81,9 @@ const articles = defineCollection({
           channel: z.string(),
         })
         .optional(),
+      // Official Steam store pages for the games this article covers, shown with Steam's own
+      // embeddable store widget (see SteamWidget.astro). Art loads from Steam; nothing is re-hosted.
+      steamAppIds: z.array(z.number().int().positive()).max(3).optional(),
     }),
 });
 

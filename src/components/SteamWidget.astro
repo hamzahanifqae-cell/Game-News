@@ -1,0 +1,43 @@
+---
+/**
+ * Steam's official store widget for a game (store.steampowered.com/widget/<appId>/).
+ *
+ * Copyright: Steam offers this embed on every store page ("Embed" on the store page) for any
+ * site to use. The capsule art, title and price load from Steam's own servers inside Steam's
+ * frame; GameNews does not download, re-host, or edit publisher images. Only use app IDs that
+ * point to the game's official Steam page.
+ *
+ * Privacy: the frame loads lazily (only when the reader scrolls near it) and Steam may set its
+ * own cookies; see "Steam store widgets" in the Privacy Policy.
+ */
+interface Props {
+  appIds: number[];
+}
+
+const { appIds } = Astro.props;
+---
+
+<section class="steam-widgets mt-10" aria-labelledby="steam-widgets-heading" data-pagefind-ignore>
+  <h2 id="steam-widgets-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-muted">
+    {appIds.length > 1 ? 'These games on Steam' : 'This game on Steam'}
+  </h2>
+  {appIds.map((appId) => (
+    <div class="steam-widget">
+      <iframe
+        src={`https://store.steampowered.com/widget/${appId}/`}
+        title="Official Steam store widget"
+        width="646"
+        height="190"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    </div>
+  ))}
+  <p class="mt-1 text-xs leading-5 text-ink-muted">Official Steam store widget, served by Steam. Prices and dates follow Steam.</p>
+</section>
+
+<style>
+  .steam-widget { max-width: 646px; overflow: hidden; }
+  .steam-widget + .steam-widget { margin-top: 12px; }
+  .steam-widget iframe { display: block; width: 100%; height: 190px; border: 0; }
+</style>

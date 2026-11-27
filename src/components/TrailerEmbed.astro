@@ -17,7 +17,15 @@ interface Props {
 }
 
 const { youtubeId, title, channel } = Astro.props;
-const thumbnail = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+// Full HD (1280x720) thumbnail: WebP for browsers that support it, JPEG otherwise. If a video
+// has no HD thumbnail, the image falls back to YouTube's standard 480x360 one.
+const thumbnailWebp = `https://i.ytimg.com/vi_webp/${youtubeId}/maxresdefault.webp`;
+const thumbnail = `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`;
+const thumbnailFallback = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+// A missing HD thumbnail comes back as an error or as YouTube's 120x90 grey placeholder;
+// either way, drop the WebP source and show the standard thumbnail instead.
+const useFallback =
+  "if(this.dataset.fallback&&this.currentSrc!==this.dataset.fallback){var s=this.parentNode.querySelector('source');if(s)s.remove();this.src=this.dataset.fallback;}";
 const embedSrc = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`;
 const watchUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
 ---
@@ -25,7 +33,10 @@ const watchUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
 <figure class="trailer mt-7" data-pagefind-ignore>
   <div class="trailer-frame">
     <button type="button" class="trailer-play" data-embed-src={embedSrc} data-title={title} aria-label={`Play the official trailer: ${title}`}>
-      <img src={thumbnail} alt="" width="480" height="360" loading="lazy" decoding="async" />
+      <picture>
+        <source srcset={thumbnailWebp} type="image/webp" />
+        <img src={thumbnail} alt="" width="1280" height="720" decoding="async" fetchpriority="high" data-fallback={thumbnailFallback} onerror={useFallback} onload={`if(this.naturalWidth<=120){${useFallback}}`} />
+      </picture>
       <span class="trailer-badge" aria-hidden="true">
         <svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.2.2 34 .2 34 .2s-21.2 0-26.5 1.5a8.6 8.6 0 0 0-6 6C0 13 0 24 0 24s0 11 1.5 16.3a8.6 8.6 0 0 0 6 6C12.8 47.8 34 47.8 34 47.8s21.2 0 26.5-1.5a8.6 8.6 0 0 0 6-6C68 35 68 24 68 24s0-11-1.5-16.3Z" fill="#000" fill-opacity=".8"/><path d="m27 34 18-10-18-10v20Z" fill="#fff"/></svg>
       </span>
@@ -41,6 +52,7 @@ const watchUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
 <style>
   .trailer-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 4px; background: #0f1424; }
   .trailer-play { position: absolute; inset: 0; display: block; width: 100%; height: 100%; padding: 0; border: 0; cursor: pointer; background: #0f1424; }
+  .trailer-play picture { display: block; width: 100%; height: 100%; }
   .trailer-play img { width: 100%; height: 100%; object-fit: cover; }
   .trailer-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transition: transform .15s; }
   .trailer-play:hover .trailer-badge, .trailer-play:focus-visible .trailer-badge { transform: translate(-50%, -50%) scale(1.08); }
