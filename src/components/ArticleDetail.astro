@@ -10,7 +10,7 @@ import TrailerEmbed from './TrailerEmbed.astro';
 import SteamWatch from './SteamWatch.astro';
 import SteamWidget from './SteamWidget.astro';
 import ArticleCard from './ArticleCard.astro';
-import AdSidebar from './AdSidebar.astro';
+import ArticleSidebar from './ArticleSidebar.astro';
 import { ADSTERRA_NATIVE_KEY, ADSTERRA_NATIVE_SRC, adsterraWriteScript } from '../lib/adsterra';
 import { getCategory, getPublicEntry, getPublicCollection, sortByPublishDateDesc, getSiteSettings } from '../lib/content';
 import { formatEditorialDate, jsonLd as serializeJsonLd, pageUrl } from '../lib/seo';
@@ -78,7 +78,12 @@ const structuredData = {
 };
 ---
 
-<div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14 lg:grid lg:max-w-[calc(48rem+160px+5.5rem)] lg:grid-cols-[minmax(0,48rem)_160px] lg:gap-10">
+{/* Phones and tablets: one column. From 1024px: article + right sidebar. From 1280px: a sticky
+    contents column on the left as well (the inline contents box above the article is then hidden). */}
+<div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14 lg:grid lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10 xl:max-w-[80rem] xl:grid-cols-[190px_minmax(0,1fr)_280px]">
+<div class="hidden xl:block">
+  <TableOfContents headings={headings} variant="rail" />
+</div>
 <div class="min-w-0">
   <Breadcrumbs items={[section, { label: data.title }]} />
 
@@ -173,7 +178,7 @@ const structuredData = {
     </div>
   )}
 </div>
-<AdSidebar />
+<ArticleSidebar currentId={article.id} />
 </div>
 
 <script type="application/ld+json" set:html={serializeJsonLd(structuredData)} />

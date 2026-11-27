@@ -7,16 +7,21 @@ interface Heading {
 
 interface Props {
   headings: Heading[];
+  /**
+   * "inline": the box above the article (phones, tablets and laptops below 1280px).
+   * "rail": the sticky list in the left column from 1280px up, which highlights the section being read.
+   */
+  variant?: 'inline' | 'rail';
 }
 
-const { headings } = Astro.props;
+const { headings, variant = 'inline' } = Astro.props;
 // Only top-level sections, and only when there are enough to make a TOC
 // actually useful rather than restating the page's only two headings.
 const sections = headings.filter((h) => h.depth === 2);
 ---
 
-{sections.length >= 3 && (
-  <nav aria-label="Table of contents" class="mb-10 border-y border-line py-5" data-pagefind-ignore>
+{sections.length >= 3 && variant === 'inline' && (
+  <nav aria-label="Table of contents" class="mb-10 border-y border-line py-5 xl:hidden" data-pagefind-ignore>
     <h2 class="mb-4 editorial-kicker text-ink-muted">In this article</h2>
     <ol class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
       {sections.map((h) => (
@@ -27,3 +32,52 @@ const sections = headings.filter((h) => h.depth === 2);
     </ol>
   </nav>
 )}
+
+{sections.length >= 3 && variant === 'rail' && (
+  <nav aria-label="Table of contents" class="toc-rail" data-pagefind-ignore>
+    <h2 class="toc-rail-title">In this article</h2>
+    <ol class="toc-rail-list">
+      {sections.map((h) => (
+        <li><a href={`#${h.slug}`} data-toc-link={h.slug}>{h.text}</a></li>
+      ))}
+    </ol>
+    <a href="#top" class="toc-rail-top">↑ Back to top</a>
+  </nav>
+)}
+
+<style>
+  .toc-rail { position: sticky; top: 96px; max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 4px; }
+  .toc-rail-title { margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #6b7189; }
+  .toc-rail-list { margin: 0; padding: 0; list-style: none; border-left: 2px solid #e4e6ef; }
+  .toc-rail-list a { display: block; margin-left: -2px; padding: 6px 0 6px 12px; border-left: 2px solid transparent; font-size: 13.5px; line-height: 1.4; color: #4a5270; text-decoration: none; }
+  .toc-rail-list a:hover { color: #4b52d8; }
+  .toc-rail-list a[aria-current='true'] { border-left-color: #4b52d8; color: #162039; font-weight: 600; }
+  .toc-rail-top { display: inline-block; margin-top: 14px; font-size: 12.5px; color: #6b7189; text-decoration: none; }
+  .toc-rail-top:hover { color: #4b52d8; }
+</style>
+
+<script>
+  // Highlight the section being read in the left contents column.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+  const targets = links
+    .map((link) => document.getElementById(link.dataset.tocLink!))
+    .filter((el): el is HTMLElement => el !== null);
+  if (links.length && targets.length) {
+    const setCurrent = () => {
+      // The last heading that has scrolled above 40% of the screen height is the current section.
+      const line = window.innerHeight * 0.4;
+      let current = targets[0];
+      for (const target of targets) {
+        if (target.getBoundingClientRect().top <= line) current = target;
+      }
+      for (const link of links) link.setAttribute('aria-current', String(link.dataset.tocLink === current.id));
+    };
+    let queued = false;
+    window.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; setCurrent(); });
+    }, { passive: true });
+    setCurrent();
+  }
+</script>

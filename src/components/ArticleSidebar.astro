@@ -1,0 +1,101 @@
+---
+/**
+ * Right-hand column on article pages, shown from 1024px up (phones and tablets keep the
+ * single-column layout). From top to bottom:
+ * - "Upcoming release dates": the next dated games on the watchlist (from each article's releaseDate)
+ * - Adsterra 160x300 (after the first box, so an unfilled slot never leaves the column starting blank)
+ * - "Latest on GameNews": the most recent articles
+ * - Adsterra 160x600, which stays in view while the reader scrolls
+ *
+ * The lists are internal links built from the article collection, so they update on every build.
+ */
+import AdBanner from './AdBanner.astro';
+import { adsterraBanners, AD_MEDIA } from '../lib/adsterra';
+import { getPublicCollection, sortByPublishDateDesc } from '../lib/content';
+import { formatEditorialDate } from '../lib/seo';
+
+interface Props {
+  /** The article being read, left out of both lists. */
+  currentId: string;
+}
+
+const { currentId } = Astro.props;
+const typeToPath = { review: 'reviews', tutorial: 'tutorials', troubleshooting: 'troubleshooting', news: 'news' } as const;
+const articles = (await getPublicCollection('articles')).filter((article) => article.id !== currentId);
+const href = (article: (typeof articles)[number]) => `/${typeToPath[article.data.type]}/${article.id}`;
+
+const upcoming = articles
+  .filter((article) => article.data.type === 'news' && !article.data.released && article.data.releaseDate)
+  .sort((a, b) => a.data.releaseDate!.valueOf() - b.data.releaseDate!.valueOf())
+  .slice(0, 5);
+const latest = sortByPublishDateDesc(articles).slice(0, 5);
+const shortDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+// Titles are written for the article page; the part before ":" names the game.
+const gameName = (title: string) => title.split(':')[0].trim();
+---
+
+<aside class="article-sidebar hidden lg:flex" aria-label="More from GameNews" data-pagefind-ignore>
+  {upcoming.length > 0 && (
+    <section class="side-box" aria-labelledby="side-upcoming">
+      <h2 id="side-upcoming" class="side-title">Upcoming release dates</h2>
+      <ol class="side-list">
+        {upcoming.map((article) => (
+          <li>
+            <a href={href(article)} class="side-link">
+              <time class="side-date" datetime={article.data.releaseDate!.toISOString().slice(0, 10)}>
+                {shortDate.format(article.data.releaseDate!)}
+              </time>
+              <span class="side-name">{gameName(article.data.title)}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <a href="/blog" class="side-more">All release dates →</a>
+    </section>
+  )}
+
+  <AdBanner {...adsterraBanners.skyscraper160x300} media={AD_MEDIA.wide} />
+
+  {latest.length > 0 && (
+    <section class="side-box" aria-labelledby="side-latest">
+      <h2 id="side-latest" class="side-title">Latest on GameNews</h2>
+      <ol class="side-list">
+        {latest.map((article) => (
+          <li>
+            <a href={href(article)} class="side-link">
+              <span class="side-name side-name--title">{article.data.title}</span>
+              <span class="side-date">{formatEditorialDate(article.data.updatedDate ?? article.data.publishDate)}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  <div class="side-sticky-area">
+    <div class="side-sticky">
+      <AdBanner {...adsterraBanners.skyscraper160x600} media={AD_MEDIA.wide} />
+    </div>
+  </div>
+</aside>
+
+<style>
+  .article-sidebar { flex-direction: column; gap: 28px; min-width: 0; }
+  .side-box { border-top: 3px solid #4b52d8; background: #fff; border-radius: 0 0 6px 6px; padding: 14px 16px 16px; box-shadow: 0 1px 0 #e6e8f0; }
+  .side-title { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #162039; }
+  .side-list { margin: 0; padding: 0; list-style: none; }
+  .side-list li + li { border-top: 1px solid #eceef4; }
+  .side-link { display: flex; flex-direction: column; gap: 2px; padding: 9px 0; text-decoration: none; }
+  .side-date { font-size: 12px; font-weight: 600; color: #4b52d8; }
+  .side-name { font-size: 14px; line-height: 1.35; font-weight: 600; color: #162039; }
+  .side-name--title { font-weight: 500; }
+  .side-link .side-name--title + .side-date { font-weight: 400; color: #6b7189; }
+  .side-link:hover .side-name { color: #4b52d8; text-decoration: underline; }
+  .side-more { display: inline-block; margin-top: 8px; font-size: 13px; font-weight: 600; color: #4b52d8; }
+  .side-more:hover { text-decoration: underline; }
+  /* The sticky area fills the rest of the column, so the 160x600 follows the reader to the end
+     of the article. The site header is 76px tall and sticky; keep the unit clear of it. */
+  .side-sticky-area { flex: 1 1 auto; }
+  .side-sticky { position: sticky; top: 96px; }
+  .article-sidebar :global(.ad-banner) { align-self: center; }
+</style>
