@@ -1,8 +1,6 @@
 ---
 import Logo from './Logo.astro';
 import { getSiteSettings } from '../lib/content';
-import AdBanner from './AdBanner.astro';
-import { adsterraBanners, AD_MEDIA } from '../lib/adsterra';
 
 const settings = await getSiteSettings();
 const year = new Date().getFullYear();
@@ -10,7 +8,6 @@ const year = new Date().getFullYear();
 
 <footer class="border-t border-line bg-[#edf0f8]" data-pagefind-ignore>
   <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-    <AdBanner {...adsterraBanners.banner468x60} media={AD_MEDIA.desktop} class="mb-10 hidden md:block" />
     <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr]">
       <div>
         <Logo />

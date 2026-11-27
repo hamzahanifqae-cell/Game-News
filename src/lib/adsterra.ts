@@ -34,6 +34,15 @@ export const AD_MEDIA = {
  * and a literal "</script>" would end the surrounding script). document.write keeps Adsterra's
  * requirement that its scripts run where the ad appears, in page order.
  */
+/**
+ * Loads an Adsterra script that does not read `atOptions` (Social Bar, Popunder) without making the
+ * page wait for it: the same script URL, added as an async script so it downloads alongside the
+ * page instead of queuing behind the banner tags. Skipped if the visitor rejected advertising cookies.
+ */
+export function adsterraAsyncScript(src: string): string {
+  return `if (window.gnAdsAllowed !== false) { var s = document.createElement('script'); s.async = true; s.setAttribute('data-cfasync', 'false'); s.src = ${JSON.stringify(src)}; (document.body || document.documentElement).appendChild(s); }`;
+}
+
 export function adsterraWriteScript(tagHtml: string, media?: string): string {
   const encoded = Buffer.from(tagHtml, 'utf8').toString('base64');
   const mediaCheck = media && media !== 'all' ? ` && window.matchMedia(\`${media}\`).matches` : '';

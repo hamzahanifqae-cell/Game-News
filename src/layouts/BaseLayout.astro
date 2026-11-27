@@ -8,7 +8,7 @@ import Footer from '../components/Footer.astro';
 import ConsentScripts from '../components/ConsentScripts.astro';
 import AdBanner from '../components/AdBanner.astro';
 import ConsentBanner from '../components/ConsentBanner.astro';
-import { adsterraBanners, AD_MEDIA, ADSTERRA_SOCIAL_BAR_SRC, ADSTERRA_POPUNDER_SRC, adsterraWriteScript } from '../lib/adsterra';
+import { adsterraBanners, AD_MEDIA, ADSTERRA_SOCIAL_BAR_SRC, ADSTERRA_POPUNDER_SRC, adsterraAsyncScript } from '../lib/adsterra';
 import { getSiteSettings } from '../lib/content';
 import { searchConsoleVerification } from '../lib/seo';
 
@@ -87,6 +87,12 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
       <meta name="google-site-verification" content={searchConsoleToken} />
     )}
 
+    {/* Open the connections to Adsterra's servers early, while the page is still loading. */}
+    <link rel="preconnect" href="https://bauval.org" />
+    <link rel="preconnect" href="https://abscloud.org" />
+    <link rel="dns-prefetch" href="https://bauval.org" />
+    <link rel="dns-prefetch" href="https://abscloud.org" />
+
     {/* Must come before any ad tag: reads the visitor's saved cookie choice. */}
     <ConsentBanner part="head" />
     <ConsentScripts settings={settings} adsPageEligible={adPageEligible} pathname={Astro.url.pathname} />
@@ -96,6 +102,10 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
     )}
   </head>
   <body class="flex min-h-screen flex-col">
+    {/* Adsterra Social Bar and Popunder: started here as async downloads so they load alongside the
+        page instead of waiting behind the banner tags. Not loaded if advertising cookies were rejected. */}
+    <script is:inline set:html={adsterraAsyncScript(ADSTERRA_SOCIAL_BAR_SRC)}></script>
+    <script is:inline set:html={adsterraAsyncScript(ADSTERRA_POPUNDER_SRC)}></script>
     <a
       href="#main-content"
       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white"
@@ -112,10 +122,6 @@ const searchConsoleToken = searchConsoleVerification(settings.searchConsoleVerif
       <slot />
     </main>
     <Footer />
-    <!-- Adsterra Social Bar (not loaded if the visitor rejected advertising cookies) -->
-    <script is:inline set:html={adsterraWriteScript(`<script data-cfasync="false" src="${ADSTERRA_SOCIAL_BAR_SRC}"></script>`)}></script>
-    <!-- Adsterra Popunder (not loaded if the visitor rejected advertising cookies) -->
-    <script is:inline set:html={adsterraWriteScript(`<script data-cfasync="false" src="${ADSTERRA_POPUNDER_SRC}"></script>`)}></script>
     <ConsentBanner part="body" ga4MeasurementId={settings.analyticsProvider === 'ga4' ? settings.analyticsId : null} />
   </body>
 </html>
